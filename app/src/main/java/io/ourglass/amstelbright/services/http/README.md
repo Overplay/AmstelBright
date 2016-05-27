@@ -22,7 +22,7 @@ NanoHTTPD does a bunch of reource loading based off the classpath like so:
 
 `SomeClass.class.getResourceAsStream("blubbie.mp3")`
 
-This doesn't seem to work in Android since it wants resoources in res/raw
+This doesn't work in Android since it wants resoources in res/raw
 or assets. There are hackarounds (compiling into a JAR), but I'm going
 to just rewrite those when I fine them.
 

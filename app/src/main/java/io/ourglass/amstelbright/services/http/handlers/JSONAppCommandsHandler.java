@@ -37,11 +37,11 @@ public class JSONAppCommandsHandler extends JSONHandler {
         String appId = urlParams.get("appid");
         String cmd = urlParams.get("command");
 
-        switch (session.getMethod()){
+        switch (session.getMethod()) {
 
             case POST:
 
-                switch (cmd){
+                switch (cmd) {
 
 
                     case "move":
@@ -57,7 +57,7 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
                         } catch (OGServerException e) {
 
-                            processOGException(e);
+                            return processOGException(e);
 
                         }
 
@@ -72,7 +72,7 @@ public class JSONAppCommandsHandler extends JSONHandler {
                             responseStatus = NanoHTTPD.Response.Status.OK;
                             return launchedApp.getAppAsJson().toString();
                         } catch (OGServerException e) {
-                            processOGException(e);
+                            return processOGException(e);
 
                         }
 
@@ -81,15 +81,13 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
 
                         try {
-                            OGApp killedApp  = OGCore.getInstance().killApp(appId);
+                            OGApp killedApp = OGCore.getInstance().killApp(appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
                             return killedApp.getAppAsJson().toString();
 
                         } catch (OGServerException e) {
-                            responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
-                            return e.toJson();
+                            return processOGException(e);
                         }
-
 
 
 
@@ -99,6 +97,8 @@ public class JSONAppCommandsHandler extends JSONHandler {
                         return "no such command, genius";
 
                 }
+
+
 
             case GET:
             case PUT:
@@ -110,6 +110,7 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
 
     }
+
 
 
 }

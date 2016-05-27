@@ -40,7 +40,7 @@
             android:enabled="true" />
 
         <service
-            android:name=".services.amstelbright.AmstelBrightServer"
+            android:name=".services.amstelbright.AmstelBrightService"
             android:exported="false" >
         </service>
 

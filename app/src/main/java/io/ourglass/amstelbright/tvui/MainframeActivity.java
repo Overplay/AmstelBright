@@ -1,5 +1,6 @@
 package io.ourglass.amstelbright.tvui;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,12 +17,16 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,13 +38,14 @@ import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
 
 import io.ourglass.amstelbright.R;
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer;
+import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 
 @SuppressLint("SetJavaScriptEnabled")
 
-public class MainframeActivity extends Activity implements OGBroadcastReceiver.OGBroadcastReceiverListener, Mainframe.MainframeListener {
+public class MainframeActivity extends Activity implements OGBroadcastReceiver.OGBroadcastReceiverListener, Mainframe.MainframeListener, OGBroadcastStatusReceiver.OGBroadcastReceiverListener {
 
     private static final String TAG = "MFActivity";
+    private static final boolean FLASHY = true;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -50,11 +56,14 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     private ImageView mBootBugImageView;
 
     private RelativeLayout mMainLayout;
+    private LinearLayout appTray;
 
     private int mScreenWidth;
     private  int mScreenHeight;
 
     private Mainframe mMf;
+
+    private boolean mShowingMenu;
 
     /**
      * Messenger for communicating with the service.
@@ -66,6 +75,8 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
      */
     boolean mBound;
     boolean isEmulator = Build.FINGERPRINT.startsWith("generic");
+    private SurfaceView mSurfaceView;
+    int colors[] = { R.color.Palette1, R.color.Palette2a, R.color.Palette3a, R.color.Palette4a, R.color.Palette5a, R.color.Palette4 };
 
 
     @Override
@@ -77,7 +88,11 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         mMf = new Mainframe(this);
 
-        startService(new Intent(getBaseContext(), AmstelBrightServer.class));
+        startService(new Intent(getBaseContext(), AmstelBrightService.class));
+
+        mSurfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+        //mSurfaceView.setVisibility(View.GONE);
+
 
         mCrawlerWebView = (WebView)findViewById(R.id.crawlerWebView);
         mWidgetWebView = (WebView)findViewById(R.id.widgetWebView);
@@ -105,7 +120,8 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
                         try {
                             mMf.getApps();
                         } catch (Exception e) {
-                            redFlag("Getting the apps shit itself.");
+                            showAlert(new UIMessage("Getting the apps shit itself.",
+                                    UIMessage.UIMessageType.REDFLAG));
                         }
                     }
                 }, 5000);
@@ -125,6 +141,87 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         setupCrawler();
         setupWidget();
 
+        appTray = (LinearLayout)findViewById(R.id.appTray);
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+
+
+
+        for (int zed=0; zed<6; zed++){
+            LinearLayout appIcon = new LinearLayout(this);
+            inflater.inflate(R.layout.appcell, appIcon);
+            ((TextView)appIcon.findViewById(R.id.textView)).setText("App #"+zed);
+            appIcon.setBackgroundColor(getResources().getColor(colors[zed]));
+            appIcon.setTag(zed);
+            appIcon.setFocusable(true);
+            appIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toast("Clicked button: "+v.getTag());
+                }
+            });
+
+            appIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus){
+                        int focusColor = getResources().getColor(R.color.Beige);
+                        v.setBackgroundColor(focusColor);
+                        v.animate().scaleY(1.1f).scaleX(1.1f).alpha(1.0f).setDuration(100).start();
+                    } else {
+                        int pCol = getResources().getColor( colors[(int)v.getTag()] );
+                        v.setBackgroundColor(pCol);
+                        v.animate().scaleY(1.0f).scaleX(1.0f).alpha(0.90f).setDuration(100).start();
+
+                    }
+                }
+            });
+
+
+            appTray.addView(appIcon);
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)appIcon.getLayoutParams();
+
+            lp.rightMargin = 2;
+            lp.leftMargin = 4;
+
+
+        }
+
+        appTray.requestLayout();
+
+        appTray.setAlpha(0f);
+        mShowingMenu = false;
+
+
+//        for (int zed=0; zed<6; zed++){
+//            Button appIcon = new Button(this);
+//            appIcon.setText("App #"+zed);
+//            appIcon.setBackgroundColor(getResources().getColor(colors[zed]));
+//            appIcon.setTag(zed);
+//            appIcon.setLayoutParams(new ViewGroup.LayoutParams(200,300));
+//            appIcon.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.man, 0, 0);
+//            appIcon.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    toast("Clicked button: "+v.getTag());
+//                }
+//            });
+//            appIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                @Override
+//                public void onFocusChange(View v, boolean hasFocus) {
+//                    if (hasFocus){
+//                        int focusColor = getResources().getColor(R.color.AntiqueWhite);
+//                        v.setBackgroundColor(focusColor);
+//                    } else {
+//                        int pCol = getResources().getColor( colors[(int)v.getTag()] );
+//                        v.setBackgroundColor(pCol);
+//                    }
+//                }
+//            });
+//            appTray.addView(appIcon);
+//        }
+
+
         Log.d(TAG, "onCreate done");
 
     }
@@ -133,28 +230,39 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     protected void onResume(){
         super.onResume();
 
-        // Binding not needed for now since we are using http and broadcast intents
-
-//        bindService(new Intent(this, AmstelBrightServer.class), mConnection,
-//                Context.BIND_AUTO_CREATE);
+//        mSurfaceView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                mSurfaceView.setVisibility(View.VISIBLE);
+//            }
+//        }, 1000);
 
         IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver");
         registerReceiver(new OGBroadcastReceiver(this), filter);
-        Log.d(TAG, "onReceive done");
+
+        IntentFilter filter2 = new IntentFilter("com.ourglass.amstelbrightserver.status");
+        registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
+
 
         mBootBugImageView.animate()
                 .scaleX(0f)
                 .scaleY(0f)
-                .setDuration(3000)
-                .setStartDelay(2000)
+                .rotationY(90f)
+                .setDuration(1000)
+                .setStartDelay(5000)
                 .start();
+
+        Log.d(TAG, "onResume done");
+
+        appTray.getChildAt(0).requestFocus();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         // Bind to the service
-        bindService(new Intent(this, AmstelBrightServer.class), mConnection,
+        bindService(new Intent(this, AmstelBrightService.class), mConnection,
                 Context.BIND_AUTO_CREATE);
     }
 
@@ -168,7 +276,31 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         }
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
 
+        // 82 = Menu button,
+
+        if (keyCode==82){
+            toggleAppMenu();
+        }
+
+
+        //Toast.makeText(this, "pressed "+event.toString(), Toast.LENGTH_SHORT).show();
+
+        return false;
+    }
+
+    private void toggleAppMenu(){
+
+        float destAlpha = mShowingMenu ? 0f:1f;
+        float destAlphaApp = mShowingMenu ? 1f:0.5f;
+        appTray.animate().alpha(destAlpha).setDuration(1000).start();
+        mCrawlerWebView.animate().alpha(destAlphaApp).setDuration(1000).start();
+        mWidgetWebView.animate().alpha(destAlphaApp).setDuration(1000).start();
+        mShowingMenu = !mShowingMenu;
+
+    }
 
     @Override
     public void receivedCommand(Intent i) {
@@ -228,6 +360,11 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         mWidgetWebView.setBackgroundColor(Color.TRANSPARENT);
         mWidgetWebView.setAlpha(0f);  // initially invisible
 
+        // TODO this is a hack for now...probably need to redo css on ABLime
+        mWidgetWebView.setScaleX(0.5f);
+        mWidgetWebView.setScaleY(0.5f);
+
+
         mWidgetWebView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
                 // Activities and WebViews measure progress with different scales.
@@ -253,6 +390,38 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
+    private void showAlert(UIMessage message){
+
+
+        mTextView.setText(message.message);
+
+        switch (message.type){
+
+            case REDFLAG:
+                    mTextView.setBackgroundColor(0xff0000);
+                break;
+
+            case INFO:
+                    mTextView.setBackgroundColor(getResources().getColor(R.color.Palette2a));
+                break;
+
+
+            case BOOT:
+
+                break;
+        }
+
+        mTextView.setVisibility(View.VISIBLE);
+
+        mTextView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mTextView.setVisibility(View.INVISIBLE);
+            }
+        }, 2000);
+
+    }
+
 
     @Override
     public void moveWidgetFromTo(Point fromTranslation, Point toTranslation) {
@@ -263,9 +432,36 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
     @Override
-    public void moveCrawlerFrom(float fromY, float toY) {
+    public void moveCrawlerFrom(final float fromY, final float toY) {
 
-        mCrawlerWebView.animate().y(toY).setDuration(1000);
+
+        mCrawlerWebView.post(new Runnable() {
+            @Override
+            public void run() {
+
+                if (FLASHY){
+
+                    ObjectAnimator close = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 0, 50 );
+                    close.setDuration(100);
+
+                    ObjectAnimator slide = ObjectAnimator.ofFloat(mCrawlerWebView, "y", fromY, toY );
+                    slide.setDuration(333);
+
+                    ObjectAnimator open = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 50, 0 );
+                    open.setDuration(100);
+
+                    AnimatorSet animSet = new AnimatorSet();
+                    //animSet.setInterpolator(new BounceInterpolator());
+                    animSet.play(close).before(slide);
+                    animSet.play(open).after(slide);
+                    animSet.start();
+
+                } else {
+                    mCrawlerWebView.animate().y(toY).setDuration(1000);
+                }
+            }
+        });
+
 
     }
 
@@ -314,9 +510,11 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
     @Override
-    public void redFlag(String message) {
-        Toast.makeText(this, "RED FLAG: "+message, Toast.LENGTH_LONG).show();
+    public void uiAlert(UIMessage message) {
+        showAlert(message);
     }
+
+
 
     // MAK this is not currently used since we ar enot binding the service
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -379,7 +577,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         try
         {
             changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
-            //changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI);
+            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI);
             bRet = TvManager.getInstance().getPlayerManager().isSignalStable();
         } catch (TvCommonException e)
         {
@@ -389,5 +587,13 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
 
+    @Override
+    public void receivedStatus(Intent intent) {
 
+        String command = intent.getStringExtra("command");
+        String msg = intent.getStringExtra("message");
+        uiAlert(new UIMessage(msg));
+
+
+    }
 }

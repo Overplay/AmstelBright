@@ -15,6 +15,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import io.ourglass.amstelbright.core.OGConstants;
+import io.ourglass.amstelbright.core.OGCore;
+
 /**
  * Created by atorres on 4/19/16.
  */
@@ -130,6 +133,8 @@ public class UDPBeaconService extends Service {
         Log.d(TAG, mMessage + " " + mPort + " " + mBeaconFreq);
 
         startBeacon();
+
+        OGCore.getInstance().sendStatusIntent("STATUS", "Starting beacon", OGConstants.BootState.UDP_START.getValue());
 
         return Service.START_STICKY;
     }

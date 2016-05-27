@@ -23,15 +23,28 @@ public abstract class JSONHandler extends OGRouterNanoHTTPD.DefaultHandler {
     }
 
     protected String processOGException(OGServerException e) {
-        if (e.type == OGServerException.ErrorType.NO_SUCH_APP) {
-            responseStatus = NanoHTTPD.Response.Status.NOT_FOUND;
-            return ("no data for that app");
-        } else {
-            e.printStackTrace();
-            responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
-            // Should not get here
-            return makeErrorJson(e);
+
+        switch (e.type){
+
+            case NO_SUCH_APP:
+
+                responseStatus = NanoHTTPD.Response.Status.NOT_FOUND;
+                break;
+
+            case APP_NOT_RUNNING:
+                responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
+                break;
+
+            case UNKNOWN:
+            default:
+
+                responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
+
         }
+
+        return (e.toJson());
+
+
     }
 
     protected NanoHTTPD.Response.IStatus responseStatus;

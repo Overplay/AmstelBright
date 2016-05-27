@@ -25,6 +25,9 @@ public class OGApp extends RealmObject {
     @Required
     public String appType;
 
+    @Required
+    public String screenName;
+
     public boolean running = false;
     public boolean onLauncher = true;
 

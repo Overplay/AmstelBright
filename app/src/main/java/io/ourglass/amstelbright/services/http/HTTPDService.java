@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
+import io.ourglass.amstelbright.core.OGConstants;
+import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.services.http.ogutil.AssetExtractor;
 import io.ourglass.amstelbright.services.udp.UDPBeaconService;
 
@@ -23,6 +25,10 @@ import io.ourglass.amstelbright.services.udp.UDPBeaconService;
 public class HTTPDService extends Service {
 
     public static final String TAG = "HTTPServer";
+    // For debug toasts
+    public static final Boolean DEBUG = false;
+
+
     private OGNanolets server;
 
     final Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -33,8 +39,7 @@ public class HTTPDService extends Service {
     /** indicates how to behave if the service is killed */
     int mStartMode = START_STICKY;
 
-    // For debug toasts
-    public static final Boolean DEBUG = true;
+
 
 
     /** indicates whether onRebind should be used */
@@ -53,10 +58,16 @@ public class HTTPDService extends Service {
 
         AssetExtractor asx = new AssetExtractor(getApplicationContext());
         asx.update();
+        OGCore.getInstance().sendStatusIntent("STATUS", "Checking for upgrades",
+                OGConstants.BootState.UPGRADE_START.getValue());
+
 
         // Let's start the HTTP service
         try {
             server = new OGNanolets(this);
+            OGCore.getInstance().sendStatusIntent("STATUS", "Starting webserver",
+                    OGConstants.BootState.HTTP_START.getValue());
+
         } catch (IOException e) {
             e.printStackTrace();
         }

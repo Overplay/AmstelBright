@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer;
+import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -24,7 +24,7 @@ public class OGCore {
 
     private static final String TAG = "OGCore";
 
-    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightServer.context).build();
+    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightService.context).build();
 
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
@@ -62,7 +62,8 @@ public class OGCore {
 
         OGApp app = OGApp.getApp(tempRealm, appId);
         if (app==null){
-            throw new OGServerException("no such app").ofType(OGServerException.ErrorType.NO_SUCH_APP);
+            throw new OGServerException("no such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
         tempRealm.beginTransaction();
@@ -77,7 +78,8 @@ public class OGCore {
 
         OGApp app = OGApp.getApp(newThreadRealm(), appId);
         if (app==null){
-            throw new OGServerException("no such app").ofType(OGServerException.ErrorType.NO_SUCH_APP);
+            throw new OGServerException("no such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
         return app.getPublicData();
@@ -90,7 +92,8 @@ public class OGCore {
         OGApp target = OGApp.getApp(newThreadRealm(), appId);
 
         if (target==null){
-            throw new OGServerException("No such app");
+            throw new OGServerException("No such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
         if (target.running)
@@ -142,11 +145,13 @@ public class OGCore {
         OGApp target = OGApp.getApp(newThreadRealm(), appId);
 
         if (target==null){
-            throw new OGServerException("No such app");
+            throw new OGServerException("No such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
         if (!target.running)
-            throw new OGServerException("App not currently running");
+            throw new OGServerException("App not currently running")
+                    .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
 
         return killApp(target);
 
@@ -161,11 +166,13 @@ public class OGCore {
         OGApp target = OGApp.getApp(tempRealm, appId);
 
         if (target==null){
-            throw new OGServerException("No such app");
+            throw new OGServerException("No such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
         if (!target.running)
-            throw new OGServerException("App not currently running");
+            throw new OGServerException("App not currently running")
+                    .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
 
         // TODO crashing here due to nested transaction...
         tempRealm.beginTransaction();
@@ -203,9 +210,22 @@ public class OGCore {
         intent.putExtra("command", cmd );
         intent.putExtra("appId",target.appId );
         intent.putExtra("app", target.getAppAsJson().toString() );
-        AmstelBrightServer.context.sendBroadcast(intent);
+        AmstelBrightService.context.sendBroadcast(intent);
 
     }
+
+    public void sendStatusIntent(String cmd, String msg, int code) {
+
+        // Notify
+        Intent intent = new Intent();
+        intent.setAction("com.ourglass.amstelbrightserver.status");
+        intent.putExtra("command", cmd );
+        intent.putExtra("message",msg );
+        intent.putExtra("code", code);
+        AmstelBrightService.context.sendBroadcast(intent);
+
+    }
+
 
     public void installStockApps(Context context){
         Log.d(TAG, "Installing stock apps");
@@ -217,13 +237,23 @@ public class OGCore {
             JSONObject pubCrawlerJson = new JSONObject()
                     .put("appId", "io.ourglass.pubcrawler")
                     .put("appType", "crawler")
+                    .put("screenName", "Pub Crawler")
                     .put("onLauncher", true);
 
             appArr.put(pubCrawlerJson);
 
+            JSONObject pubCrawler2Json = new JSONObject()
+                    .put("appId", "io.ourglass.pubcrawler2")
+                    .put("appType", "crawler")
+                    .put("screenName", "Combo Crawler")
+                    .put("onLauncher", true);
+
+            appArr.put(pubCrawler2Json);
+
             JSONObject budboard = new JSONObject()
                     .put("appId", "io.ourglass.budboard2")
                     .put("appType", "crawler")
+                    .put("screenName", "Bud Board")
                     .put("onLauncher", true);
 
             appArr.put(budboard);
@@ -231,6 +261,7 @@ public class OGCore {
             JSONObject shuffle = new JSONObject()
                     .put("appId", "io.ourglass.shuffleboard")
                     .put("appType", "widget")
+                    .put("screenName", "Shuffleboard")
                     .put("onLauncher", true);
 
             appArr.put(shuffle);

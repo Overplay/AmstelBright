@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -49,7 +50,6 @@ public class Mainframe {
 
     private MainframeListener mListener;
 
-
     public interface MainframeListener {
 
         public void moveWidgetFromTo(Point fromTranslation, Point toTranslation);
@@ -58,7 +58,7 @@ public class Mainframe {
         public void killWidget();
         public void launchCrawler(String urlPathToApp);
         public void launchWidget(String urlPathToApp);
-        public void redFlag(String message);
+        public void uiAlert(UIMessage message);
 
     }
 
@@ -73,7 +73,7 @@ public class Mainframe {
 
     private float crawlerTranslationY(int slotNumber){
 
-        return ((float)slotNumber * 0.915f ) *  mScreenRect.height;
+        return ((float)slotNumber * 0.945f ) *  mScreenRect.height;
 
     }
 
@@ -125,7 +125,7 @@ public class Mainframe {
     private void raiseRedFlag(String message){
 
         if (mListener!=null)
-            mListener.redFlag(message);
+            mListener.uiAlert(new UIMessage(message, UIMessage.UIMessageType.REDFLAG));
 
     }
 
@@ -155,6 +155,7 @@ public class Mainframe {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
                 Log.e(TAG, "GET apps failed");
+                raiseRedFlag("Unable to get apps from server!");
             }
 
             @Override
@@ -177,6 +178,7 @@ public class Mainframe {
         });
     }
 
+
     private void processInboundApps(){
 
         for (int i = 0; i < mAllApps.length(); i++) {
@@ -197,6 +199,45 @@ public class Mainframe {
         }
 
 
+    }
+
+
+    // Feels like a hack to go two places to get similar info
+    public void getAppInfo() throws Exception {
+
+
+
+        Request request = new Request.Builder()
+                .url("http://localhost:9090/api/system/apps")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                Log.e(TAG, "GET apps failed");
+                raiseRedFlag("Unable to get apps from server!");
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                String jString = response.body().string();
+
+                try {
+                    mAllApps = new JSONArray(jString);
+                } catch (JSONException e) {
+                    throw new IOException("Unexpected Json error " + e.toString());
+                }
+
+                Log.d(TAG, "GET all apps complete");
+                processInboundApps();
+
+            }
+        });
     }
 
     private void moveCrawlerIfNeeded(int destSlot){
@@ -267,17 +308,18 @@ public class Mainframe {
 
         String appId = null;
         String appType = null;
+        String screenName = null;
 
         try {
             appId = app.getString("appId");
             appType = app.getString("appType");
+            screenName = app.getString("screenName");
 
         } catch (Exception e){
             raiseRedFlag("Could not launch app. Error parsing JSON");
         }
 
-        raiseRedFlag("Launching: "+appId);
-
+        mListener.uiAlert(new UIMessage("Launching "+ screenName));
         // OK, so at this point we need to concern ourselves with the type, URL, and slotNumber
         switch (appType){
             case "crawler":
@@ -361,6 +403,35 @@ public class Mainframe {
                 killApp(app);
                 break;
         }
+    }
+
+    public ArrayList<AppDisplayInfo> getLauncherApps(){
+
+        ArrayList<AppDisplayInfo> rval = new ArrayList<>();
+
+        AppDisplayInfo shuff = new AppDisplayInfo();
+        shuff.appId = "io.ourglass.shuffleboard";
+        shuff.displayName = "Shuffleboard";
+        shuff.primaryColor = 0x2019f5;
+        shuff.secondaryColor = 0x110c9d;
+        rval.add(shuff);
+
+        AppDisplayInfo pub = new AppDisplayInfo();
+        shuff.appId = "io.ourglass.pubcrawler";
+        shuff.displayName = "PubCrawler";
+        shuff.primaryColor = 0x68566B;
+        shuff.secondaryColor = 0x987D9C;
+        rval.add(pub);
+
+        AppDisplayInfo bud = new AppDisplayInfo();
+        shuff.appId = "io.ourglass.budboard2";
+        shuff.displayName = "BudBoard";
+        shuff.primaryColor = 0xff0000;
+        shuff.secondaryColor = 0xD03C3C;
+        rval.add(bud);
+
+        return rval;
+
     }
 
 

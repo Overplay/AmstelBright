@@ -8,7 +8,7 @@ import org.json.JSONObject;
  */
 public class OGServerException extends Exception {
 
-    public enum ErrorType { NO_SUCH_APP, UNKNOWN }
+    public enum ErrorType { NO_SUCH_APP, UNKNOWN, APP_NOT_RUNNING }
     public ErrorType type = ErrorType.UNKNOWN;;
 
     public OGServerException(String s) {

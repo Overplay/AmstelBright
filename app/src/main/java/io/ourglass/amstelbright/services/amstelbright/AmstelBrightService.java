@@ -9,6 +9,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.widget.Toast;
 
+import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.services.http.HTTPDService;
 import io.ourglass.amstelbright.services.udp.UDPBeaconService;
@@ -21,8 +22,12 @@ import io.ourglass.amstelbright.services.udp.UDPBeaconService;
  * Mitch Kahn, May 2016
  */
 
-public class AmstelBrightServer extends Service {
+public class AmstelBrightService extends Service {
 
+    public static final String TAG = "ABS";
+
+    // For debug toasts
+    public static final Boolean DEBUG = false;
 
     //Context mContext = getApplicationContext();
     final Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -30,15 +35,11 @@ public class AmstelBrightServer extends Service {
     // This is here as a reliable ref to context for the Realm stuff.
     public static Context context;
 
-    public AmstelBrightServer() {
+    public AmstelBrightService() {
     }
 
     /** indicates how to behave if the service is killed */
     int mStartMode = START_STICKY;
-
-    // For debug toasts
-    public static final Boolean DEBUG = true;
-
 
     /** indicates whether onRebind should be used */
     boolean mAllowRebind = true;
@@ -52,10 +53,16 @@ public class AmstelBrightServer extends Service {
     /** The service is starting, due to a call to startService() */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         dbToastr("ABS: onStartCommand");
 
         context = getApplicationContext();
         // Let's start the UDP service
+
+        OGCore.getInstance().sendStatusIntent("STATUS", "Starting Services",
+                OGConstants.BootState.ABS_START.getValue());
+
+
         startChildServices();
 
         return mStartMode;
@@ -107,6 +114,9 @@ public class AmstelBrightServer extends Service {
     private void startChildServices(){
 
         OGCore.getInstance().installStockApps(this);
+        OGCore.getInstance().sendStatusIntent("STATUS", "Installing stock apps",
+                OGConstants.BootState.UPGRADE_START.getValue());
+
 
         Intent udpIntent = new Intent(this, UDPBeaconService.class)
                 .putExtra("data", "some data to broadcast")
@@ -117,8 +127,6 @@ public class AmstelBrightServer extends Service {
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
-
-
 
     }
 
