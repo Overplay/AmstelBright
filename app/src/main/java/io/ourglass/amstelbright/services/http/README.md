@@ -15,8 +15,36 @@ You could also do
 but this would probably be a bad idea and make your PC webserver upset :).
 
 
-Resource Loading
-----------------
+Adding Routes
+-------------
+
+Routes are added near the bottom of OGNanolets:
+
+        /**
+         * Add the routes Every route is an absolute path Parameters starts with ":"
+         * Handler class should implement @UriResponder interface If the handler not
+         * implement UriResponder interface - toString() is used
+         */
+        @Override
+        public void addMappings() {
+            super.addMappings();
+    
+            // Real OG Routes
+            addRoute("/api/appdata/:appid", JSONAppDataHandler.class);
+            addRoute("/api/system/:command", JSONSystemHandler.class);
+            addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
+    
+            // Static pages (AmstelBrightWithLime)
+            addRoute("/www/(.)+", StaticPageTestHandler.class, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/www").getAbsoluteFile());
+            
+            }
+
+The syntax is pretty obvious since it uses slugs (":appid") like most route libraries. You pass the route,
+then the handler. All of our JSON handlers inherit from the abstract class `JSONHandler`. `JSONHandler` does
+ al the common work needed for any JSON response so only the unique work needs to be implemented.
+
+Resource Loading CHanges from Stock NanoHTTP
+--------------------------------------------
 
 NanoHTTPD does a bunch of reource loading based off the classpath like so:
 

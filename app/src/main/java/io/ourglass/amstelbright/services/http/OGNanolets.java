@@ -147,7 +147,10 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/system/:command", JSONSystemHandler.class);
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
 
+        // Static pages (AmstelBrightWithLime)
+        addRoute("/www/(.)+", StaticPageTestHandler.class, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/www").getAbsoluteFile());
 
+        // Examples
         addRoute("/user", UserHandler.class);
         addRoute("/user/:id", UserHandler.class);
         addRoute("/user/help", GeneralHandler.class);
@@ -160,7 +163,6 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/toBeDeleted", String.class);
         removeRoute("/toBeDeleted");
         addRoute("/stream", StreamUrl.class);
-        addRoute("/www/(.)+", StaticPageTestHandler.class, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/www").getAbsoluteFile());
     }
 
 

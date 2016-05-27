@@ -6,6 +6,8 @@ public interface OGAppRealmProxyInterface {
     public void realmSet$appId(String value);
     public String realmGet$appType();
     public void realmSet$appType(String value);
+    public String realmGet$screenName();
+    public void realmSet$screenName(String value);
     public boolean realmGet$running();
     public void realmSet$running(boolean value);
     public boolean realmGet$onLauncher();

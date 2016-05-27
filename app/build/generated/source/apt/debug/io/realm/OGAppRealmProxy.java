@@ -33,6 +33,7 @@ public class OGAppRealmProxy extends OGApp
 
         public final long appIdIndex;
         public final long appTypeIndex;
+        public final long screenNameIndex;
         public final long runningIndex;
         public final long onLauncherIndex;
         public final long slotNumberIndex;
@@ -44,12 +45,15 @@ public class OGAppRealmProxy extends OGApp
         public final long privateDataIndex;
 
         OGAppColumnInfo(String path, Table table) {
-            final Map<String, Long> indicesMap = new HashMap<String, Long>(11);
+            final Map<String, Long> indicesMap = new HashMap<String, Long>(12);
             this.appIdIndex = getValidColumnIndex(path, table, "OGApp", "appId");
             indicesMap.put("appId", this.appIdIndex);
 
             this.appTypeIndex = getValidColumnIndex(path, table, "OGApp", "appType");
             indicesMap.put("appType", this.appTypeIndex);
+
+            this.screenNameIndex = getValidColumnIndex(path, table, "OGApp", "screenName");
+            indicesMap.put("screenName", this.screenNameIndex);
 
             this.runningIndex = getValidColumnIndex(path, table, "OGApp", "running");
             indicesMap.put("running", this.runningIndex);
@@ -89,6 +93,7 @@ public class OGAppRealmProxy extends OGApp
         List<String> fieldNames = new ArrayList<String>();
         fieldNames.add("appId");
         fieldNames.add("appType");
+        fieldNames.add("screenName");
         fieldNames.add("running");
         fieldNames.add("onLauncher");
         fieldNames.add("slotNumber");
@@ -132,6 +137,20 @@ public class OGAppRealmProxy extends OGApp
             throw new IllegalArgumentException("Trying to set non-nullable field appType to null.");
         }
         proxyState.getRow$realm().setString(columnInfo.appTypeIndex, value);
+    }
+
+    @SuppressWarnings("cast")
+    public String realmGet$screenName() {
+        proxyState.getRealm$realm().checkIfValid();
+        return (java.lang.String) proxyState.getRow$realm().getString(columnInfo.screenNameIndex);
+    }
+
+    public void realmSet$screenName(String value) {
+        proxyState.getRealm$realm().checkIfValid();
+        if (value == null) {
+            throw new IllegalArgumentException("Trying to set non-nullable field screenName to null.");
+        }
+        proxyState.getRow$realm().setString(columnInfo.screenNameIndex, value);
     }
 
     @SuppressWarnings("cast")
@@ -246,6 +265,7 @@ public class OGAppRealmProxy extends OGApp
             Table table = transaction.getTable("class_OGApp");
             table.addColumn(RealmFieldType.STRING, "appId", Table.NOT_NULLABLE);
             table.addColumn(RealmFieldType.STRING, "appType", Table.NOT_NULLABLE);
+            table.addColumn(RealmFieldType.STRING, "screenName", Table.NOT_NULLABLE);
             table.addColumn(RealmFieldType.BOOLEAN, "running", Table.NOT_NULLABLE);
             table.addColumn(RealmFieldType.BOOLEAN, "onLauncher", Table.NOT_NULLABLE);
             table.addColumn(RealmFieldType.INTEGER, "slotNumber", Table.NOT_NULLABLE);
@@ -265,11 +285,11 @@ public class OGAppRealmProxy extends OGApp
     public static OGAppColumnInfo validateTable(ImplicitTransaction transaction) {
         if (transaction.hasTable("class_OGApp")) {
             Table table = transaction.getTable("class_OGApp");
-            if (table.getColumnCount() != 11) {
-                throw new RealmMigrationNeededException(transaction.getPath(), "Field count does not match - expected 11 but was " + table.getColumnCount());
+            if (table.getColumnCount() != 12) {
+                throw new RealmMigrationNeededException(transaction.getPath(), "Field count does not match - expected 12 but was " + table.getColumnCount());
             }
             Map<String, RealmFieldType> columnTypes = new HashMap<String, RealmFieldType>();
-            for (long i = 0; i < 11; i++) {
+            for (long i = 0; i < 12; i++) {
                 columnTypes.put(table.getColumnName(i), table.getColumnType(i));
             }
 
@@ -298,6 +318,15 @@ public class OGAppRealmProxy extends OGApp
             }
             if (table.isColumnNullable(columnInfo.appTypeIndex)) {
                 throw new RealmMigrationNeededException(transaction.getPath(), "Field 'appType' does support null values in the existing Realm file. Remove @Required or @PrimaryKey from field 'appType' or migrate using RealmObjectSchema.setNullable().");
+            }
+            if (!columnTypes.containsKey("screenName")) {
+                throw new RealmMigrationNeededException(transaction.getPath(), "Missing field 'screenName' in existing Realm file. Either remove field or migrate using io.realm.internal.Table.addColumn().");
+            }
+            if (columnTypes.get("screenName") != RealmFieldType.STRING) {
+                throw new RealmMigrationNeededException(transaction.getPath(), "Invalid type 'String' for field 'screenName' in existing Realm file.");
+            }
+            if (table.isColumnNullable(columnInfo.screenNameIndex)) {
+                throw new RealmMigrationNeededException(transaction.getPath(), "Field 'screenName' does support null values in the existing Realm file. Remove @Required or @PrimaryKey from field 'screenName' or migrate using RealmObjectSchema.setNullable().");
             }
             if (!columnTypes.containsKey("running")) {
                 throw new RealmMigrationNeededException(transaction.getPath(), "Missing field 'running' in existing Realm file. Either remove field or migrate using io.realm.internal.Table.addColumn().");
@@ -436,6 +465,13 @@ public class OGAppRealmProxy extends OGApp
                 ((OGAppRealmProxyInterface) obj).realmSet$appType((String) json.getString("appType"));
             }
         }
+        if (json.has("screenName")) {
+            if (json.isNull("screenName")) {
+                ((OGAppRealmProxyInterface) obj).realmSet$screenName(null);
+            } else {
+                ((OGAppRealmProxyInterface) obj).realmSet$screenName((String) json.getString("screenName"));
+            }
+        }
         if (json.has("running")) {
             if (json.isNull("running")) {
                 throw new IllegalArgumentException("Trying to set non-nullable field running to null.");
@@ -522,6 +558,13 @@ public class OGAppRealmProxy extends OGApp
                     ((OGAppRealmProxyInterface) obj).realmSet$appType(null);
                 } else {
                     ((OGAppRealmProxyInterface) obj).realmSet$appType((String) reader.nextString());
+                }
+            } else if (name.equals("screenName")) {
+                if (reader.peek() == JsonToken.NULL) {
+                    reader.skipValue();
+                    ((OGAppRealmProxyInterface) obj).realmSet$screenName(null);
+                } else {
+                    ((OGAppRealmProxyInterface) obj).realmSet$screenName((String) reader.nextString());
                 }
             } else if (name.equals("running")) {
                 if (reader.peek() == JsonToken.NULL) {
@@ -629,6 +672,7 @@ public class OGAppRealmProxy extends OGApp
         cache.put(newObject, (RealmObjectProxy) realmObject);
         ((OGAppRealmProxyInterface) realmObject).realmSet$appId(((OGAppRealmProxyInterface) newObject).realmGet$appId());
         ((OGAppRealmProxyInterface) realmObject).realmSet$appType(((OGAppRealmProxyInterface) newObject).realmGet$appType());
+        ((OGAppRealmProxyInterface) realmObject).realmSet$screenName(((OGAppRealmProxyInterface) newObject).realmGet$screenName());
         ((OGAppRealmProxyInterface) realmObject).realmSet$running(((OGAppRealmProxyInterface) newObject).realmGet$running());
         ((OGAppRealmProxyInterface) realmObject).realmSet$onLauncher(((OGAppRealmProxyInterface) newObject).realmGet$onLauncher());
         ((OGAppRealmProxyInterface) realmObject).realmSet$slotNumber(((OGAppRealmProxyInterface) newObject).realmGet$slotNumber());
@@ -661,6 +705,7 @@ public class OGAppRealmProxy extends OGApp
         }
         ((OGAppRealmProxyInterface) standaloneObject).realmSet$appId(((OGAppRealmProxyInterface) realmObject).realmGet$appId());
         ((OGAppRealmProxyInterface) standaloneObject).realmSet$appType(((OGAppRealmProxyInterface) realmObject).realmGet$appType());
+        ((OGAppRealmProxyInterface) standaloneObject).realmSet$screenName(((OGAppRealmProxyInterface) realmObject).realmGet$screenName());
         ((OGAppRealmProxyInterface) standaloneObject).realmSet$running(((OGAppRealmProxyInterface) realmObject).realmGet$running());
         ((OGAppRealmProxyInterface) standaloneObject).realmSet$onLauncher(((OGAppRealmProxyInterface) realmObject).realmGet$onLauncher());
         ((OGAppRealmProxyInterface) standaloneObject).realmSet$slotNumber(((OGAppRealmProxyInterface) realmObject).realmGet$slotNumber());
@@ -675,6 +720,7 @@ public class OGAppRealmProxy extends OGApp
 
     static OGApp update(Realm realm, OGApp realmObject, OGApp newObject, Map<RealmModel, RealmObjectProxy> cache) {
         ((OGAppRealmProxyInterface) realmObject).realmSet$appType(((OGAppRealmProxyInterface) newObject).realmGet$appType());
+        ((OGAppRealmProxyInterface) realmObject).realmSet$screenName(((OGAppRealmProxyInterface) newObject).realmGet$screenName());
         ((OGAppRealmProxyInterface) realmObject).realmSet$running(((OGAppRealmProxyInterface) newObject).realmGet$running());
         ((OGAppRealmProxyInterface) realmObject).realmSet$onLauncher(((OGAppRealmProxyInterface) newObject).realmGet$onLauncher());
         ((OGAppRealmProxyInterface) realmObject).realmSet$slotNumber(((OGAppRealmProxyInterface) newObject).realmGet$slotNumber());
@@ -699,6 +745,10 @@ public class OGAppRealmProxy extends OGApp
         stringBuilder.append(",");
         stringBuilder.append("{appType:");
         stringBuilder.append(realmGet$appType());
+        stringBuilder.append("}");
+        stringBuilder.append(",");
+        stringBuilder.append("{screenName:");
+        stringBuilder.append(realmGet$screenName());
         stringBuilder.append("}");
         stringBuilder.append(",");
         stringBuilder.append("{running:");

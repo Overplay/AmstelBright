@@ -44,7 +44,7 @@
             android:name="io.ourglass.amstelbright.services.http.HTTPDService"
             android:enabled="true" />
         <service
-            android:name="io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer"
+            android:name="io.ourglass.amstelbright.services.amstelbright.AmstelBrightService"
             android:exported="false" >
         </service>
 

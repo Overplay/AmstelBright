@@ -90,12 +90,12 @@ ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/And
 		ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:40:13-35
 	android:name
 		ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:39:13-55
-service#io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer
+service#io.ourglass.amstelbright.services.amstelbright.AmstelBrightService
 ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:42:9-45:19
 	android:exported
 		ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:44:13-37
 	android:name
-		ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:43:13-69
+		ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:43:13-70
 activity#io.ourglass.amstelbright.tvui.MainframeActivity
 ADDED from /Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/AndroidManifest.xml:47:9-53:20
 	android:name

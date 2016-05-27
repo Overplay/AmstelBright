@@ -2,5 +2,9 @@
     {
         "merged": "/Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/build/intermediates/res/merged/debug/mipmap-xxhdpi-v4/ic_launcher.png",
         "source": "/Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/res/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/build/intermediates/res/merged/debug/mipmap-xxhdpi-v4/ic_featured_video_white_24dp.png",
+        "source": "/Users/mkahn/Developer/Ourglass/Android/AmstelBright/app/src/main/res/mipmap-xxhdpi/ic_featured_video_white_24dp.png"
     }
 ]
