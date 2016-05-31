@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
+import io.ourglass.amstelbright.realm.OGDevice;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -24,7 +25,7 @@ public class OGCore {
 
     private static final String TAG = "OGCore";
 
-    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightServer.context).build();
+    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightServer.context).deleteRealmIfMigrationNeeded().build();
 
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
@@ -53,7 +54,10 @@ public class OGCore {
     public String getAllApps(){
 
         return OGApp.getAllApps(newThreadRealm()).toString();
+    }
 
+    public String getDevice(){
+        return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
     }
 
     public JSONObject updateAppData(String appId, JSONObject dataJson) throws OGServerException {

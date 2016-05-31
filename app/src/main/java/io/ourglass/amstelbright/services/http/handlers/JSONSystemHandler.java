@@ -3,6 +3,7 @@ package io.ourglass.amstelbright.services.http.handlers;
 import java.util.Map;
 
 import io.ourglass.amstelbright.core.OGCore;
+import io.ourglass.amstelbright.realm.OGDevice;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 
 
@@ -25,6 +26,10 @@ public class JSONSystemHandler extends JSONHandler {
                     case "apps":
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return OGCore.getInstance().getAllApps();
+
+                    case "device":
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return OGCore.getInstance().getDevice();
 
                     default:
                         responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
