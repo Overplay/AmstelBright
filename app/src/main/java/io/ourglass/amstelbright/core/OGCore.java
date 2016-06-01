@@ -56,6 +56,10 @@ public class OGCore {
 
     }
 
+    public String getDevice(){
+        return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
+    }
+
     public JSONObject updateAppData(String appId, JSONObject dataJson) throws OGServerException {
 
         Realm tempRealm = newThreadRealm();
