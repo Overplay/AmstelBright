@@ -56,9 +56,10 @@ public class AmstelBrightService extends Service {
 
         dbToastr("ABS: onStartCommand");
 
+        // Create global static ref for code that needs Context
         context = getApplicationContext();
-        // Let's start the UDP service
 
+        // Let's start the UDP service
         OGCore.getInstance().sendStatusIntent("STATUS", "Starting Services",
                 OGConstants.BootState.ABS_START.getValue());
 

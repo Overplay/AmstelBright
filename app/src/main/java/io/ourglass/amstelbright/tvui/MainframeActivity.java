@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,11 +20,11 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
@@ -31,6 +33,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.mstar.android.tv.TvCommonManager;
 import com.mstar.android.tvapi.common.TvManager;
@@ -49,6 +52,10 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
+    private WebView mSubfloorWebView;
+
+    VideoView videoView;
+
 
     private ProgressBar mProgressSpinner;
     private TextView mTextView;
@@ -82,7 +89,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.mainframe_layout);
+        setContentView(R.layout.mainframe_layout_demo);
 
 
 
@@ -96,6 +103,8 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         mCrawlerWebView = (WebView)findViewById(R.id.crawlerWebView);
         mWidgetWebView = (WebView)findViewById(R.id.widgetWebView);
+        mSubfloorWebView = (WebView)findViewById(R.id.subfloorWebView);
+
 
         mProgressSpinner = (ProgressBar)findViewById(R.id.progressBar);
         mProgressSpinner.setVisibility(View.INVISIBLE);
@@ -129,7 +138,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         });
 
         if (isEmulator){
-            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Palette4a));
+            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Black));
             Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
 
         } else {
@@ -140,7 +149,10 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         setupCrawler();
         setupWidget();
+        //setupSubfloor();
+        setupVideo();
 
+        /*
         appTray = (LinearLayout)findViewById(R.id.appTray);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -190,6 +202,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         appTray.requestLayout();
 
         appTray.setAlpha(0f);
+        */
         mShowingMenu = false;
 
 
@@ -254,7 +267,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         Log.d(TAG, "onResume done");
 
-        appTray.getChildAt(0).requestFocus();
+        //appTray.getChildAt(0).requestFocus();
 
     }
 
@@ -382,6 +395,73 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         });
 
+
+    }
+
+    public void setupSubfloor(){
+
+        mSubfloorWebView.getSettings().setJavaScriptEnabled(true);
+        mSubfloorWebView.setBackgroundColor(Color.TRANSPARENT);
+        mSubfloorWebView.setAlpha(1f);
+
+        mSubfloorWebView.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                // Activities and WebViews measure progress with different scales.
+                // The progress meter will automatically disappear when we reach 100%
+            }
+        });
+
+        mSubfloorWebView.setWebViewClient(new WebViewClient() {
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                toast("Error loading app into crawler slot");
+            }
+
+            public void onPageFinished(WebView view, String url){
+                animateIn(view, 1);
+            }
+
+        });
+
+        String youtubeId = "Xu_plv2CTEM";
+        String video = "<iframe class=\"youtube-player\" style=\"border: 0; width: 100%; height: 100%; padding:0px; margin:0px\" id=\"ytplayer\" type=\"text/html\" src=\"http://www.youtube.com/embed/"
+                + youtubeId +
+                "?autoplay=1"
+                + "&fs=0\" frameborder=\"0\">\n"
+                + "</iframe>\n";
+        mSubfloorWebView.getSettings().setPluginState(WebSettings.PluginState.ON);
+        mSubfloorWebView.setWebChromeClient(new WebChromeClient());
+        mSubfloorWebView.getSettings().setJavaScriptEnabled(true);
+        mSubfloorWebView.setHorizontalScrollBarEnabled(false);
+        mSubfloorWebView.setVerticalScrollBarEnabled(false);
+        mSubfloorWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        mSubfloorWebView.getSettings().setBuiltInZoomControls(false);
+        mSubfloorWebView.getSettings().setAppCacheEnabled(true);
+        mSubfloorWebView.setInitialScale(0);
+        mSubfloorWebView.getSettings().setLoadWithOverviewMode(true);
+        mSubfloorWebView.getSettings().setUseWideViewPort(true);
+        mSubfloorWebView.loadData(video,"text/html","UTF-8");
+
+
+        //mSubfloorWebView.loadUrl("https://www.youtube.com/embed/8V_1ZxCN3nI?autoplay=1&origin=http://example.com%22%20frameborder=%220%22");
+        // mCrawlerWebView.loadUrl("http://159.203.242.99/opp/io.overplay.pubcrawler/app/tv/index.html");
+        // mCrawlerWebView.loadUrl("http://www.overplay.io");
+
+    }
+
+    public void setupVideo(){
+
+        VideoView videoView = (VideoView)findViewById(R.id.videoView);
+        Uri video = Uri.parse("android.resource://" + getPackageName() + "/"
+                + R.raw.splash);
+        videoView.setVideoURI(video);
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
+
+        videoView.start();
 
     }
 
