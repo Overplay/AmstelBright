@@ -47,6 +47,7 @@ public class JSONSystemHandler extends JSONHandler {
 
 
             case POST:
+            case PUT:
                 cmd = urlParams.get("command");
 
                 switch(cmd){
@@ -54,13 +55,11 @@ public class JSONSystemHandler extends JSONHandler {
                         OGCore core = OGCore.getInstance();
 
                         //check for JWT
-                        /*Map<String, String> headers = session.getHeaders();
-                        Iterator it = headers.entrySet().iterator();
-                        while(it.hasNext()){
-                            Map.Entry pair = (Map.Entry)it.next();
-                            Log.wtf("TAGTAGTAG", pair.getKey() + " = " + pair.getValue());
-                            it.remove();
-                        }*/
+                        //todo add more checks to determine if the JWT contains the correct information
+                        if(!JWTPresent(session)){
+                            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+                            return "Unauthorized";
+                        }
 
                         //if JWT not present then set responseStatus accordingly
 
@@ -95,8 +94,6 @@ public class JSONSystemHandler extends JSONHandler {
                             return e.toString();
                         }
                 }
-            case PUT:
-
             default:
                 // Only allowed verbs are GET/POST/PUT
                 responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;

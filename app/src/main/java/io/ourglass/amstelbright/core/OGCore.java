@@ -57,7 +57,12 @@ public class OGCore {
 
     }
 
+    public OGDevice getDeviceAsObject(){
+        return OGDevice.getDevice(newThreadRealm());
+    }
+
     public String getDevice(){
+
         return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
     }
 

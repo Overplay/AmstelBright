@@ -17,6 +17,7 @@ import java.net.SocketException;
 
 import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
+import io.ourglass.amstelbright.core.OGDevice;
 
 /**
  * Created by atorres on 4/19/16.
@@ -37,6 +38,14 @@ public class UDPBeaconService extends Service {
     Boolean mSending = false;
 
     private void sendUDPPacket() {
+        OGDevice device = OGCore.getInstance().getDeviceAsObject();
+
+        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        String mac = manager.getConnectionInfo().getMacAddress();
+
+        mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
+                device.name, device.locationWithinVenue, mac);
+
         if (mSocket == null || mSocket.isClosed()) {
             try {
                 mSocket = new DatagramSocket(mPort);
@@ -109,14 +118,17 @@ public class UDPBeaconService extends Service {
         Toast.makeText(this, "Starting UDP Beacon", Toast.LENGTH_SHORT).show();
 
         if (intent != null) {
-            if (intent.getStringExtra("data") != null) {
-                mMessage = intent.getStringExtra("data");
-            } else {
+//            if (intent.getStringExtra("data") != null) {
+//                mMessage = intent.getStringExtra("data");
+//            } else {
                 WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
                 String mac = manager.getConnectionInfo().getMacAddress();
+
+                OGDevice device = OGCore.getInstance().getDeviceAsObject();
+
                 mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                        DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_LOCATION, mac);
-            }
+                        device.name, device.locationWithinVenue, mac);
+            //}
 
             mPort = intent.getIntExtra("port", DEFAULT_PORT);
             mBeaconFreq = intent.getIntExtra("beaconFreq", DEFAULT_BEACON_FREQ);
@@ -124,8 +136,12 @@ public class UDPBeaconService extends Service {
         } else {
             WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
             String mac = manager.getConnectionInfo().getMacAddress();
+
+            OGDevice device = OGCore.getInstance().getDeviceAsObject();
+
             mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                    DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_LOCATION, mac);
+                    device.name, device.locationWithinVenue, mac);
+
             mPort = DEFAULT_PORT;
             mBeaconFreq = DEFAULT_BEACON_FREQ;
         }

@@ -79,4 +79,8 @@ public abstract class JSONHandler extends OGRouterNanoHTTPD.DefaultHandler {
         return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
     }
 
+    public boolean JWTPresent(NanoHTTPD.IHTTPSession session){
+        Map<String, String> headers = session.getHeaders();
+        return headers.containsKey("authorization") && headers.get("authorization").contains("JWT");
+    }
 }
