@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
+import io.ourglass.amstelbright.core.OGDevice;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -24,7 +25,7 @@ public class OGCore {
 
     private static final String TAG = "OGCore";
 
-    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightService.context).build();
+    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightService.context).deleteRealmIfMigrationNeeded().build();
 
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
@@ -54,6 +55,29 @@ public class OGCore {
 
         return OGApp.getAllApps(newThreadRealm()).toString();
 
+    }
+
+    public OGDevice getDeviceAsObject(){
+        return OGDevice.getDevice(newThreadRealm());
+    }
+
+    public String getDevice(){
+
+        return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
+    }
+
+    public void updateDevice(String attrName, String newValue){
+        switch(attrName){
+            case "name":
+                OGDevice.setName(newThreadRealm(), newValue);
+                break;
+            case "locationWithinVenue":
+                OGDevice.setLocationWithinVenue(newThreadRealm(), newValue);
+                break;
+            default:
+                Log.e(getClass().toString(),
+                        "attempted to update device with invalid attribute <" + attrName + "> - device unaffected");
+        }
     }
 
     public JSONObject updateAppData(String appId, JSONObject dataJson) throws OGServerException {

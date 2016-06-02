@@ -29,4 +29,6 @@ public class OGConstants {
         }
     }
 
+    public static final boolean TEST_MODE = true;
+
 }
