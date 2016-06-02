@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.core.OGDevice;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
@@ -56,7 +57,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                         //check for JWT
                         //todo add more checks to determine if the JWT contains the correct information
-                        if(!JWTPresent(session)){
+                        if(!OGConstants.TEST_MODE && !JWTPresent(session)){
                             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
                             return "Unauthorized";
                         }
