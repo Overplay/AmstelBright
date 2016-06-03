@@ -6,12 +6,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
-import io.ourglass.amstelbright.core.OGDevice;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 
 
@@ -24,12 +22,11 @@ public class JSONSystemHandler extends JSONHandler {
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
 
-        String cmd;
+        String cmd = urlParams.get("command");
 
         switch (session.getMethod()){
 
             case GET:
-                cmd = urlParams.get("command");
 
                 switch (cmd){
 
@@ -49,7 +46,6 @@ public class JSONSystemHandler extends JSONHandler {
 
             case POST:
             case PUT:
-                cmd = urlParams.get("command");
 
                 switch(cmd){
                     case "device":

@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -89,7 +87,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.mainframe_layout_demo);
+        setContentView(R.layout.mainframe_layout);
 
 
 
@@ -150,7 +148,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         setupCrawler();
         setupWidget();
         //setupSubfloor();
-        setupVideo();
+
 
         /*
         appTray = (LinearLayout)findViewById(R.id.appTray);
@@ -448,22 +446,6 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
-    public void setupVideo(){
-
-        VideoView videoView = (VideoView)findViewById(R.id.videoView);
-        Uri video = Uri.parse("android.resource://" + getPackageName() + "/"
-                + R.raw.splash);
-        videoView.setVideoURI(video);
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(true);
-            }
-        });
-
-        videoView.start();
-
-    }
 
     private void toast(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
