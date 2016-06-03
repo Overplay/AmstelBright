@@ -10,6 +10,7 @@ import java.util.Map;
 
 import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
+import io.ourglass.amstelbright.realm.OGDevice;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 
 
@@ -37,8 +38,13 @@ public class JSONSystemHandler extends JSONHandler {
                     case "device":
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return OGCore.getInstance().getDevice();
-                    
+
 		            default:
+                    case "device":
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return OGCore.getInstance().getDevice();
+
+                    default:
                         responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
                         return "no such command: "+cmd;
                 }
