@@ -13,7 +13,7 @@ public class OGBroadcastReceiver extends BroadcastReceiver {
 
     public interface OGBroadcastReceiverListener {
 
-        public void receivedCommand(Intent intent);
+        void receivedCommand(Intent intent);
 
     }
 
@@ -23,8 +23,7 @@ public class OGBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String targetApp = intent.getStringExtra("appId");
-        String command = intent.getStringExtra("command");
+
         if (mListener!=null){
             mListener.receivedCommand(intent);
         }

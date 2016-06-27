@@ -7,11 +7,16 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.util.Log;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
+import io.ourglass.amstelbright.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright.services.http.HTTPDService;
+import io.ourglass.amstelbright.services.cloudscraper.OGTweetScraper;
 import io.ourglass.amstelbright.services.udp.UDPBeaconService;
 
 
@@ -22,9 +27,11 @@ import io.ourglass.amstelbright.services.udp.UDPBeaconService;
  * Mitch Kahn, May 2016
  */
 
-public class AmstelBrightService extends Service {
+public class AmstelBrightService extends Service  {
 
     public static final String TAG = "ABS";
+
+    OGTweetScraper twatter;
 
     // For debug toasts
     public static final Boolean DEBUG = false;
@@ -60,7 +67,7 @@ public class AmstelBrightService extends Service {
         context = getApplicationContext();
 
         // Let's start the UDP service
-        OGCore.getInstance().sendStatusIntent("STATUS", "Starting Services",
+        OGCore.sendStatusIntent("STATUS", "Starting Services",
                 OGConstants.BootState.ABS_START.getValue());
 
 
@@ -94,6 +101,8 @@ public class AmstelBrightService extends Service {
     }
 
 
+
+
     // TODO: Seriously with the leaks? This code is right from the Google site. FCOL
     private class IncomingHandler extends Handler {
         @Override
@@ -111,23 +120,34 @@ public class AmstelBrightService extends Service {
         }
     }
 
+    private void logTweets(JSONObject jobj){
+        Log.d(TAG, jobj.toString());
+    }
 
     private void startChildServices(){
 
-        OGCore.getInstance().installStockApps(this);
-        OGCore.getInstance().sendStatusIntent("STATUS", "Installing stock apps",
+
+
+        OGCore.installStockApps(this);
+        OGCore.sendStatusIntent("STATUS", "Installing stock apps",
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
         Intent udpIntent = new Intent(this, UDPBeaconService.class)
                 .putExtra("data", "some data to broadcast")
-                .putExtra("port", 1234)
+                .putExtra("port", 9091)
                 .putExtra("beaconFreq", 2000);
 
         startService(udpIntent);
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
+
+        Intent csIntent = new Intent(this, CloudScraperService.class);
+        startService(csIntent);
+
+//        Intent stbIntent = new Intent(this, STBService.class);
+//        startService(stbIntent);
 
     }
 

@@ -36,7 +36,15 @@
             android:enabled="true" />
 
         <service
+            android:name=".services.stbservice.STBService"
+            android:enabled="true" />
+
+        <service
             android:name=".services.http.HTTPDService"
+            android:enabled="true" />
+
+        <service
+            android:name=".services.cloudscraper.CloudScraperService"
             android:enabled="true" />
 
         <service

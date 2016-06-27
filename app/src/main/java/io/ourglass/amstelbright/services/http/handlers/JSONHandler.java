@@ -1,6 +1,11 @@
 package io.ourglass.amstelbright.services.http.handlers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
@@ -11,6 +16,17 @@ import io.ourglass.amstelbright.services.http.OGRouterNanoHTTPD;
  * Created by mkahn on 5/18/16.
  */
 public abstract class JSONHandler extends OGRouterNanoHTTPD.DefaultHandler {
+
+    protected JSONObject getBodyAsJSONObject(NanoHTTPD.IHTTPSession session) throws IOException, NanoHTTPD.ResponseException, JSONException {
+
+        //parse the body of the request
+        // TODO this does not work for PUT which makes me think it is not the right way to do it
+        Map<String, String> files = new HashMap<String, String>();
+        session.parseBody(files);
+        String json = files.get("postData");
+        return new JSONObject(json);
+
+    }
 
     protected String makeErrorJson(Exception e) {
 

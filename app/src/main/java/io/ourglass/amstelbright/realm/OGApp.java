@@ -28,10 +28,15 @@ public class OGApp extends RealmObject {
     @Required
     public String screenName;
 
+    int primaryColor;
+    int secondaryColor;
+    String icon;
+
     public boolean running = false;
     public boolean onLauncher = true;
 
     public int slotNumber = 0;
+    public float scale = 1;
 
     public int xPos = 0;
     public int yPos = 0;
@@ -41,7 +46,7 @@ public class OGApp extends RealmObject {
     private String publicData = "{}";
     private String privateData = "{}";
 
-    private JSONObject validOrEmptyJson(String jsonString){
+    private static JSONObject validOrEmptyJson(String jsonString){
 
         JSONObject rval;
 
@@ -58,7 +63,7 @@ public class OGApp extends RealmObject {
 
     public JSONObject getPublicData(){
 
-       return this.validOrEmptyJson(this.publicData);
+       return OGApp.validOrEmptyJson(this.publicData);
 
     }
 
@@ -70,7 +75,7 @@ public class OGApp extends RealmObject {
 
     public JSONObject getPrivateData(){
 
-        return this.validOrEmptyJson(this.publicData);
+        return OGApp.validOrEmptyJson(this.publicData);
 
     }
 
@@ -85,10 +90,19 @@ public class OGApp extends RealmObject {
             rval.put("running", this.running);
             rval.put("onLauncher", this.onLauncher);
             rval.put("slotNumber", this.slotNumber);
-            rval.put("xPos", this.xPos);
-            rval.put("yPos", this.yPos);
-            rval.put("height", this.height);
-            rval.put("width", this.width);
+//            rval.put("xPos", this.xPos);
+//            rval.put("yPos", this.yPos);
+//            rval.put("height", this.height);
+//            rval.put("width", this.width);
+            rval.put("screenName", this.screenName);
+            rval.put("primaryColor", this.primaryColor);
+            rval.put("primaryColorHex", String.format("#%06X", (0xFFFFFF & this.primaryColor)));
+
+            rval.put("secondaryColor", this.secondaryColor);
+            rval.put("secondaryColorHex", String.format("#%06X", (0xFFFFFF & this.secondaryColor)));
+
+            rval.put("icon", this.icon);
+            rval.put("iconPath", "www/opp/"+this.appId+"/assets/icon/"+this.icon);
 
         } catch (Exception e){
 
@@ -100,9 +114,15 @@ public class OGApp extends RealmObject {
 
     }
 
-    public static JSONArray getAllApps(Realm  realm){
+    public static RealmResults<OGApp> getAllApps(Realm realm){
 
-        RealmResults<OGApp> result = realm.where(OGApp.class).findAll();
+        return realm.where(OGApp.class).findAll();
+
+    }
+
+    public static JSONArray getAllAppsAsJSON(Realm  realm){
+
+        RealmResults<OGApp> result = getAllApps(realm);
 
         ListIterator<OGApp> litr = result.listIterator();
 
@@ -125,7 +145,7 @@ public class OGApp extends RealmObject {
         return result.size()>0;
     }
 
-    public static OGApp getApp(Realm realm,  String appId){
+    public static OGApp getApp(Realm realm, String appId){
 
         RealmResults<OGApp> result = realm.where(OGApp.class)
                 .equalTo("appId", appId)

@@ -58,14 +58,14 @@ public class HTTPDService extends Service {
 
         AssetExtractor asx = new AssetExtractor(getApplicationContext());
         asx.update();
-        OGCore.getInstance().sendStatusIntent("STATUS", "Checking for upgrades",
+        OGCore.sendStatusIntent("STATUS", "Checking for upgrades",
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
         // Let's start the HTTP service
         try {
             server = new OGNanolets(this);
-            OGCore.getInstance().sendStatusIntent("STATUS", "Starting webserver",
+            OGCore.sendStatusIntent("STATUS", "Starting webserver",
                     OGConstants.BootState.HTTP_START.getValue());
 
         } catch (IOException e) {

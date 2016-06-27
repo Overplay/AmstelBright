@@ -12,6 +12,7 @@ import java.util.Map;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 import io.ourglass.amstelbright.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright.services.http.handlers.JSONAppDataHandler;
+import io.ourglass.amstelbright.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright.services.http.handlers.JSONSystemHandler;
 import io.ourglass.amstelbright.services.http.handlers.JSONTestHandler;
 
@@ -146,6 +147,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/appdata/:appid", JSONAppDataHandler.class);
         addRoute("/api/system/:command", JSONSystemHandler.class);
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
+        // TODO: add source to route e.g."twitter"
+        addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
 
         // Static pages (AmstelBrightWithLime)
         addRoute("/www/(.)+", StaticPageTestHandler.class, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/www").getAbsoluteFile());

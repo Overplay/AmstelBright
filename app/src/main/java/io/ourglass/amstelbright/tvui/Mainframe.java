@@ -1,6 +1,7 @@
 package io.ourglass.amstelbright.tvui;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,8 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -44,6 +47,10 @@ public class Mainframe {
     private int mRunningWidgetSlot = 0;
 
 
+    // TODO this should be combined with mAllApps so there is a single native array with all app info
+    public ArrayList<AppIcon> appIcons = new ArrayList<>();
+
+
     public static final int SERVER_PORT = 9090;
 
     private JSONArray mAllApps;
@@ -54,6 +61,8 @@ public class Mainframe {
 
         public void moveWidgetFromTo(Point fromTranslation, Point toTranslation);
         public void moveCrawlerFrom(float fromY, float toY);
+        public void scaleCrawler( float scale );
+        public void scaleWidget( float scale );
         public void killCrawler();
         public void killWidget();
         public void launchCrawler(String urlPathToApp);
@@ -73,7 +82,7 @@ public class Mainframe {
 
     private float crawlerTranslationY(int slotNumber){
 
-        return ((float)slotNumber * 0.945f ) *  mScreenRect.height;
+        return ((float)slotNumber * 0.9f ) *  mScreenRect.height;
 
     }
 
@@ -142,6 +151,16 @@ public class Mainframe {
         return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
     }
 
+    public String urlForAppInfo(String appId){
+
+        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
+    }
+
+    public String urlForAppIcon(String appId, String iconName){
+
+        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
+    }
+
     public void getApps() throws Exception {
 
         // TODO: Should we do this thru service calls now??
@@ -181,9 +200,12 @@ public class Mainframe {
 
     private void processInboundApps(){
 
+        mListener.uiAlert(new UIMessage("Processing Apps"));
         for (int i = 0; i < mAllApps.length(); i++) {
             try {
                 JSONObject app = mAllApps.getJSONObject(i);
+
+                // Set what's running
                 boolean running = app.getBoolean("running");
                 if (running){
                     String type = app.getString("appType");
@@ -193,6 +215,10 @@ public class Mainframe {
                         setRunningWidget(app);
                     }
                 }
+
+                loadAppIconFor(app.getString("appId"));
+
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -201,6 +227,54 @@ public class Mainframe {
 
     }
 
+
+    private void loadAppIconFor( final String appId){
+
+
+        Request request = new Request.Builder()
+                .url(urlForAppInfo(appId))
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                Log.e(TAG, "GET app info.json failed");
+                raiseRedFlag("Unable to get app info from server!");
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                String jString = response.body().string();
+
+                JSONObject aiObj;
+                try {
+                    aiObj = new JSONObject(jString);
+                    AppIcon ai = new AppIcon();
+                    ai.primaryColor = Color.parseColor( aiObj.getString("primaryColor") );
+                    ai.secondaryColor = Color.parseColor( aiObj.getString("secondaryColor") );
+                    ai.label = aiObj.getString("iconLabel");
+                    ai.appId = appId;
+                    ai.imageUrl = urlForAppIcon(appId, aiObj.getString("iconImage"));
+                    ai.textColor = Color.WHITE; // TODO parse from JSON
+                    appIcons.add(ai);
+                    mListener.uiAlert(new UIMessage("Processed "+ai.label));
+
+                } catch (JSONException e) {
+                    throw new IOException("Unexpected Json error " + e.toString());
+                }
+
+
+
+            }
+        });
+
+
+    }
 
     // Feels like a hack to go two places to get similar info
     public void getAppInfo() throws Exception {
@@ -283,6 +357,29 @@ public class Mainframe {
 
     }
 
+    public boolean isRunning(String appId){
+
+        // TODO another reason we need to dispense with JSONObjects quickly
+        try {
+            if (mRunningCrawler != null){
+                String rcaid = mRunningCrawler.getString("appId");
+                if (rcaid.equalsIgnoreCase(appId))
+                    return true;
+            }
+
+            if (mRunningWidget != null){
+                String rcaid = mRunningWidget.getString("appId");
+                if (rcaid.equalsIgnoreCase(appId))
+                    return true;
+            }
+
+        } catch (Exception e){
+            Log.wtf(TAG, "JSONObject sucks");
+        }
+
+        return false;
+
+    }
 
     private void setRunningWidget(JSONObject appJson){
 
@@ -304,7 +401,7 @@ public class Mainframe {
 
     }
 
-    private void launchApp(JSONObject app){
+    public void launchApp(JSONObject app){
 
         String appId = null;
         String appType = null;
@@ -373,6 +470,24 @@ public class Mainframe {
         }
     }
 
+    private void scaleApp(JSONObject app, float scale){
+
+        try {
+
+            if (app.getString("appType").equalsIgnoreCase("crawler")){
+                mListener.scaleCrawler(scale);
+            } else {
+                mListener.scaleWidget(scale);
+            }
+
+        } catch (Exception e){
+            Log.wtf(TAG, "WTF with the bad JSON again!");
+            raiseRedFlag("WTF with the bad JSON again!");
+        }
+
+
+    }
+
     public void postCommand(Intent intent) {
 
         String command = intent.getStringExtra("command");
@@ -402,7 +517,44 @@ public class Mainframe {
             case "kill":
                 killApp(app);
                 break;
+
+            case "scale":
+                float scale = intent.getFloatExtra("scale", 1f);
+                scaleApp(app, scale);
+                break;
         }
+    }
+
+    public void launchViaHttp(String appId){
+
+        MediaType JSON
+                = MediaType.parse("application/json; charset=utf-8");
+        RequestBody body = RequestBody.create(JSON, "{}");
+
+        Request request = new Request.Builder()
+                .url("http://localhost:9090/api/app/"+appId+"/launch")
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                Log.e(TAG, "Launch apps failed");
+                raiseRedFlag("Unable to launch app via server!");
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+                Log.d(TAG, "App operation complete");
+
+            }
+        });
+
+
     }
 
     public ArrayList<AppDisplayInfo> getLauncherApps(){

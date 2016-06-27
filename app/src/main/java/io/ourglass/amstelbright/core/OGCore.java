@@ -7,106 +7,47 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import io.ourglass.amstelbright.R;
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
-import io.ourglass.amstelbright.core.OGDevice;
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright.realm.OGDevice;
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer;
+import io.ourglass.amstelbright.realm.OGScraper;
+import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 
 /**
  * Created by mkahn on 5/9/16.
- *
+ * <p/>
  * Switched this to a singleton and forcing all Realm operations to be here so if we have
  * to synch lock, we can.
- *
  */
 public class OGCore {
 
     private static final String TAG = "OGCore";
 
-    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightService.context).deleteRealmIfMigrationNeeded().build();
-    private final RealmConfiguration mRealmConfig = new RealmConfiguration.Builder(AmstelBrightServer.context).deleteRealmIfMigrationNeeded().build();
-
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
 
-    private Boolean mUseExclusionZones;
+    private String channel;
+    private String programId;
+    private String programTitle;
 
-    private static OGCore instance = null;
 
-    protected OGCore() {
-
+    public static OGDevice getDeviceAsObject(Realm realm) {
+        return OGDevice.getDevice(realm);
     }
 
-    public static OGCore getInstance() {
-        if(instance == null) {
-            instance = new OGCore();
-        }
-        return instance;
+    public static JSONObject getDeviceAsJSON(Realm realm) {
+
+        return OGDevice.getDeviceAsJSON(realm);
     }
 
-    public Realm newThreadRealm(){
 
-        return Realm.getInstance(mRealmConfig);
+    public static JSONObject getAppDataFor(Realm realm, String appId) throws OGServerException {
 
-    }
+        OGApp app = OGApp.getApp(realm, appId);
 
-    public String getAllApps(){
-
-        return OGApp.getAllApps(newThreadRealm()).toString();
-
-    public String getDevice(){
-        return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
-    }
-
-    public OGDevice getDeviceAsObject(){
-        return OGDevice.getDevice(newThreadRealm());
-    }
-
-    public String getDevice(){
-
-        return OGDevice.getDeviceAsJSON(newThreadRealm()).toString();
-    }
-
-    public void updateDevice(String attrName, String newValue){
-        switch(attrName){
-            case "name":
-                OGDevice.setName(newThreadRealm(), newValue);
-                break;
-            case "locationWithinVenue":
-                OGDevice.setLocationWithinVenue(newThreadRealm(), newValue);
-                break;
-            default:
-                Log.e(getClass().toString(),
-                        "attempted to update device with invalid attribute <" + attrName + "> - device unaffected");
-        }
-    }
-
-    public JSONObject updateAppData(String appId, JSONObject dataJson) throws OGServerException {
-
-        Realm tempRealm = newThreadRealm();
-
-        OGApp app = OGApp.getApp(tempRealm, appId);
-        if (app==null){
-            throw new OGServerException("no such app")
-                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
-        }
-
-        tempRealm.beginTransaction();
-        app.setPublicData(dataJson);
-        tempRealm.commitTransaction();
-
-        return dataJson;  // TODO is this needed?
-
-    }
-
-    public JSONObject getAppDataFor(String appId) throws OGServerException{
-
-        OGApp app = OGApp.getApp(newThreadRealm(), appId);
-        if (app==null){
+        if (app == null) {
             throw new OGServerException("no such app")
                     .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
@@ -115,12 +56,12 @@ public class OGCore {
 
     }
 
-    public OGApp launchApp(String appId) throws OGServerException {
+    public static OGApp launchApp(Realm realm, String appId) throws OGServerException {
 
         Log.d(TAG, "Launching app");
-        OGApp target = OGApp.getApp(newThreadRealm(), appId);
+        final OGApp target = OGApp.getApp(realm, appId);
 
-        if (target==null){
+        if (target == null) {
             throw new OGServerException("No such app")
                     .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
@@ -128,52 +69,50 @@ public class OGCore {
         if (target.running)
             return target;
 
+
         // Per Treb, one app at a time of any particular kind
 
-        Realm tempRealm = newThreadRealm();
-
-        OGApp alreadyRunning = OGApp.getRunningByType(tempRealm, target.appType);
+        OGApp alreadyRunning = OGApp.getRunningByType(realm, target.appType);
 
         int slotNumber = -1;
 
-        if (alreadyRunning!=null){
-            // grab it's slot
+        if (alreadyRunning != null) {
+            // grab its slot
             slotNumber = alreadyRunning.slotNumber;
             // We need to kill the already running app
-            killApp(alreadyRunning);
+            killApp(realm, alreadyRunning);
         }
 
+        final int newSlot = slotNumber;
 
-        tempRealm.beginTransaction();
+        realm.beginTransaction();
         target.running = true;
-        // Replace already positioned slot, otherwise keep last slot
-        if (slotNumber>-1)
-            target.slotNumber = slotNumber;
-        tempRealm.commitTransaction();
-
+        if (newSlot > -1)
+            target.slotNumber = newSlot;
         sendCommandIntent("launch", target);
+        realm.commitTransaction();
 
         return target;
     }
 
-    public OGApp killApp(OGApp markedForDeath){
+    public static OGApp killApp(Realm realm, final OGApp markedForDeath) {
 
-        Realm tempRealm = newThreadRealm();
-
-        tempRealm.beginTransaction();
-        markedForDeath.running = false;
-        tempRealm.commitTransaction();
         sendCommandIntent("kill", markedForDeath);
+
+        realm.beginTransaction();
+        markedForDeath.running = false;
+        realm.commitTransaction();
+
         return markedForDeath;
 
     }
 
-    public OGApp killApp(String appId) throws OGServerException {
+    public static OGApp killApp(Realm realm, String appId) throws OGServerException {
 
         Log.d(TAG, "Killing app");
-        OGApp target = OGApp.getApp(newThreadRealm(), appId);
+        OGApp target = OGApp.getApp(realm, appId);
 
-        if (target==null){
+        if (target == null) {
             throw new OGServerException("No such app")
                     .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
@@ -182,19 +121,17 @@ public class OGCore {
             throw new OGServerException("App not currently running")
                     .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
 
-        return killApp(target);
+        return killApp(realm, target);
 
     }
 
-    public OGApp moveApp(String appId) throws OGServerException {
+    public static OGApp moveApp(Realm realm, String appId) throws OGServerException {
 
         Log.d(TAG, "Moving app");
 
-        Realm tempRealm = newThreadRealm();
+        final OGApp target = OGApp.getApp(realm, appId);
 
-        OGApp target = OGApp.getApp(tempRealm, appId);
-
-        if (target==null){
+        if (target == null) {
             throw new OGServerException("No such app")
                     .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
@@ -203,114 +140,184 @@ public class OGCore {
             throw new OGServerException("App not currently running")
                     .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
 
-        // TODO crashing here due to nested transaction...
-        tempRealm.beginTransaction();
+        realm.beginTransaction();
 
         target.slotNumber++;
 
-        switch (target.appType){
+        switch (target.appType) {
 
             case "crawler":
-                if (target.slotNumber==NUM_CRAWLER_SLOTS)
+                if (target.slotNumber == NUM_CRAWLER_SLOTS)
                     target.slotNumber = 0;
                 break;
 
             case "widget":
-                if (target.slotNumber==NUM_WIDGET_SLOTS)
+                if (target.slotNumber == NUM_WIDGET_SLOTS)
                     target.slotNumber = 0;
                 break;
 
         }
 
-
-        tempRealm.commitTransaction();
-
         sendCommandIntent("move", target);
+
+        realm.commitTransaction();
 
         return target;
 
     }
 
-    private void sendCommandIntent(String cmd, OGApp target) {
+    public void scaleApp(float scale) {
+
+        // TODO implement scaling
+
+    }
+
+    private static void sendCommandIntent(String cmd, OGApp target) {
 
         // Notify
         Intent intent = new Intent();
         intent.setAction("com.ourglass.amstelbrightserver");
-        intent.putExtra("command", cmd );
-        intent.putExtra("appId",target.appId );
-        intent.putExtra("app", target.getAppAsJson().toString() );
+        intent.putExtra("command", cmd);
+        intent.putExtra("appId", target.appId);
+        intent.putExtra("app", target.getAppAsJson().toString());
         AmstelBrightService.context.sendBroadcast(intent);
 
     }
 
-    public void sendStatusIntent(String cmd, String msg, int code) {
+    public static void sendStatusIntent(String cmd, String msg, int code) {
 
         // Notify
         Intent intent = new Intent();
         intent.setAction("com.ourglass.amstelbrightserver.status");
-        intent.putExtra("command", cmd );
-        intent.putExtra("message",msg );
+        intent.putExtra("command", cmd);
+        intent.putExtra("message", msg);
         intent.putExtra("code", code);
         AmstelBrightService.context.sendBroadcast(intent);
 
     }
 
 
-    public void installStockApps(Context context){
+    public static void installStockApps(Context context) {
+
         Log.d(TAG, "Installing stock apps");
 
-        JSONArray appArr = new JSONArray();
+        final JSONArray appArr = new JSONArray();
+        final JSONArray scrapeArr = new JSONArray();
 
         try {
 
-            JSONObject pubCrawlerJson = new JSONObject()
-                    .put("appId", "io.ourglass.pubcrawler")
-                    .put("appType", "crawler")
-                    .put("screenName", "Pub Crawler")
-                    .put("onLauncher", true);
-
-            appArr.put(pubCrawlerJson);
 
             JSONObject pubCrawler2Json = new JSONObject()
                     .put("appId", "io.ourglass.pubcrawler2")
                     .put("appType", "crawler")
-                    .put("screenName", "Combo Crawler")
-                    .put("onLauncher", true);
+                    .put("screenName", "PubCrawler")
+                    .put("onLauncher", true)
+                    .put("primaryColor", context.getResources().getColor(R.color.Green))
+                    .put("icon", "pub.png");
+
 
             appArr.put(pubCrawler2Json);
 
-            JSONObject budboard = new JSONObject()
-                    .put("appId", "io.ourglass.budboard2")
-                    .put("appType", "crawler")
-                    .put("screenName", "Bud Board")
-                    .put("onLauncher", true);
-
-            appArr.put(budboard);
 
             JSONObject shuffle = new JSONObject()
                     .put("appId", "io.ourglass.shuffleboard")
                     .put("appType", "widget")
                     .put("screenName", "Shuffleboard")
-                    .put("onLauncher", true);
+                    .put("onLauncher", true)
+                    .put("primaryColor", context.getResources().getColor(R.color.DarkGray))
+                    .put("icon", "shuffle.png");
+            ;
 
             appArr.put(shuffle);
 
+//            JSONObject babs = new JSONObject()
+//                    .put("appId", "io.ourglass.babylon")
+//                    .put("appType", "widget")
+//                    .put("screenName", "Babylon")
+//                    .put("onLauncher", true)
+//                    .put("primaryColor", context.getResources().getColor(R.color.AntiqueWhite))
+//                    .put("icon", "babs.png");
+//            ;
+//
+//            appArr.put(babs);
+//
+//            JSONObject velo = new JSONObject()
+//                    .put("appId", "io.ourglass.velocity")
+//                    .put("appType", "crawler")
+//                    .put("screenName", "Velocity")
+//                    .put("onLauncher", true)
+//                    .put("primaryColor", context.getResources().getColor(R.color.SkyBlue))
+//                    .put("icon", "velo.png");
+//            ;
+//
+//            appArr.put(velo);
+
+            JSONObject scrapeTwitter = new JSONObject()
+                    .put("source", "twitter")
+                    .put("query", "\"Steph Curry\"")
+                    .put("appId", "io.ourglass.pubcrawler2");
+
+            scrapeArr.put(scrapeTwitter);
 
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "You screwed up your stock app Json, fix it!");
         }
 
-        Realm tempRealm = newThreadRealm();
+        Realm realm = Realm.getDefaultInstance();
 
-        tempRealm.beginTransaction();
-        tempRealm.createOrUpdateAllFromJson(OGApp.class, appArr);
-        tempRealm.commitTransaction();
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm bgRealm) {
+
+                bgRealm.createOrUpdateAllFromJson(OGApp.class, appArr);
+                bgRealm.createOrUpdateAllFromJson(OGScraper.class, scrapeArr);
+
+
+            }
+        }, null, null);
+
+
+        realm.close();
 
     }
 
-    public static void getApps(){
+    public static void getApps() {
 
+
+    }
+
+    public void setChannel(String channel) {
+        if (this.channel.equalsIgnoreCase(channel))
+            return;
+
+        Log.d(TAG, "New channel is: " + channel);
+        this.channel = channel;
+        //TODO add auto-placement code here
+
+    }
+
+    public void setProgramTitle(String title) {
+        this.programTitle = title;
+    }
+
+    public void setProgramId(String id) {
+        this.programId = id;
+    }
+
+
+    private JSONObject validOrEmptyJson(String jsonString) {
+
+        JSONObject rval;
+
+        try {
+            rval = new JSONObject(jsonString);
+        } catch (Exception e) {
+            Log.e("OGApp.model", "Error converting string to JSON");
+            rval = new JSONObject();
+        }
+
+        return rval;
 
     }
 

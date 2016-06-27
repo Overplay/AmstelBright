@@ -6,6 +6,7 @@ import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
+import io.realm.Realm;
 
 
 // TODO Maybe this should handle appData too?
@@ -45,12 +46,14 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
 
                     case "move":
+                    {
 
                         OGApp movedApp;
+                        Realm realm = Realm.getDefaultInstance();
 
                         try {
 
-                            movedApp = OGCore.getInstance().moveApp(appId);
+                            movedApp = OGCore.moveApp(realm, appId);
                             String appJsonString = movedApp.getAppAsJson().toString();
                             responseStatus = NanoHTTPD.Response.Status.OK;
                             return appJsonString;
@@ -59,38 +62,70 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
                             return processOGException(e);
 
+                        } finally {
+                            realm.close();
                         }
+
+                    }
+
 
 
 
                     case "launch":
 
+                    {
+
                         OGApp launchedApp;
+                        Realm realm = Realm.getDefaultInstance();
+
 
                         try {
-                            launchedApp = OGCore.getInstance().launchApp(appId);
+
+                            launchedApp = OGCore.launchApp(realm, appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
                             return launchedApp.getAppAsJson().toString();
+
                         } catch (OGServerException e) {
+
                             return processOGException(e);
 
+                        } finally {
+                            realm.close();
                         }
+
+
+                    }
 
 
                     case "kill":
 
+                    {
+
+                        Realm realm = Realm.getDefaultInstance();
+
 
                         try {
-                            OGApp killedApp = OGCore.getInstance().killApp(appId);
+
+                            OGApp killedApp = OGCore.killApp(realm, appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
                             return killedApp.getAppAsJson().toString();
 
                         } catch (OGServerException e) {
+
                             return processOGException(e);
+
+                        } finally {
+                            realm.close();
                         }
 
+                    }
 
 
+
+
+                    //TODO add scaling. Pass scale in JSON body so same slug can be used
+
+                    case "scale":
                     default:
 
                         responseStatus = NanoHTTPD.Response.Status.NOT_FOUND;

@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightServer;
+import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
@@ -60,7 +60,7 @@ public class OGDevice extends RealmObject{
         newDevice.locationWithinVenue = "undefined";
 
         //retrieve the MAC address
-        WifiManager manager = (WifiManager) AmstelBrightServer.context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager manager = (WifiManager) AmstelBrightService.context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
         String MACaddress = info.getMacAddress();
 
@@ -122,6 +122,24 @@ public class OGDevice extends RealmObject{
         }
 
         return deviceJSON;
+    }
+
+    public static void setName(Realm realm, String newName){
+        OGDevice device = getDevice(realm);
+
+        realm.beginTransaction();
+        device.name = newName;
+        realm.copyToRealmOrUpdate(device);
+        realm.commitTransaction();
+    }
+
+    public static void setLocationWithinVenue(Realm realm, String newLoc){
+        OGDevice device = getDevice(realm);
+
+        realm.beginTransaction();
+        device.locationWithinVenue = newLoc;
+        realm.copyToRealmOrUpdate(device);
+        realm.commitTransaction();
     }
 
 }

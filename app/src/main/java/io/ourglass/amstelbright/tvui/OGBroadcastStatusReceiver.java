@@ -26,13 +26,11 @@ public class OGBroadcastStatusReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String targetApp = intent.getStringExtra("appId");
-        String command = intent.getStringExtra("command");
+
         if (mListener!=null){
             mListener.receivedStatus(intent);
         }
 
-        //Toast.makeText(context, command+" for app "+targetApp, Toast.LENGTH_SHORT).show();
     }
 
 }

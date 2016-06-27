@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright.tvui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -10,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,6 +21,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -27,16 +31,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.mstar.android.tv.TvCommonManager;
 import com.mstar.android.tvapi.common.TvManager;
 import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
+import com.squareup.picasso.Picasso;
+import com.yarolegovich.lovelydialog.LovelyStandardDialog;
 
 import io.ourglass.amstelbright.R;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
@@ -50,12 +54,8 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
-    private WebView mSubfloorWebView;
+    private WebView mFullScreenWebView;
 
-    VideoView videoView;
-
-
-    private ProgressBar mProgressSpinner;
     private TextView mTextView;
 
     private ImageView mBootBugImageView;
@@ -64,11 +64,14 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     private LinearLayout appTray;
 
     private int mScreenWidth;
-    private  int mScreenHeight;
+    private int mScreenHeight;
 
     private Mainframe mMf;
 
     private boolean mShowingMenu;
+    private boolean inMenuDebounce = false; // debounce the menu button
+
+    AnimatorSet mCurrentSelectAnim;
 
     /**
      * Messenger for communicating with the service.
@@ -81,40 +84,33 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     boolean mBound;
     boolean isEmulator = Build.FINGERPRINT.startsWith("generic");
     private SurfaceView mSurfaceView;
-    int colors[] = { R.color.Palette1, R.color.Palette2a, R.color.Palette3a, R.color.Palette4a, R.color.Palette5a, R.color.Palette4 };
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainframe_layout);
-
-
 
         mMf = new Mainframe(this);
 
         startService(new Intent(getBaseContext(), AmstelBrightService.class));
 
-        mSurfaceView = (SurfaceView)findViewById(R.id.surfaceView);
-        //mSurfaceView.setVisibility(View.GONE);
+        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
+        setupCrawler();
+        setupWidget();
+        //setupFullscreen();
 
-        mCrawlerWebView = (WebView)findViewById(R.id.crawlerWebView);
-        mWidgetWebView = (WebView)findViewById(R.id.widgetWebView);
-        mSubfloorWebView = (WebView)findViewById(R.id.subfloorWebView);
+        mTextView = (TextView) findViewById(R.id.textViewMsg);
+        mTextView.setAlpha(0);
 
-
-        mProgressSpinner = (ProgressBar)findViewById(R.id.progressBar);
-        mProgressSpinner.setVisibility(View.INVISIBLE);
-
-        mTextView = (TextView)findViewById(R.id.textViewMsg);
-        mTextView.setVisibility(View.INVISIBLE);
-
-        mMainLayout = (RelativeLayout)findViewById(R.id.mainframeLayout);
+        mMainLayout = (RelativeLayout) findViewById(R.id.mainframeLayout);
         mMainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                Log.d(TAG, "Layout done, updating Mainframe");
+
+                Log.d(TAG, "Layout done, updating Mainframe screen sizing.");
                 mScreenHeight = mMainLayout.getHeight();
                 mScreenWidth = mMainLayout.getWidth();
                 mMf.setTVScreenSize(mScreenWidth, mScreenHeight);
@@ -135,7 +131,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             }
         });
 
-        if (isEmulator){
+        if (isEmulator) {
             mMainLayout.setBackgroundColor(getResources().getColor(R.color.Black));
             Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
 
@@ -143,110 +139,25 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             enableHDMI();
         }
 
-        mBootBugImageView = (ImageView)findViewById(R.id.bootBugIV);
+        mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
 
-        setupCrawler();
-        setupWidget();
+
         //setupSubfloor();
 
 
-        /*
-        appTray = (LinearLayout)findViewById(R.id.appTray);
-        LayoutInflater inflater = LayoutInflater.from(this);
-
-
-
-
-        for (int zed=0; zed<6; zed++){
-            LinearLayout appIcon = new LinearLayout(this);
-            inflater.inflate(R.layout.appcell, appIcon);
-            ((TextView)appIcon.findViewById(R.id.textView)).setText("App #"+zed);
-            appIcon.setBackgroundColor(getResources().getColor(colors[zed]));
-            appIcon.setTag(zed);
-            appIcon.setFocusable(true);
-            appIcon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    toast("Clicked button: "+v.getTag());
-                }
-            });
-
-            appIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus){
-                        int focusColor = getResources().getColor(R.color.Beige);
-                        v.setBackgroundColor(focusColor);
-                        v.animate().scaleY(1.1f).scaleX(1.1f).alpha(1.0f).setDuration(100).start();
-                    } else {
-                        int pCol = getResources().getColor( colors[(int)v.getTag()] );
-                        v.setBackgroundColor(pCol);
-                        v.animate().scaleY(1.0f).scaleX(1.0f).alpha(0.90f).setDuration(100).start();
-
-                    }
-                }
-            });
-
-
-            appTray.addView(appIcon);
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)appIcon.getLayoutParams();
-
-            lp.rightMargin = 2;
-            lp.leftMargin = 4;
-
-
-        }
-
-        appTray.requestLayout();
-
+        appTray = (LinearLayout) findViewById(R.id.appTray);
         appTray.setAlpha(0f);
-        */
+        appTray.setRotationX(90f);
+        appTray.setTranslationX(-1000f);
         mShowingMenu = false;
-
-
-//        for (int zed=0; zed<6; zed++){
-//            Button appIcon = new Button(this);
-//            appIcon.setText("App #"+zed);
-//            appIcon.setBackgroundColor(getResources().getColor(colors[zed]));
-//            appIcon.setTag(zed);
-//            appIcon.setLayoutParams(new ViewGroup.LayoutParams(200,300));
-//            appIcon.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.man, 0, 0);
-//            appIcon.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    toast("Clicked button: "+v.getTag());
-//                }
-//            });
-//            appIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//                @Override
-//                public void onFocusChange(View v, boolean hasFocus) {
-//                    if (hasFocus){
-//                        int focusColor = getResources().getColor(R.color.AntiqueWhite);
-//                        v.setBackgroundColor(focusColor);
-//                    } else {
-//                        int pCol = getResources().getColor( colors[(int)v.getTag()] );
-//                        v.setBackgroundColor(pCol);
-//                    }
-//                }
-//            });
-//            appTray.addView(appIcon);
-//        }
-
 
         Log.d(TAG, "onCreate done");
 
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
-
-//        mSurfaceView.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                mSurfaceView.setVisibility(View.VISIBLE);
-//            }
-//        }, 1000);
 
         IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver");
         registerReceiver(new OGBroadcastReceiver(this), filter);
@@ -266,6 +177,13 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         Log.d(TAG, "onResume done");
 
         //appTray.getChildAt(0).requestFocus();
+
+        mBootBugImageView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //buildAppTray();
+            }
+        }, 5000);
 
     }
 
@@ -292,34 +210,154 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         // 82 = Menu button,
 
-        if (keyCode==82){
+        if (keyCode == 82 || keyCode == 41) {
             toggleAppMenu();
+            return false;
         }
 
 
-        //Toast.makeText(this, "pressed "+event.toString(), Toast.LENGTH_SHORT).show();
+        showAlert(new UIMessage("You pushed key " + keyCode));
 
         return false;
     }
 
-    private void toggleAppMenu(){
+    private void killAppConfirm(AppIcon ai) {
 
-        float destAlpha = mShowingMenu ? 0f:1f;
-        float destAlphaApp = mShowingMenu ? 1f:0.5f;
-        appTray.animate().alpha(destAlpha).setDuration(1000).start();
-        mCrawlerWebView.animate().alpha(destAlphaApp).setDuration(1000).start();
-        mWidgetWebView.animate().alpha(destAlphaApp).setDuration(1000).start();
+        final Context context = this;
+
+        new LovelyStandardDialog(this)
+                .setTopColorRes(R.color.Palette5a)
+                .setButtonsColorRes(R.color.Palette5a)
+                .setIcon(R.drawable.ic_flip_to_front_white_48dp)
+                .setTitle("Close " + ai.label + "?")
+                .setMessage("")
+                .setPositiveButton(android.R.string.ok, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(context, "positive clicked", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null)
+                .show();
+
+    }
+
+
+    private void buildAppTray() {
+
+        appTray.removeAllViews();
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (final AppIcon ai : mMf.appIcons) {
+
+            LinearLayout appIcon = new LinearLayout(this);
+            inflater.inflate(R.layout.appcell, appIcon);
+            appIcon.setBackgroundColor(ai.primaryColor);
+            appIcon.setTag(R.string.app_icon_tag, ai);
+            appIcon.setFocusable(true);
+
+            TextView label = (TextView) appIcon.findViewById(R.id.textView);
+            label.setText(ai.label);
+            label.setTextColor(ai.textColor);
+            label.setTypeface(null, Typeface.BOLD);
+
+            ImageView iconView = (ImageView) appIcon.findViewById(R.id.imageViewIcon);
+            Picasso.with(this).load(ai.imageUrl).into(iconView);
+
+            ImageView rv = (ImageView) appIcon.findViewById(R.id.imageViewRunning);
+            rv.setVisibility(mMf.isRunning(ai.appId) ? View.VISIBLE : View.INVISIBLE);
+
+            appIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AppIcon ai = (AppIcon) v.getTag(R.string.app_icon_tag);
+                    toast("Clicked button: " + ai.label);
+                    mMf.launchViaHttp(ai.appId);
+                    toggleAppMenu();
+                    //killAppConfirm(ai);
+                }
+            });
+
+            appIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    AppIcon ai = (AppIcon) v.getTag(R.string.app_icon_tag);
+                    if (hasFocus) {
+                        int focusColor = ai.secondaryColor;
+                        v.setBackgroundColor(focusColor);
+                        v.animate().scaleY(1.02f).scaleX(1.02f).alpha(1.0f).setDuration(100).start();
+                    } else {
+                        int pCol = ai.primaryColor;
+                        v.setBackgroundColor(pCol);
+                        v.animate().scaleY(1.0f).scaleX(1.0f).alpha(0.90f).setDuration(100).start();
+
+                    }
+                }
+            });
+
+            appTray.addView(appIcon);
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) appIcon.getLayoutParams();
+
+            lp.rightMargin = 2;
+            lp.leftMargin = 4;
+
+
+        }
+
+        appTray.requestLayout();
+        appTray.setAlpha(0f);
+        appTray.setRotationX(90f);
+        appTray.setTranslationX(-1000f);
+
+    }
+
+    private void toggleAppMenu() {
+
+        if (inMenuDebounce)
+            return; // do nothing, we are debouncing
+
+        inMenuDebounce = true;
+        // Allow pressing menu button 1 second later
+        mCrawlerWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                inMenuDebounce = false;
+            }
+        }, 1000);
+
         mShowingMenu = !mShowingMenu;
 
+        if (mShowingMenu) {
+            buildAppTray();
+        }
+
+        // If about to show, my dest Alpha should be 1
+        float destAlpha = mShowingMenu ? 1f : 0f;
+        float destRot = mShowingMenu ? 0f : 90f;
+        float destTransX = mShowingMenu ? 0 : -1000;
+        float destAlphaApp = mShowingMenu ? 0.25f : 1f;
+
+
+        appTray.animate()
+                .alpha(destAlpha)
+                .rotationX(destRot)
+                .translationX(destTransX)
+                .setDuration(500)
+                .start();
+
+        mCrawlerWebView.animate().alpha(destAlphaApp).setDuration(500).start();
+        mWidgetWebView.animate().alpha(destAlphaApp).setDuration(500).start();
+        //mFullScreenWebView.animate().alpha(destAlphaApp).setDuration(500).start();
+
+
     }
 
-    @Override
-    public void receivedCommand(Intent i) {
-        //Toast.makeText(this, command+" for app "+appId, Toast.LENGTH_SHORT).show();
-        mMf.postCommand(i);
-    }
 
-    public void animateIn(View v, float finalAlpha){
+    /***********************
+     * ANIMATIONS
+     ***********************/
+
+    public void animateIn(View v, float finalAlpha) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", 0f, finalAlpha);
         anim.setDuration(1000);
@@ -327,7 +365,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
-    public void animateOut(View v){
+    public void animateOut(View v) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", v.getAlpha(), 0);
         anim.setDuration(1000);
@@ -335,154 +373,135 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
-    public void setupCrawler(){
+    public AnimatorSet animatePulse(View v) {
 
-        mCrawlerWebView.getSettings().setJavaScriptEnabled(true);
-        mCrawlerWebView.setBackgroundColor(Color.TRANSPARENT);
-        mCrawlerWebView.setAlpha(0f);
+        float startWidth = v.getScaleX();
+        float startHeight = v.getScaleX();
+        float delta = 0.9f;
 
-        mCrawlerWebView.setWebChromeClient(new WebChromeClient() {
-            public void onProgressChanged(WebView view, int progress) {
-                // Activities and WebViews measure progress with different scales.
-                // The progress meter will automatically disappear when we reach 100%
-            }
-        });
+        ObjectAnimator animWidthIn = ObjectAnimator.ofFloat(v, "scaleX", startWidth, delta*startWidth);
+        animWidthIn.setDuration(250);
 
-        mCrawlerWebView.setWebViewClient(new WebViewClient() {
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                toast("Error loading app into crawler slot");
-            }
-
-            public void onPageFinished(WebView view, String url){
-                animateIn(view, 1);
-            }
-
-        });
-
-        // mCrawlerWebView.loadUrl("http://localhost:9090/www/opp/io.overplay.pubcrawler/app/tv/index.html");
-        // mCrawlerWebView.loadUrl("http://159.203.242.99/opp/io.overplay.pubcrawler/app/tv/index.html");
-        // mCrawlerWebView.loadUrl("http://www.overplay.io");
-
-   }
-
-    public void setupWidget(){
-
-        mWidgetWebView.getSettings().setJavaScriptEnabled(true);
-        mWidgetWebView.setBackgroundColor(Color.TRANSPARENT);
-        mWidgetWebView.setAlpha(0f);  // initially invisible
-
-        // TODO this is a hack for now...probably need to redo css on ABLime
-        mWidgetWebView.setScaleX(0.5f);
-        mWidgetWebView.setScaleY(0.5f);
+        ObjectAnimator animWidthOut = ObjectAnimator.ofFloat(v, "scaleX", delta*startWidth, startWidth );
+        animWidthOut.setDuration(250);
 
 
-        mWidgetWebView.setWebChromeClient(new WebChromeClient() {
-            public void onProgressChanged(WebView view, int progress) {
-                // Activities and WebViews measure progress with different scales.
-                // The progress meter will automatically disappear when we reach 100%
-            }
-        });
+        ObjectAnimator animHeightIn = ObjectAnimator.ofFloat(v, "scaleY", startHeight, delta*startHeight);
+        animHeightIn.setDuration(250);
 
-        mWidgetWebView.setWebViewClient(new WebViewClient() {
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            }
+        ObjectAnimator animHeightOut = ObjectAnimator.ofFloat(v, "scaleY",  delta*startHeight, startHeight);
+        animHeightOut.setDuration(250);
 
-            public void onPageFinished(WebView view, String url){
-                animateIn(view, 1);
-            }
-
-        });
+        final AnimatorSet pulser = new AnimatorSet();
+        pulser.play(animWidthIn).before(animHeightIn);
+        pulser.play(animWidthOut).with(animHeightIn);
+        pulser.play(animHeightOut).with(animWidthIn);
+        pulser.play(animWidthOut);
 
 
-    }
+        pulser.addListener(new AnimatorListenerAdapter() {
 
-    public void setupSubfloor(){
-
-        mSubfloorWebView.getSettings().setJavaScriptEnabled(true);
-        mSubfloorWebView.setBackgroundColor(Color.TRANSPARENT);
-        mSubfloorWebView.setAlpha(1f);
-
-        mSubfloorWebView.setWebChromeClient(new WebChromeClient() {
-            public void onProgressChanged(WebView view, int progress) {
-                // Activities and WebViews measure progress with different scales.
-                // The progress meter will automatically disappear when we reach 100%
-            }
-        });
-
-        mSubfloorWebView.setWebViewClient(new WebViewClient() {
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                toast("Error loading app into crawler slot");
-            }
-
-            public void onPageFinished(WebView view, String url){
-                animateIn(view, 1);
-            }
-
-        });
-
-        String youtubeId = "Xu_plv2CTEM";
-        String video = "<iframe class=\"youtube-player\" style=\"border: 0; width: 100%; height: 100%; padding:0px; margin:0px\" id=\"ytplayer\" type=\"text/html\" src=\"http://www.youtube.com/embed/"
-                + youtubeId +
-                "?autoplay=1"
-                + "&fs=0\" frameborder=\"0\">\n"
-                + "</iframe>\n";
-        mSubfloorWebView.getSettings().setPluginState(WebSettings.PluginState.ON);
-        mSubfloorWebView.setWebChromeClient(new WebChromeClient());
-        mSubfloorWebView.getSettings().setJavaScriptEnabled(true);
-        mSubfloorWebView.setHorizontalScrollBarEnabled(false);
-        mSubfloorWebView.setVerticalScrollBarEnabled(false);
-        mSubfloorWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-        mSubfloorWebView.getSettings().setBuiltInZoomControls(false);
-        mSubfloorWebView.getSettings().setAppCacheEnabled(true);
-        mSubfloorWebView.setInitialScale(0);
-        mSubfloorWebView.getSettings().setLoadWithOverviewMode(true);
-        mSubfloorWebView.getSettings().setUseWideViewPort(true);
-        mSubfloorWebView.loadData(video,"text/html","UTF-8");
-
-
-        //mSubfloorWebView.loadUrl("https://www.youtube.com/embed/8V_1ZxCN3nI?autoplay=1&origin=http://example.com%22%20frameborder=%220%22");
-        // mCrawlerWebView.loadUrl("http://159.203.242.99/opp/io.overplay.pubcrawler/app/tv/index.html");
-        // mCrawlerWebView.loadUrl("http://www.overplay.io");
-
-    }
-
-
-    private void toast(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-
-    }
-
-    private void showAlert(UIMessage message){
-
-
-        mTextView.setText(message.message);
-
-        switch (message.type){
-
-            case REDFLAG:
-                    mTextView.setBackgroundColor(0xff0000);
-                break;
-
-            case INFO:
-                    mTextView.setBackgroundColor(getResources().getColor(R.color.Palette2a));
-                break;
-
-
-            case BOOT:
-
-                break;
-        }
-
-        mTextView.setVisibility(View.VISIBLE);
-
-        mTextView.postDelayed(new Runnable() {
             @Override
-            public void run() {
-                mTextView.setVisibility(View.INVISIBLE);
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                pulser.start();
             }
-        }, 2000);
+
+        });
+
+        //pulser.setDuration(5000);
+        pulser.start();
+        return pulser;
+
 
     }
+
+
+    /************************
+     * WEBVIEW SETUP
+     ************************/
+
+    public void setupAppWebView(WebView wv) {
+
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.setBackgroundColor(Color.TRANSPARENT);
+        wv.setAlpha(0f);
+        wv.setFocusable(false);
+
+        wv.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                // Activities and WebViews measure progress with different scales.
+                // The progress meter will automatically disappear when we reach 100%
+            }
+        });
+
+        wv.setWebViewClient(new WebViewClient() {
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                toast("Error loading app into crawler slot");
+            }
+
+            public void onPageFinished(WebView view, String url) {
+                animateIn(view, 1);
+            }
+
+        });
+
+        // Attempt to speed up JS performance
+        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        // For now focusable will be set to false so this stuff is never called
+//        wv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//
+//            private AnimatorSet runningAnim;
+//
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                if (hasFocus) {
+//                    //runningAnim = animatePulse(v);
+//                    v.animate().scaleY(0.9f).scaleX(0.9f).setDuration(100).start();
+//
+//                } else {
+//                    v.animate().scaleY(1.0f).scaleX(1.0f).setDuration(100).start();
+////                    runningAnim.cancel();
+////                    v.setScaleX(1f);
+////                    v.setScaleY(1f);
+//                }
+//            }
+//        });
+
+        WebSettings settings = wv.getSettings();
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+
+    }
+
+    public void setupCrawler() {
+
+        mCrawlerWebView = (WebView) findViewById(R.id.crawlerWebView);
+        setupAppWebView(mCrawlerWebView);
+
+    }
+
+    public void setupWidget() {
+
+        mWidgetWebView = (WebView) findViewById(R.id.widgetWebView);
+        setupAppWebView(mWidgetWebView);
+
+    }
+
+    public void setupFullscreen() {
+
+        //mFullScreenWebView = (WebView) findViewById(R.id.subfloorWebView);
+        //setupAppWebView(mFullScreenWebView);
+
+    }
+
+
+    /****************************************
+     * CALLBACKS from MAINFRAME
+     ****************************************/
 
 
     @Override
@@ -501,15 +520,15 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             @Override
             public void run() {
 
-                if (FLASHY){
+                if (FLASHY) {
 
-                    ObjectAnimator close = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 0, 50 );
+                    ObjectAnimator close = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 0, 50);
                     close.setDuration(100);
 
-                    ObjectAnimator slide = ObjectAnimator.ofFloat(mCrawlerWebView, "y", fromY, toY );
+                    ObjectAnimator slide = ObjectAnimator.ofFloat(mCrawlerWebView, "y", fromY, toY);
                     slide.setDuration(333);
 
-                    ObjectAnimator open = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 50, 0 );
+                    ObjectAnimator open = ObjectAnimator.ofFloat(mCrawlerWebView, "rotationX", 50, 0);
                     open.setDuration(100);
 
                     AnimatorSet animSet = new AnimatorSet();
@@ -527,6 +546,19 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
+    private void loadWebView(final WebView wv, final String url) {
+
+        wv.post(new Runnable() {
+
+            @Override
+            public void run() {
+                wv.loadUrl(url);
+            }
+
+        });
+
+    }
+
     @Override
     public void killCrawler() {
 
@@ -541,33 +573,26 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
     @Override
+    public void scaleWidget(float scale){
+
+    }
+
+    @Override
+    public void scaleCrawler(float scale){
+
+    }
+
+    @Override
     public void launchCrawler(final String urlPathToApp) {
 
-        // Must promote this to UI thread if coming from background thread
-        mCrawlerWebView.post( new Runnable(){
-
-            @Override
-            public void run() {
-                mCrawlerWebView.loadUrl(urlPathToApp);
-
-            }
-
-        });
+        loadWebView(mCrawlerWebView, urlPathToApp);
 
     }
 
     @Override
     public void launchWidget(final String urlPathToApp) {
 
-        mWidgetWebView.post( new Runnable(){
-
-            @Override
-            public void run() {
-                mWidgetWebView.loadUrl(urlPathToApp);
-
-            }
-
-        });
+        loadWebView(mWidgetWebView, urlPathToApp);
 
     }
 
@@ -577,6 +602,118 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
 
+    /*******************************************
+     * SYSTEM STATUS MESSAGE BROADCAST RECEIVER
+     *******************************************/
+
+    @Override
+    public void receivedStatus(Intent intent) {
+
+        String command = intent.getStringExtra("command");
+        String msg = intent.getStringExtra("message");
+        uiAlert(new UIMessage(msg));
+
+    }
+
+    /*******************************************
+     * SYSTEM COMMAND MESSAGE BROADCAST RECEIVER
+     *******************************************/
+    @Override
+    public void receivedCommand(Intent i) {
+        // Commands are processed by Mainframe
+        mMf.postCommand(i);
+    }
+
+
+    /*****************************************
+     * TOASTS and ALERTS
+     *****************************************/
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void showAlert(final UIMessage message) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                mTextView.setText(message.message);
+
+                switch (message.type) {
+
+                    case REDFLAG:
+                        //mTextView.setBackgroundColor(0xff0000);
+                        break;
+
+                    case INFO:
+                        //mTextView.setBackgroundColor(getResources().getColor(R.color.Palette2a));
+                        break;
+
+
+                    case BOOT:
+
+                        break;
+                }
+
+                //mTextView.setVisibility(View.VISIBLE);
+                mTextView.setAlpha(0);
+                mTextView.animate().alpha(1).setDuration(250);
+
+                mTextView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTextView.animate().alpha(0).setDuration(250);
+                        //mTextView.setVisibility(View.INVISIBLE);
+                    }
+                }, 2000);
+
+            }
+        });
+
+
+    }
+
+
+    /***************************************
+     * TRONSMART CODE
+     ***************************************/
+
+    public static boolean enableHDMI() {
+        boolean bRet = false;
+        try {
+            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
+            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI);
+            bRet = TvManager.getInstance().getPlayerManager().isSignalStable();
+        } catch (TvCommonException e) {
+            e.printStackTrace();
+        }
+        return bRet;
+    }
+
+    public static void changeInputSource(TvOsType.EnumInputSource eis) {
+
+        TvCommonManager commonService = TvCommonManager.getInstance();
+
+        if (commonService != null) {
+            TvOsType.EnumInputSource currentSource = commonService.getCurrentInputSource();
+            if (currentSource != null) {
+                if (currentSource.equals(eis)) {
+                    return;
+                }
+
+                commonService.setInputSource(eis);
+            }
+        }
+    }
+
+
+    /*************************************
+     * PLACEHOLDER CODE
+     * Not currently used.
+     ************************************/
 
     // MAK this is not currently used since we ar enot binding the service
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -610,52 +747,5 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         }
     }
 
-    public static void changeInputSource(TvOsType.EnumInputSource eis)
-    {
 
-        TvCommonManager commonService = TvCommonManager.getInstance();
-
-        if (commonService != null)
-        {
-            TvOsType.EnumInputSource currentSource = commonService.getCurrentInputSource();
-            if (currentSource != null)
-            {
-                if (currentSource.equals(eis))
-                {
-                    return;
-                }
-
-                commonService.setInputSource(eis);
-            }
-
-        }
-
-
-    }
-
-    public static boolean enableHDMI()
-    {
-        boolean bRet = false;
-        try
-        {
-            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
-            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI);
-            bRet = TvManager.getInstance().getPlayerManager().isSignalStable();
-        } catch (TvCommonException e)
-        {
-            e.printStackTrace();
-        }
-        return bRet;
-    }
-
-
-    @Override
-    public void receivedStatus(Intent intent) {
-
-        String command = intent.getStringExtra("command");
-        String msg = intent.getStringExtra("message");
-        uiAlert(new UIMessage(msg));
-
-
-    }
 }

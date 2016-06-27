@@ -4,58 +4,62 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-import io.ourglass.amstelbright.realm.OGApp;
+import io.ourglass.amstelbright.realm.OGScraper;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 import io.realm.Realm;
 
 /**
- * Created by mkahn on 5/9/16.
+Scrape endpoint
+ MAK June 2016
  */
-public class JSONAppDataHandler extends JSONHandler {
+public class JSONAppScrapeHandler extends JSONHandler {
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
 
         final String appId = urlParams.get("appid");
 
-        Realm realm = Realm.getDefaultInstance();
-        OGApp app = OGApp.getApp(realm, appId);
 
-        if (app==null){
-            realm.close();
+        // TODO this is not the right logic, just trying to work while listening to Treb
+        if (appId==null){
             responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
             return makeErrorJson("No such app installed.");
         }
 
         switch (session.getMethod()) {
 
-            case GET:
+            case GET: {
 
-                JSONObject appData = app.getPublicData();
+                Realm realm = Realm.getDefaultInstance();
+                String results = OGScraper.getScrape(realm, appId);
                 realm.close();
                 responseStatus = NanoHTTPD.Response.Status.OK;
-                return appData.toString();
+                return results;
+
+            }
+
 
             // These are treated the same for now
 
-            case POST:
+            case POST: {
+
+                Realm realm = Realm.getDefaultInstance();
 
                 try {
                     final JSONObject dataJson = getBodyAsJSONObject(session);
-                    realm.executeTransactionAsync(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm bgRealm) {
-                            OGApp app = OGApp.getApp(bgRealm, appId);
-                            app.setPublicData(dataJson);
-                        }
-                    }, null, null );
-                    realm.close();
+                    OGScraper.setQueryFor(realm, appId, dataJson.getString("query"));
                     responseStatus = NanoHTTPD.Response.Status.OK;
                     return dataJson.toString();
 
                 } catch (Exception e) {
                     responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
                     return makeErrorJson(e);
+                } finally {
+                    realm.close();
                 }
+
+            }
+
+
 
 
             default:
