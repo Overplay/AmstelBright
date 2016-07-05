@@ -241,16 +241,17 @@ public class OGCore {
 //
 //            appArr.put(babs);
 //
-//            JSONObject velo = new JSONObject()
-//                    .put("appId", "io.ourglass.velocity")
-//                    .put("appType", "crawler")
-//                    .put("screenName", "Velocity")
-//                    .put("onLauncher", true)
-//                    .put("primaryColor", context.getResources().getColor(R.color.SkyBlue))
-//                    .put("icon", "velo.png");
-//            ;
-//
-//            appArr.put(velo);
+
+            JSONObject velo = new JSONObject()
+                    .put("appId", "io.ourglass.waitinglist")
+                    .put("appType", "widget")
+                    .put("screenName", "Waiting")
+                    .put("onLauncher", true)
+                    .put("primaryColor", context.getResources().getColor(R.color.SkyBlue))
+                    .put("icon", "velo.png");
+
+
+            appArr.put(velo);
 
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")

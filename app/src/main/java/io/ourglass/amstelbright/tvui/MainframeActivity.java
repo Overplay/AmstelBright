@@ -1,5 +1,6 @@
 package io.ourglass.amstelbright.tvui;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -19,6 +21,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -85,6 +88,13 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     boolean isEmulator = Build.FINGERPRINT.startsWith("generic");
     private SurfaceView mSurfaceView;
 
+    // New permissions crap added to API 23+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,11 +102,14 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainframe_layout);
 
+        // Cross fingers and toes that this works the permissions magic for SDCARD on OG1
+        verifyStoragePermissions(this);
+
         mMf = new Mainframe(this);
 
         startService(new Intent(getBaseContext(), AmstelBrightService.class));
 
-        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
         setupCrawler();
         setupWidget();
@@ -136,7 +149,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
 
         } else {
-            enableHDMI();
+            //enableHDMI();
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
@@ -219,6 +232,27 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         showAlert(new UIMessage("You pushed key " + keyCode));
 
         return false;
+    }
+
+    /**
+     * Checks if the app has permission to write to device storage
+     *
+     * If the app does not has permission then the user will be prompted to grant permissions
+     *
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
     }
 
     private void killAppConfirm(AppIcon ai) {
@@ -424,6 +458,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     public void setupAppWebView(WebView wv) {
 
         wv.getSettings().setJavaScriptEnabled(true);
+        wv.getSettings().setDomStorageEnabled(true);
         wv.setBackgroundColor(Color.TRANSPARENT);
         wv.setAlpha(0f);
         wv.setFocusable(false);
@@ -447,9 +482,9 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         });
 
         // Attempt to speed up JS performance
-        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+//        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+//        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+//        wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         // For now focusable will be set to false so this stuff is never called
 //        wv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
