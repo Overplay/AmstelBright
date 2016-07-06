@@ -207,8 +207,8 @@ public class OGCore {
         try {
 
 
-            JSONObject pubCrawler2Json = new JSONObject()
-                    .put("appId", "io.ourglass.pubcrawler2")
+            JSONObject pubCrawlerJson = new JSONObject()
+                    .put("appId", "io.ourglass.pubcrawler")
                     .put("appType", "crawler")
                     .put("screenName", "PubCrawler")
                     .put("onLauncher", true)
@@ -216,7 +216,7 @@ public class OGCore {
                     .put("icon", "pub.png");
 
 
-            appArr.put(pubCrawler2Json);
+            appArr.put(pubCrawlerJson);
 
 
             JSONObject shuffle = new JSONObject()
@@ -242,21 +242,20 @@ public class OGCore {
 //            appArr.put(babs);
 //
 
-            JSONObject velo = new JSONObject()
+            JSONObject waitingList = new JSONObject()
                     .put("appId", "io.ourglass.waitinglist")
                     .put("appType", "widget")
-                    .put("screenName", "Waiting")
+                    .put("screenName", "WaitingList")
                     .put("onLauncher", true)
                     .put("primaryColor", context.getResources().getColor(R.color.SkyBlue))
-                    .put("icon", "velo.png");
+                    .put("icon", "wl.png");
 
-
-            appArr.put(velo);
+            appArr.put(waitingList);
 
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")
                     .put("query", "\"Steph Curry\"")
-                    .put("appId", "io.ourglass.pubcrawler2");
+                    .put("appId", "io.ourglass.pubcrawler");
 
             scrapeArr.put(scrapeTwitter);
 
