@@ -150,6 +150,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
 
+        File f = new File("/mnt/sdcard/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW/").getAbsoluteFile();
+
         // Static pages (AmstelBrightWithLime)
         addRoute("/www/(.)+", StaticPageTestHandler.class, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/www").getAbsoluteFile());
 
