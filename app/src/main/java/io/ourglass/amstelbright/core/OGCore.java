@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import io.ourglass.amstelbright.R;
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
 import io.ourglass.amstelbright.realm.OGDevice;
@@ -24,7 +23,6 @@ import io.ourglass.amstelbright.realm.OGScraper;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
@@ -222,8 +220,13 @@ public class OGCore {
                 String appInfoString = readInfo(appName);
                 //2. convert that string into a json object
                 JSONObject appInfo = new JSONObject(appInfoString);
-                //3. put the json object into a JSON array
-                jsonAppArr.put(appInfo);
+                if(OGApp.jsonObjCorrectlyFormatted(appInfo)) {
+                    //3. put the json object into a JSON array
+                    jsonAppArr.put(appInfo);
+                }
+                else {
+                    Log.e(TAG, "incorrectly formatted: " + appInfo);
+                }
             } catch(JSONException e){
                 Log.e(TAG, "there was a problem installing " + appName);
             }
@@ -250,11 +253,8 @@ public class OGCore {
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm bgRealm) {
-
                 bgRealm.createOrUpdateAllFromJson(OGApp.class, jsonAppArr);
                 bgRealm.createOrUpdateAllFromJson(OGScraper.class, scrapeArr);
-
-
             }
         }, null, null);
 
@@ -271,7 +271,8 @@ public class OGCore {
                 appIds.add(obj.getString("appId"));
             } catch(org.json.JSONException e){
                 Log.e(TAG, "there was a problem with JSON parsing, " +
-                        "will probably affect the information in the realm database pertaining to apps");
+                        "will probably affect the information in the realm database pertaining to apps" +
+                        "\n" + e.getMessage());
             }
         }
 
@@ -284,7 +285,7 @@ public class OGCore {
             boolean goingToDie = true;
             for(int i = 0; i < appIds.size(); i++){
                 String appId = ((OGAppRealmProxy) appInDatabase).realmGet$appId();
-                  if(appId.equals(appIds.get(i))){
+                if(appId.equals(appIds.get(i))){
                     goingToDie = false;
                     break;
                 }
@@ -303,7 +304,7 @@ public class OGCore {
     }
 
     private static ArrayList<String> getNamesOfAppsFromSd(){
-        String sdcard = Environment.getExternalStorageDirectory().toString() + "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW/opp";
+        String sdcard = Environment.getExternalStorageDirectory().toString() + OGConstants.PATH_TO_ABWL+"/opp";
         File sdcard_dir = new File(sdcard);
 
         ArrayList<String> fileNamesOnSd = new ArrayList<String>();
