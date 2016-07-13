@@ -255,8 +255,12 @@ public class Mainframe {
                 try {
                     aiObj = new JSONObject(jString);
                     AppIcon ai = new AppIcon();
-                    ai.primaryColor = Color.parseColor( aiObj.getString("primaryColor") );
-                    ai.secondaryColor = Color.parseColor( aiObj.getString("secondaryColor") );
+                    try {
+                        ai.primaryColor = Color.parseColor(aiObj.getString("primaryColor"));
+                        ai.secondaryColor = Color.parseColor(aiObj.getString("secondaryColor"));
+                    } catch(IllegalArgumentException e){
+                        Log.e(TAG, "There was an error parsing color, verify that the correct information is associated with your applications or change your info.json to HEX values");
+                    }
                     ai.label = aiObj.getString("iconLabel");
                     ai.appId = appId;
                     ai.imageUrl = urlForAppIcon(appId, aiObj.getString("iconImage"));
