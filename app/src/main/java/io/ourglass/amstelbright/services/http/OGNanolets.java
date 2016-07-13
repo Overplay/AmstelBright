@@ -1,8 +1,5 @@
 package io.ourglass.amstelbright.services.http;
 
-import android.os.Environment;
-import android.util.Log;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -10,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
 import io.ourglass.amstelbright.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright.services.http.handlers.JSONAppDataHandler;
@@ -151,7 +149,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
 
-        File f = new File("/mnt/sdcard/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW/").getAbsoluteFile();
+        File f = new File("/mnt/sdcard"+ OGConstants.PATH_TO_ABWL).getAbsoluteFile();
 
         // Static pages (AmstelBrightWithLime)
         addRoute("/www/(.)+", StaticPageTestHandler.class, f.getAbsoluteFile());
