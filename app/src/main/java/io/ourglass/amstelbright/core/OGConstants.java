@@ -20,6 +20,12 @@ public class OGConstants {
 
     public static final boolean SHOW_DB_TOASTS = true;
 
+    // When using git, use the one below
+    //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
+
+    // When manually psushing
+    public static final String PATH_TO_ABWL = "/www";
+
     public static void dbToast(Context context, String message){
         if (SHOW_DB_TOASTS){
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

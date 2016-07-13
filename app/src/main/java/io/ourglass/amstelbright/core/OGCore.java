@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import io.ourglass.amstelbright.R;
 import io.ourglass.amstelbright.core.exceptions.OGServerException;
 import io.ourglass.amstelbright.realm.OGApp;
 import io.ourglass.amstelbright.realm.OGDevice;
@@ -24,7 +23,6 @@ import io.ourglass.amstelbright.realm.OGScraper;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
@@ -303,7 +301,7 @@ public class OGCore {
     }
 
     private static ArrayList<String> getNamesOfAppsFromSd(){
-        String sdcard = Environment.getExternalStorageDirectory().toString() + "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW/opp";
+        String sdcard = Environment.getExternalStorageDirectory().toString() + OGConstants.PATH_TO_ABWL+"/opp";
         File sdcard_dir = new File(sdcard);
 
         ArrayList<String> fileNamesOnSd = new ArrayList<String>();
