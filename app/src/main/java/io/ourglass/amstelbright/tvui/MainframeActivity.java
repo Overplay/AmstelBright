@@ -149,7 +149,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
 
         } else {
-            //enableHDMI();
+            enableHDMI();
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);

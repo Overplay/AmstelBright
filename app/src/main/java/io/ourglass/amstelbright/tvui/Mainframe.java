@@ -95,7 +95,8 @@ public class Mainframe {
         float ybot = 0.55f * mScreenRect.height;
 
         float xleft = 0.013f * mScreenRect.width;
-        float xright = 0.87f * mScreenRect.width;
+        //float xright = 0.87f * mScreenRect.width;
+        float xright = 0.76f * mScreenRect.width;
 
         switch (slotNumber){
 
