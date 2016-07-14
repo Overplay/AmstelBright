@@ -3,6 +3,7 @@ package io.ourglass.amstelbright.realm;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ListIterator;
@@ -172,6 +173,22 @@ public class OGApp extends RealmObject {
 
         return null;
 
+    }
+
+    /**
+     * this method checks whether or not the jsonObject object passed in contains all required values
+     * this was added to with the intent of filtering a json array which possibly contains incorrectly formatted objects
+     * because if one object in the array is incorrect, realm seems to not allow any of the objects to be pushed
+     * @return true if contains all required fields, else false
+     */
+    public static boolean jsonObjCorrectlyFormatted(JSONObject candidate){
+        try {
+            return candidate.has("appId") && !candidate.getString("appId").isEmpty()
+                    && candidate.has("appType") && !candidate.getString("appType").isEmpty()
+                    && candidate.has("screenName") && !candidate.getString("screenName").isEmpty();
+        } catch(JSONException e){
+            return false;
+        }
     }
 
 }

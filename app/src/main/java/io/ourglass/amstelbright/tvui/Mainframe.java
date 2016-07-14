@@ -252,28 +252,35 @@ public class Mainframe {
                 String jString = response.body().string();
 
                 JSONObject aiObj;
+                AppIcon ai = new AppIcon();
                 try {
                     aiObj = new JSONObject(jString);
-                    AppIcon ai = new AppIcon();
                     try {
-                        ai.primaryColor = Color.parseColor(aiObj.getString("primaryColor"));
-                        ai.secondaryColor = Color.parseColor(aiObj.getString("secondaryColor"));
+                        ai.primaryColor = aiObj.getInt("primaryColor"); //Color.parseColor(aiObj.getString("primaryColor"));
                     } catch(IllegalArgumentException e){
                         Log.e(TAG, "There was an error parsing color, verify that the correct information is associated with your applications or change your info.json to HEX values");
                     }
-                    ai.label = aiObj.getString("iconLabel");
+                    try{
+                        ai.secondaryColor = aiObj.getInt("secondaryColor");
+                    } catch(IllegalArgumentException e){
+                        Log.e(TAG, "There was an error parsing secondaryColor, verify that the correct information is associated with your applications or change your info.json to HEX values");
+                    }
+                    try {
+                        ai.label = aiObj.getString("iconLabel");
+                    } catch(JSONException e){
+                        Log.w(TAG, "iconLabel was missing from json, using appName as default");
+                        ai.label = appId;
+                    }
                     ai.appId = appId;
-                    ai.imageUrl = urlForAppIcon(appId, aiObj.getString("iconImage"));
                     ai.textColor = Color.WHITE; // TODO parse from JSON
-                    appIcons.add(ai);
-                    mListener.uiAlert(new UIMessage("Processed "+ai.label));
+                    ai.imageUrl = urlForAppIcon(appId, aiObj.getString("icon"));
 
                 } catch (JSONException e) {
                     throw new IOException("Unexpected Json error " + e.toString());
+                } finally {
+                    appIcons.add(ai);
+                    mListener.uiAlert(new UIMessage("Processed " + ai.label));
                 }
-
-
-
             }
         });
 
