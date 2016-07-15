@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright.tvui;
+fpackage io.ourglass.amstelbright.tvui;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -6,6 +6,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -149,7 +150,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
 
         } else {
-            //enableHDMI();
+            enableHDMI();
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
@@ -625,7 +626,19 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
     @Override
-    public void launchWidget(final String urlPathToApp) {
+    public void launchWidget(final String urlPathToApp, int width, int height) {
+        int curWidth = mWidgetWebView.getLayoutParams().width;
+        int curHeight = mWidgetWebView.getLayoutParams().height;
+        if(curWidth != width || curHeight != height){
+            mWidgetWebView.getLayoutParams().height = height;
+            mWidgetWebView.getLayoutParams().width = width;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mWidgetWebView.requestLayout();
+                }
+            });
+        }
 
         loadWebView(mWidgetWebView, urlPathToApp);
 

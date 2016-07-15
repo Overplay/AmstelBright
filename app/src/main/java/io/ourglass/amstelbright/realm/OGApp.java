@@ -93,8 +93,8 @@ public class OGApp extends RealmObject {
             rval.put("slotNumber", this.slotNumber);
 //            rval.put("xPos", this.xPos);
 //            rval.put("yPos", this.yPos);
-//            rval.put("height", this.height);
-//            rval.put("width", this.width);
+            rval.put("height", this.height);
+            rval.put("width", this.width);
             rval.put("screenName", this.screenName);
             rval.put("primaryColor", this.primaryColor);
             rval.put("primaryColorHex", String.format("#%06X", (0xFFFFFF & this.primaryColor)));
