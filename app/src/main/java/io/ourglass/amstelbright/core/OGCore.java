@@ -38,10 +38,30 @@ public class OGCore {
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
 
-    private String channel;
-    private String programId;
-    private String programTitle;
+    public static String channel = "";
+    public static String programId = "";
+    public static String programTitle = "";
 
+    public static boolean setChannelInfo(String channel, String programId, String programTitle){
+
+        if ( OGCore.channel.equalsIgnoreCase(channel) &&
+                OGCore.programId.equalsIgnoreCase(programId) &&
+                    OGCore.programTitle.equalsIgnoreCase(programTitle) )
+            return false;
+
+        OGCore.channel = channel;
+        OGCore.programId = programId;
+        OGCore.programTitle = programTitle;
+
+        Intent intent = new Intent();
+        intent.setAction("com.ourglass.amstelbrightserver");
+        intent.putExtra("command", "NEW_CHANNEL");
+        intent.putExtra("channel", channel);
+        AmstelBrightService.context.sendBroadcast(intent);
+
+        return true;
+
+    }
 
     public static OGDevice getDeviceAsObject(Realm realm) {
         return OGDevice.getDevice(realm);

@@ -504,37 +504,58 @@ public class Mainframe {
 
         String command = intent.getStringExtra("command");
 
-        JSONObject app;
+        if ( command.equalsIgnoreCase("NEW_CHANNEL")){
+
+            // Channel change stuff
+            String channel = intent.getStringExtra("channel");
+            Log.d(TAG, "Got a channel change: "+channel);
+            UIMessage m = new UIMessage("Changed to: "+channel);
+            mListener.uiAlert(m);
+
+            if (channel.startsWith("ES") || channel.startsWith("CNN") ){
+                moveCrawlerIfNeeded(0); // top
+            } else if ( channel.startsWith("beIN")){
+                moveCrawlerIfNeeded(1); // bottom
+            }
 
 
-        try {
-            app = new JSONObject(intent.getStringExtra("app"));
+        } else {
 
-        } catch (JSONException e) {
-            raiseRedFlag("Error parsing inbound intent JSON");
-            return;
+            JSONObject app;
+
+
+            try {
+                app = new JSONObject(intent.getStringExtra("app"));
+
+            } catch (JSONException e) {
+                raiseRedFlag("Error parsing inbound intent JSON");
+                return;
+            }
+
+            switch (command){
+
+                case "launch":
+
+                    launchApp(app);
+                    break;
+
+                case "move":
+                    moveApp(app);
+                    break;
+
+                case "kill":
+                    killApp(app);
+                    break;
+
+                case "scale":
+                    float scale = intent.getFloatExtra("scale", 1f);
+                    scaleApp(app, scale);
+                    break;
+            }
+
         }
 
-        switch (command){
 
-            case "launch":
-
-                launchApp(app);
-                break;
-
-            case "move":
-                moveApp(app);
-                break;
-
-            case "kill":
-                killApp(app);
-                break;
-
-            case "scale":
-                float scale = intent.getFloatExtra("scale", 1f);
-                scaleApp(app, scale);
-                break;
-        }
     }
 
     public void launchViaHttp(String appId){

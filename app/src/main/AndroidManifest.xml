@@ -12,16 +12,16 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <!-- Application is subclassed for a default Realm -->
     <application
+        android:name=".core.ABApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".core.ABApplication">
+        android:theme="@style/AppTheme">
 
         <!--
         <receiver android:name=".AutoStartBroadcastReceiver" >
@@ -34,31 +34,38 @@
         <service
             android:name=".services.udp.UDPBeaconService"
             android:enabled="true" />
-
         <service
             android:name=".services.stbservice.STBService"
             android:enabled="true" />
-
         <service
             android:name=".services.http.HTTPDService"
             android:enabled="true" />
-
         <service
             android:name=".services.cloudscraper.CloudScraperService"
             android:enabled="true" />
-
         <service
             android:name=".services.amstelbright.AmstelBrightService"
-            android:exported="false" >
-        </service>
+            android:exported="false"></service>
+
 
         <activity android:name=".tvui.MainframeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- The following two intent-filters are the key to set homescreen -->
+                <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
         </activity>
+
+        <!-- LAUNCH *AFTER* BOOT -->
+        <!--<receiver-->
+            <!--android:name=".core.BootDoneReceiver">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
     </application>
 

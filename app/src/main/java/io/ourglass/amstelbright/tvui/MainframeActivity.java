@@ -228,6 +228,11 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             return false;
         }
 
+        // Launch settings from button 0 on remote
+        if (keyCode == 7){
+            startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+        }
+
 
         showAlert(new UIMessage("You pushed key " + keyCode));
 

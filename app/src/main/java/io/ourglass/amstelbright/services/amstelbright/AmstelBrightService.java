@@ -15,8 +15,9 @@ import org.json.JSONObject;
 import io.ourglass.amstelbright.core.OGConstants;
 import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.services.cloudscraper.CloudScraperService;
-import io.ourglass.amstelbright.services.http.HTTPDService;
 import io.ourglass.amstelbright.services.cloudscraper.OGTweetScraper;
+import io.ourglass.amstelbright.services.http.HTTPDService;
+import io.ourglass.amstelbright.services.stbservice.STBService;
 import io.ourglass.amstelbright.services.udp.UDPBeaconService;
 
 
@@ -146,8 +147,8 @@ public class AmstelBrightService extends Service  {
         Intent csIntent = new Intent(this, CloudScraperService.class);
         startService(csIntent);
 
-//        Intent stbIntent = new Intent(this, STBService.class);
-//        startService(stbIntent);
+        Intent stbIntent = new Intent(this, STBService.class);
+        startService(stbIntent);
 
     }
 
