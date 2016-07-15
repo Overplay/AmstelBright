@@ -92,12 +92,21 @@ public class Mainframe {
         float y;
 
         float ytop = 0.12f * mScreenRect.height;
-        float ybot = 0.55f * mScreenRect.height;
+        float ybot = 0.47f * mScreenRect.height;
 
         float xleft = 0.013f * mScreenRect.width;
-        //float xright = 0.87f * mScreenRect.width;
         float xright = 0.76f * mScreenRect.width;
 
+        //todo please make this better
+        try {
+            String appId = mRunningWidget.getString("appId");
+            if(appId.equals("io.ourglass.shuffleboard")){
+                xright = 0.87f * mScreenRect.width;
+                ybot = 0.55f * mScreenRect.height;
+            }
+        } catch(JSONException e){
+            Log.wtf("fUck", e.getMessage());
+        }
         switch (slotNumber){
 
             case 0:
@@ -359,13 +368,13 @@ public class Mainframe {
 
     private void moveWidgetIfNeeded(int destSlot){
 
-        if (destSlot!=mRunningWidgetSlot){
+        //if (destSlot!=mRunningWidgetSlot){
             // We're going to need to move it
             if (mListener!=null){
                 mListener.moveWidgetFromTo(widgetTranslationXY(mRunningWidgetSlot), widgetTranslationXY(destSlot));
                 mRunningWidgetSlot = destSlot;
             }
-        }
+        //}
 
     }
 
