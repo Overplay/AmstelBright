@@ -103,7 +103,7 @@ public class OGApp extends RealmObject {
             rval.put("secondaryColorHex", String.format("#%06X", (0xFFFFFF & this.secondaryColor)));
 
             rval.put("icon", this.icon);
-            rval.put("iconPath", "www/opp/"+this.appId+"/assets/icon/"+this.icon);
+            rval.put("iconPath", "www/opp/"+this.appId+"/assets/icons/"+this.icon);
 
         } catch (Exception e){
 
