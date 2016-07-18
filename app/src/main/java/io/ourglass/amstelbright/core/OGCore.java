@@ -91,6 +91,21 @@ public class OGCore {
 
     }
 
+    public static JSONObject getCurrentChannel(){
+
+            JSONObject jobj = new JSONObject();
+        try {
+            jobj.put("channel", OGCore.channel);
+            jobj.put("programId", OGCore.programId);
+            jobj.put("programTitle", OGCore.programTitle);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jobj;
+    }
+
     public static OGDevice getDeviceAsObject(Realm realm) {
         return OGDevice.getDevice(realm);
     }

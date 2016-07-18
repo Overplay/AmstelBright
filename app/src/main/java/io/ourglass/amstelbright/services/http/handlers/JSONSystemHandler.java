@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.ourglass.amstelbright.core.OGConstants;
+import io.ourglass.amstelbright.core.OGCore;
 import io.ourglass.amstelbright.realm.OGApp;
 import io.ourglass.amstelbright.realm.OGDevice;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
@@ -47,6 +48,11 @@ public class JSONSystemHandler extends JSONHandler {
                         realm2.close();
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return obj.toString();
+
+                    case "channel":
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return OGCore.getCurrentChannel().toString();
+
 
                     default:
                         responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;

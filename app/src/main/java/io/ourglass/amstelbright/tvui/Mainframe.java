@@ -105,8 +105,9 @@ public class Mainframe {
                 ybot = 0.55f * mScreenRect.height;
             }
         } catch(JSONException e){
-            Log.wtf("fUck", e.getMessage());
+            Log.wtf(TAG, e.getMessage());
         }
+
         switch (slotNumber){
 
             case 0:
