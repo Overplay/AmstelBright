@@ -59,6 +59,34 @@ public class OGCore {
         intent.putExtra("channel", channel);
         AmstelBrightService.context.sendBroadcast(intent);
 
+        //  Add scrape for channel
+
+        Realm realm = Realm.getDefaultInstance();
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+
+                OGScraper channelScraper;
+
+                RealmResults<OGScraper> ctwitter = realm.where(OGScraper.class)
+                        .equalTo("appId", "io.ourglass.core.channeltweets")
+                        .findAll();
+
+                if (ctwitter.size()==0){
+                    // There isn't a channel scrape, create
+                    channelScraper = realm.createObject(OGScraper.class);
+                } else {
+                    channelScraper = ctwitter.first();
+                }
+
+                channelScraper.appId = "io.ourglass.core.channeltweets";
+                channelScraper.setQuery(OGCore.programTitle+"&lang=en&result_type=popular&include_entities=false");
+
+            }
+        });
+
+
         return true;
 
     }
