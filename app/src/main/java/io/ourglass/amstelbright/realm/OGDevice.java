@@ -114,6 +114,7 @@ public class OGDevice extends RealmObject{
             deviceJSON.put("settings", device.settings);
             deviceJSON.put("apiToken", device.apiToken);
             deviceJSON.put("uuid", device.uuid);
+            deviceJSON.put("version", ">0.5.3");
             //deviceJSON.put("owners", );
             //deviceJSON.put("managers", );
         } catch (JSONException e){

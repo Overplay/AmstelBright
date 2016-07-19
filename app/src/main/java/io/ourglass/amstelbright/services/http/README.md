@@ -43,7 +43,7 @@ The syntax is pretty obvious since it uses slugs (":appid") like most route libr
 then the handler. All of our JSON handlers inherit from the abstract class `JSONHandler`. `JSONHandler` does
  al the common work needed for any JSON response so only the unique work needs to be implemented.
 
-Resource Loading CHanges from Stock NanoHTTP
+Resource Loading Changes from Stock NanoHTTP
 --------------------------------------------
 
 NanoHTTPD does a bunch of reource loading based off the classpath like so:
