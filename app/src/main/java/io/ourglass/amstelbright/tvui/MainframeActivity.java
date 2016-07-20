@@ -1,4 +1,4 @@
-fpackage io.ourglass.amstelbright.tvui;
+package io.ourglass.amstelbright.tvui;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -86,7 +86,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
      * Flag indicating whether we have called bind on the service.
      */
     boolean mBound;
-    boolean isEmulator = Build.FINGERPRINT.startsWith("generic");
+    boolean isEmulator = Build.FINGERPRINT.contains("generic");
     private SurfaceView mSurfaceView;
 
     // New permissions crap added to API 23+
@@ -658,9 +658,20 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     public void receivedStatus(Intent intent) {
 
         String command = intent.getStringExtra("command");
-        String msg = intent.getStringExtra("message");
-        uiAlert(new UIMessage(msg));
 
+        String newAppData = intent.getStringExtra("newAppData");
+        if(newAppData != null){
+            if(newAppData.contains("widget")){
+                mWidgetWebView.loadUrl("javascript:updateAppData(" + newAppData + ")");
+            }
+            else if(newAppData.contains("crawler")){
+                mCrawlerWebView.loadUrl("javascript:updateAppData(" + newAppData + ")");
+            }
+        }
+        else {
+            String msg = intent.getStringExtra("message");
+            uiAlert(new UIMessage(msg));
+        }
     }
 
     /*******************************************

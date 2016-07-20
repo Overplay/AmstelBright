@@ -1,11 +1,15 @@
 package io.ourglass.amstelbright.services.http.handlers;
 
+import android.content.Intent;
+
 import org.json.JSONObject;
 
 import java.util.Map;
 
 import io.ourglass.amstelbright.realm.OGApp;
+import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright.tvui.MainframeActivity;
 import io.realm.Realm;
 
 /**
@@ -50,12 +54,18 @@ public class JSONAppDataHandler extends JSONHandler {
                     }, null, null );
                     realm.close();
                     responseStatus = NanoHTTPD.Response.Status.OK;
+                    Intent intent = new Intent();
+                    intent.setAction("com.ourglass.amstelbrightserver.status");
+                    intent.putExtra("newAppData", dataJson.toString());
+                    AmstelBrightService.context.sendBroadcast(intent);
+
                     return dataJson.toString();
 
                 } catch (Exception e) {
                     responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
                     return makeErrorJson(e);
                 }
+
 
 
             default:
