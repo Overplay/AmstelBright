@@ -129,7 +129,7 @@ public class AmstelBrightService extends Service  {
 
 
 
-        OGCore.installStockApps(this);
+        OGCore.installStockApps();
         OGCore.sendStatusIntent("STATUS", "Installing stock apps",
                 OGConstants.BootState.UPGRADE_START.getValue());
 

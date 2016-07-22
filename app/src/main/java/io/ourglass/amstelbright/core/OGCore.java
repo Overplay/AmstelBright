@@ -269,7 +269,7 @@ public class OGCore {
 
     }
 
-    public static void installStockApps(Context context){
+    public static JSONArray installStockApps(){
         Log.d(TAG, "Attempting alternative to install stock apps");
         final JSONArray jsonAppArr = new JSONArray(), scrapeArr = new JSONArray();
 
@@ -295,7 +295,7 @@ public class OGCore {
             }
         }
 
-        //copy over default scrape objects into array from other installstockapps
+        //copied over default scrape objects into array from other installstockapps
         try{
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")
@@ -323,6 +323,8 @@ public class OGCore {
 
 
         realm.close();
+
+        return jsonAppArr;
     }
 
     private static void removeUninstalledAppsFromRealm(JSONArray installedApps){

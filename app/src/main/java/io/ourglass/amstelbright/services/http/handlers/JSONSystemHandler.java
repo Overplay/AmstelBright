@@ -129,6 +129,12 @@ public class JSONSystemHandler extends JSONHandler {
                             return makeErrorJson(e);
 
                         }
+                        //endpoint to discover installed apps, useful if there are new apps installed while running
+                    case "discover-apps":
+                        JSONArray installedApps = OGCore.installStockApps();
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return "Apps currently installed\n" + installedApps.toString();
+
                 }
             default:
                 // Only allowed verbs are GET/POST/PUT

@@ -85,7 +85,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
      * Flag indicating whether we have called bind on the service.
      */
     boolean mBound;
-    boolean isEmulator = Build.FINGERPRINT.startsWith("generic");
+    boolean isEmulator = Build.FINGERPRINT.contains("generic");
     private SurfaceView mSurfaceView;
 
     // New permissions crap added to API 23+
