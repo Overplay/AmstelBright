@@ -82,7 +82,7 @@ public class Mainframe {
 
     private float crawlerTranslationY(int slotNumber){
 
-        return ((float)slotNumber * 0.9f ) *  mScreenRect.height;
+        return ((float)slotNumber * 0.915f ) *  mScreenRect.height;
 
     }
 
@@ -91,22 +91,12 @@ public class Mainframe {
         float x;
         float y;
 
+        // TOOK out the peephole code when Waiting List went back to 200x300
         float ytop = 0.12f * mScreenRect.height;
         float ybot = 0.47f * mScreenRect.height;
 
         float xleft = 0.013f * mScreenRect.width;
-        float xright = 0.76f * mScreenRect.width;
-
-        //todo please make this better
-        try {
-            String appId = mRunningWidget.getString("appId");
-            if(appId.equals("io.ourglass.shuffleboard")){
-                xright = 0.87f * mScreenRect.width;
-                ybot = 0.55f * mScreenRect.height;
-            }
-        } catch(JSONException e){
-            Log.wtf(TAG, e.getMessage());
-        }
+        float xright = 0.82f * mScreenRect.width;
 
         switch (slotNumber){
 
@@ -267,12 +257,13 @@ public class Mainframe {
                 try {
                     aiObj = new JSONObject(jString);
                     try {
-                        ai.primaryColor = aiObj.getInt("primaryColor"); //Color.parseColor(aiObj.getString("primaryColor"));
+                        //ai.primaryColor = aiObj.getInt("primaryColor"); //Color.parseColor(aiObj.getString("primaryColor"));
+                        ai.primaryColor = Color.parseColor(aiObj.getString("primaryColorHex"));
                     } catch(IllegalArgumentException e){
                         Log.e(TAG, "There was an error parsing color, verify that the correct information is associated with your applications or change your info.json to HEX values");
                     }
                     try{
-                        ai.secondaryColor = aiObj.getInt("secondaryColor");
+                        ai.secondaryColor = Color.parseColor(aiObj.getString("secondaryColorHex"));
                     } catch(IllegalArgumentException e){
                         Log.e(TAG, "There was an error parsing secondaryColor, verify that the correct information is associated with your applications or change your info.json to HEX values");
                     }
