@@ -66,7 +66,7 @@ public class Mainframe {
         public void killCrawler();
         public void killWidget();
         public void launchCrawler(String urlPathToApp);
-        public void launchWidget(String urlPathToApp);
+        public void launchWidget(String urlPathToApp, int width, int height);
         public void uiAlert(UIMessage message);
 
     }
@@ -91,12 +91,25 @@ public class Mainframe {
         float x;
         float y;
 
-        // TOOK out the peephole code when Waiting List went back to 200x300
+        //default values
+        int widgetWidth = 300;
+        int widgetHeight = 300;
+
+        try{
+            widgetWidth = mRunningWidget.getInt("width");
+            widgetHeight = mRunningWidget.getInt("height");
+        } catch (JSONException e){
+            Log.e(TAG, "Couldn't get the running widget dimensions, widgets will probably be in the wrong place");
+        }
+
+        //y padding on widget is .12f (because of crawler)
+        //x padding on widget is .013f
+
         float ytop = 0.12f * mScreenRect.height;
-        float ybot = 0.47f * mScreenRect.height;
+        float ybot = (0.88f * mScreenRect.height) - widgetHeight;
 
         float xleft = 0.013f * mScreenRect.width;
-        float xright = 0.82f * mScreenRect.width;
+        float xright = 0.987f * mScreenRect.width - widgetWidth;
 
         switch (slotNumber){
 
@@ -400,11 +413,14 @@ public class Mainframe {
             String appId = appJson.getString("appId");
             int slotNumber = appJson.getInt("slotNumber");
 
+            //get the height and width and pass to launchWidget
+            int width = appJson.getInt("width"), height = appJson.getInt("height");
+
             mRunningWidget = appJson;
             Log.d(TAG, "Widget set to: "+ appId);
-            if (mListener!=null)
-                mListener.launchWidget(urlForApp(appId));
-
+            if (mListener!=null) {
+                mListener.launchWidget(urlForApp(appId), width, height);
+            }
             moveWidgetIfNeeded(slotNumber);
 
         } catch (JSONException e) {

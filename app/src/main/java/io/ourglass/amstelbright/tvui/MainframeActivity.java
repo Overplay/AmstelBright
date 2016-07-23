@@ -1,5 +1,6 @@
 package io.ourglass.amstelbright.tvui;
 
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -43,7 +44,6 @@ import com.mstar.android.tvapi.common.TvManager;
 import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
 import com.squareup.picasso.Picasso;
-import com.yarolegovich.lovelydialog.LovelyStandardDialog;
 
 import io.ourglass.amstelbright.R;
 import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
@@ -258,27 +258,6 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
                     REQUEST_EXTERNAL_STORAGE
             );
         }
-    }
-
-    private void killAppConfirm(AppIcon ai) {
-
-        final Context context = this;
-
-        new LovelyStandardDialog(this)
-                .setTopColorRes(R.color.Palette5a)
-                .setButtonsColorRes(R.color.Palette5a)
-                .setIcon(R.drawable.ic_flip_to_front_white_48dp)
-                .setTitle("Close " + ai.label + "?")
-                .setMessage("")
-                .setPositiveButton(android.R.string.ok, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(context, "positive clicked", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, null)
-                .show();
-
     }
 
 
@@ -630,7 +609,19 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
     @Override
-    public void launchWidget(final String urlPathToApp) {
+    public void launchWidget(final String urlPathToApp, int width, int height) {
+        int curWidth = mWidgetWebView.getLayoutParams().width;
+        int curHeight = mWidgetWebView.getLayoutParams().height;
+        if(curWidth != width || curHeight != height){
+            mWidgetWebView.getLayoutParams().height = height;
+            mWidgetWebView.getLayoutParams().width = width;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mWidgetWebView.requestLayout();
+                }
+            });
+        }
 
         loadWebView(mWidgetWebView, urlPathToApp);
 
