@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Ourglass A</string>
+    <string name="app_name">Ourglass Alpha</string>
     <string name="app_icon_tag">TAG</string>
     <string name="close_app">Close App?</string>
     <string name="close_app_text">Are you sure you want to close this app?</string>

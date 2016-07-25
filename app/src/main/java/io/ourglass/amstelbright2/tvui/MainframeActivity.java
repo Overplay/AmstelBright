@@ -39,13 +39,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mstar.android.tv.TvCommonManager;
-import com.mstar.android.tvapi.common.TvManager;
-import com.mstar.android.tvapi.common.exception.TvCommonException;
-import com.mstar.android.tvapi.common.vo.TvOsType;
 import com.squareup.picasso.Picasso;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -102,6 +99,12 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainframe_layout);
 
+        Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
+        Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
+        Log.d(TAG, "Is real OG H/W? " + (OGSystem.isRealOG()?"YES":"NO"));
+        Log.d(TAG, "Is emulated H/W? " + (OGSystem.isEmulator()?"YES":"NO"));
+
+
         // Cross fingers and toes that this works the permissions magic for SDCARD on OG1
         verifyStoragePermissions(this);
 
@@ -144,12 +147,9 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             }
         });
 
-        if (isEmulator) {
-            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Black));
-            Log.d(TAG, "Running in emulator, skipping HDMI passthru.");
-
-        } else {
-            enableHDMI();
+        if (!OGSystem.enableHDMI()) {
+            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
+            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
@@ -707,38 +707,6 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     }
 
-
-    /***************************************
-     * TRONSMART CODE
-     ***************************************/
-
-    public static boolean enableHDMI() {
-        boolean bRet = false;
-        try {
-            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
-            changeInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI);
-            bRet = TvManager.getInstance().getPlayerManager().isSignalStable();
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
-        return bRet;
-    }
-
-    public static void changeInputSource(TvOsType.EnumInputSource eis) {
-
-        TvCommonManager commonService = TvCommonManager.getInstance();
-
-        if (commonService != null) {
-            TvOsType.EnumInputSource currentSource = commonService.getCurrentInputSource();
-            if (currentSource != null) {
-                if (currentSource.equals(eis)) {
-                    return;
-                }
-
-                commonService.setInputSource(eis);
-            }
-        }
-    }
 
 
     /*************************************
