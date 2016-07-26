@@ -53,6 +53,21 @@
         android:focusable="false"
         android:padding="15dip" />
 
+    <TextView
+        android:layout_width="400dip"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="DEBUG"
+        android:id="@+id/textViewDebug"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="200dip"
+        android:background="@drawable/debug_bkg"
+        android:focusable="false"
+        android:padding="15dip" />
+
     <ImageView
         android:layout_width="300dip"
         android:layout_height="wrap_content"

@@ -54,9 +54,9 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
-    private WebView mFullScreenWebView;
 
-    private TextView mTextView;
+    private TextView mPopupSystemMessageTV;
+    private TextView mDebugMessageTV;
 
     private ImageView mBootBugImageView;
 
@@ -116,10 +116,14 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
 
         setupCrawler();
         setupWidget();
-        //setupFullscreen();
 
-        mTextView = (TextView) findViewById(R.id.textViewMsg);
-        mTextView.setAlpha(0);
+        mPopupSystemMessageTV = (TextView) findViewById(R.id.textViewMsg);
+        mPopupSystemMessageTV.setText("");
+        mPopupSystemMessageTV.setAlpha(0);
+
+        mDebugMessageTV = (TextView) findViewById(R.id.textViewDebug);
+        mDebugMessageTV.setText("");
+        mDebugMessageTV.setAlpha(0);
 
         mMainLayout = (RelativeLayout) findViewById(R.id.mainframeLayout);
         mMainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -148,15 +152,12 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         });
 
         if (!OGSystem.enableHDMI()) {
+            // The color change doesn't seem to do anything...:(.. not worth stressing.
             mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
-
-
-        //setupSubfloor();
-
 
         appTray = (LinearLayout) findViewById(R.id.appTray);
         appTray.setAlpha(0f);
@@ -671,16 +672,16 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
             @Override
             public void run() {
 
-                mTextView.setText(message.message);
+                mPopupSystemMessageTV.setText(message.message);
 
                 switch (message.type) {
 
                     case REDFLAG:
-                        //mTextView.setBackgroundColor(0xff0000);
+                        //mPopupSystemMessageTV.setBackgroundColor(0xff0000);
                         break;
 
                     case INFO:
-                        //mTextView.setBackgroundColor(getResources().getColor(R.color.Palette2a));
+                        //mPopupSystemMessageTV.setBackgroundColor(getResources().getColor(R.color.Palette2a));
                         break;
 
 
@@ -689,15 +690,15 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
                         break;
                 }
 
-                //mTextView.setVisibility(View.VISIBLE);
-                mTextView.setAlpha(0);
-                mTextView.animate().alpha(1).setDuration(250);
+                //mPopupSystemMessageTV.setVisibility(View.VISIBLE);
+                mPopupSystemMessageTV.setAlpha(0);
+                mPopupSystemMessageTV.animate().alpha(1).setDuration(250);
 
-                mTextView.postDelayed(new Runnable() {
+                mPopupSystemMessageTV.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mTextView.animate().alpha(0).setDuration(250);
-                        //mTextView.setVisibility(View.INVISIBLE);
+                        mPopupSystemMessageTV.animate().alpha(0).setDuration(250);
+                        //mPopupSystemMessageTV.setVisibility(View.INVISIBLE);
                     }
                 }, 2000);
 
