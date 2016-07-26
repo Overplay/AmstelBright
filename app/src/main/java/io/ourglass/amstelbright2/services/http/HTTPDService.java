@@ -39,10 +39,7 @@ public class HTTPDService extends Service {
     /** indicates how to behave if the service is killed */
     int mStartMode = START_STICKY;
 
-
-
-
-    /** indicates whether onRebind should be used */
+   /** indicates whether onRebind should be used */
     boolean mAllowRebind = true;
 
     /** Called when the service is being created. */

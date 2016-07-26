@@ -132,19 +132,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
                 mScreenWidth = mMainLayout.getWidth();
                 mMf.setTVScreenSize(mScreenWidth, mScreenHeight);
                 mMainLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                // Give webserver some time to finish firing up
-                // TODO, I hate magic delays, we need some indication from Nano it is Done loading
-                mMainLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            mMf.getApps();
-                        } catch (Exception e) {
-                            showAlert(new UIMessage("Getting the apps shit itself.",
-                                    UIMessage.UIMessageType.REDFLAG));
-                        }
-                    }
-                }, 5000);
+
             }
         });
 

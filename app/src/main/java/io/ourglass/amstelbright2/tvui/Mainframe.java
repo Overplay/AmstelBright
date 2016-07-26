@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import io.ourglass.amstelbright2.core.OGConstants;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -251,6 +252,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
         }
 
+        mListener.uiAlert(new UIMessage(mAllApps.length()+" apps intalled. Nice!"));
 
     }
 
@@ -307,7 +309,6 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     throw new IOException("Unexpected Json error " + e.toString());
                 } finally {
                     appIcons.add(ai);
-                    mListener.uiAlert(new UIMessage("Processed " + ai.label));
                 }
             }
         });
@@ -668,8 +669,20 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     public void receivedStatus(Intent intent) {
 
         String command = intent.getStringExtra("command");
+
         String msg = intent.getStringExtra("message");
         ((MainframeActivity)mContext).uiAlert(new UIMessage(msg));
+
+        int code = intent.getIntExtra("code", 0);
+        if ( code == OGConstants.BootState.HTTP_START.getValue() ){
+            Log.d(TAG, "HTTP server has started, going to get apps");
+            try {
+                getApps();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
 
     }
 
