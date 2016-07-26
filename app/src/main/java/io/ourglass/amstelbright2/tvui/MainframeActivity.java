@@ -11,12 +11,10 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -26,7 +24,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.webkit.WebChromeClient;
@@ -47,7 +44,7 @@ import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 @SuppressLint("SetJavaScriptEnabled")
 
-public class MainframeActivity extends Activity implements OGBroadcastReceiver.OGBroadcastReceiverListener, Mainframe.MainframeListener, OGBroadcastStatusReceiver.OGBroadcastReceiverListener {
+public class MainframeActivity extends Activity implements Mainframe.MainframeListener {
 
     private static final String TAG = "MFActivity";
     private static final boolean FLASHY = true;
@@ -82,8 +79,8 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
      * Flag indicating whether we have called bind on the service.
      */
     boolean mBound;
-    boolean isEmulator = Build.FINGERPRINT.contains("generic");
-    private SurfaceView mSurfaceView;
+
+    //private SurfaceView mSurfaceView;
 
     // New permissions crap added to API 23+
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -108,7 +105,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
         // Cross fingers and toes that this works the permissions magic for SDCARD on OG1
         verifyStoragePermissions(this);
 
-        mMf = new Mainframe(this);
+        mMf = new Mainframe(this, this);
 
         startService(new Intent(getBaseContext(), AmstelBrightService.class));
 
@@ -173,11 +170,7 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     protected void onResume() {
         super.onResume();
 
-        IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver");
-        registerReceiver(new OGBroadcastReceiver(this), filter);
 
-        IntentFilter filter2 = new IntentFilter("com.ourglass.amstelbrightserver.status");
-        registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
 
 
         mBootBugImageView.animate()
@@ -634,27 +627,6 @@ public class MainframeActivity extends Activity implements OGBroadcastReceiver.O
     }
 
 
-    /*******************************************
-     * SYSTEM STATUS MESSAGE BROADCAST RECEIVER
-     *******************************************/
-
-    @Override
-    public void receivedStatus(Intent intent) {
-
-        String command = intent.getStringExtra("command");
-        String msg = intent.getStringExtra("message");
-        uiAlert(new UIMessage(msg));
-
-    }
-
-    /*******************************************
-     * SYSTEM COMMAND MESSAGE BROADCAST RECEIVER
-     *******************************************/
-    @Override
-    public void receivedCommand(Intent i) {
-        // Commands are processed by Mainframe
-        mMf.postCommand(i);
-    }
 
 
     /*****************************************

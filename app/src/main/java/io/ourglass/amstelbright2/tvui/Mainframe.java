@@ -1,6 +1,8 @@
 package io.ourglass.amstelbright2.tvui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.util.Log;
 
@@ -21,9 +23,12 @@ import okhttp3.Response;
 /**
  * Created by mkahn on 5/11/16.
  */
-public class Mainframe {
+public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListener, OGBroadcastStatusReceiver.OGBroadcastReceiverListener {
 
     private static final String TAG = "Mainframe";
+    private Context mContext;
+
+
     private static final boolean REPLACE_OURGLASS = true;
 
     private final OkHttpClient client = new OkHttpClient();
@@ -57,6 +62,7 @@ public class Mainframe {
 
     private MainframeListener mListener;
 
+
     public interface MainframeListener {
 
         public void moveWidgetFromTo(Point fromTranslation, Point toTranslation);
@@ -72,9 +78,16 @@ public class Mainframe {
     }
 
     // Constructor
-    public Mainframe(MainframeListener listener){
+    public Mainframe(Context c, MainframeListener listener){
 
         mListener = listener;
+        mContext = c;
+
+        IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver");
+        mContext.registerReceiver(new OGBroadcastReceiver(this), filter);
+
+        IntentFilter filter2 = new IntentFilter("com.ourglass.amstelbrightserver.status");
+        mContext.registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
 
     }
 
@@ -635,6 +648,31 @@ public class Mainframe {
         return rval;
 
     }
+
+    // BROADCAST RECEIVER CALLBACKS
+
+    /*******************************************
+     * SYSTEM COMMAND MESSAGE BROADCAST RECEIVER
+     *******************************************/
+
+    @Override
+    public void receivedCommand(Intent intent) {
+        postCommand(intent);
+    }
+
+    /*******************************************
+     * SYSTEM STATUS MESSAGE BROADCAST RECEIVER
+     *******************************************/
+
+    @Override
+    public void receivedStatus(Intent intent) {
+
+        String command = intent.getStringExtra("command");
+        String msg = intent.getStringExtra("message");
+        ((MainframeActivity)mContext).uiAlert(new UIMessage(msg));
+
+    }
+
 
 
 }
