@@ -26,7 +26,7 @@ public class OGConstants {
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
 
     // When manually psushing
-    public static final String PATH_TO_ABWL = "/www";
+    public static final String PATH_TO_ABWL = "/wwwaqui";
 
     public static void dbToast(Context context, String message){
         if (SHOW_DB_TOASTS){

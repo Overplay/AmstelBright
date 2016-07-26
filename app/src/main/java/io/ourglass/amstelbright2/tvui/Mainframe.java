@@ -668,12 +668,26 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     @Override
     public void receivedStatus(Intent intent) {
 
+        if(intent.hasExtra("newAppData") && intent.hasExtra("appType")){
+            String newAppData = intent.getStringExtra("newAppData"), appType = intent.getStringExtra("appType");
+            if(newAppData != null){
+                if("widget".equals(appType)) {
+                    ((MainframeActivity)mContext).injectAppDataIntoWidget(newAppData);
+                }
+                else if("crawler".equals(appType)){
+                    ((MainframeActivity)mContext).injectAppDataIntoCrawler(newAppData);
+                }
+            }
+            return;
+        }
+
         String command = intent.getStringExtra("command");
 
         String msg = intent.getStringExtra("message");
         ((MainframeActivity)mContext).uiAlert(new UIMessage(msg));
 
         int code = intent.getIntExtra("code", 0);
+
         if ( code == OGConstants.BootState.HTTP_START.getValue() ){
             Log.d(TAG, "HTTP server has started, going to get apps");
             try {

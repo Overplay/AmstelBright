@@ -7,6 +7,8 @@ import java.util.Map;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
 import io.realm.Realm;
+import android.content.Intent;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 /**
  * Created by mkahn on 5/9/16.
@@ -41,15 +43,26 @@ public class JSONAppDataHandler extends JSONHandler {
 
                 try {
                     final JSONObject dataJson = getBodyAsJSONObject(session);
+
                     realm.executeTransactionAsync(new Realm.Transaction() {
                         @Override
                         public void execute(Realm bgRealm) {
                             OGApp app = OGApp.getApp(bgRealm, appId);
                             app.setPublicData(dataJson);
+
+                            String appType = app.appType;
+                            Intent intent = new Intent();
+                            intent.setAction("com.ourglass.amstelbrightserver.status");
+                            intent.putExtra("newAppData", dataJson.toString());
+                            intent.putExtra("appType", appType);
+                            AmstelBrightService.context.sendBroadcast(intent);
+
                         }
                     }, null, null );
                     realm.close();
                     responseStatus = NanoHTTPD.Response.Status.OK;
+
+
                     return dataJson.toString();
 
                 } catch (Exception e) {

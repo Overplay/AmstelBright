@@ -695,6 +695,14 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
     };
 
+    public void injectAppDataIntoWidget(String appdata){
+        mWidgetWebView.loadUrl("javascript:GLOBAL_UPDATE_TARGET(" + appdata + ")");
+    }
+
+    public void injectAppDataIntoCrawler(String appdata){
+        mCrawlerWebView.loadUrl("javascript:GLOBAL_UPDATE_TARGET(" + appdata + ")");
+    }
+
     // From old example code, needs to go...eventually
     public void sayHello(int msgnum) {
         if (!mBound) return;
