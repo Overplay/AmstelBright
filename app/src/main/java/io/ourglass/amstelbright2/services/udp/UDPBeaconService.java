@@ -18,6 +18,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.realm.OGDevice;
@@ -125,7 +126,7 @@ public class UDPBeaconService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        OGConstants.dbToast(this, "Starting UDP Beacon");
+        ABApplication.dbToast(this, "Starting UDP Beacon");
 
         udpLooperThread.start();
         mUdpThreadHandler = new Handler(udpLooperThread.getLooper());

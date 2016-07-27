@@ -13,7 +13,6 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
-import io.ourglass.amstelbright2.services.http.handlers.JSONTestHandler;
 
 
 public class OGNanolets extends OGRouterNanoHTTPD {
@@ -155,18 +154,18 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/www/(.)+", StaticPageTestHandler.class, f.getAbsoluteFile());
 
         // Examples
-        addRoute("/user", UserHandler.class);
-        addRoute("/user/:id", UserHandler.class);
-        addRoute("/user/help", GeneralHandler.class);
-        addRoute("/json/:id/:eid", JSONTestHandler.class);
-        addRoute("/general/:param1/:param2", GeneralHandler.class);
-        addRoute("/photos/:customer_id/:photo_id", null);
-        addRoute("/test", String.class);
-        addRoute("/interface", UriResponder.class); // this will cause an error
-        // when called
-        addRoute("/toBeDeleted", String.class);
-        removeRoute("/toBeDeleted");
-        addRoute("/stream", StreamUrl.class);
+//        addRoute("/user", UserHandler.class);
+//        addRoute("/user/:id", UserHandler.class);
+//        addRoute("/user/help", GeneralHandler.class);
+//        addRoute("/json/:id/:eid", JSONTestHandler.class);
+//        addRoute("/general/:param1/:param2", GeneralHandler.class);
+//        addRoute("/photos/:customer_id/:photo_id", null);
+//        addRoute("/test", String.class);
+//        addRoute("/interface", UriResponder.class); // this will cause an error
+//        // when called
+//        addRoute("/toBeDeleted", String.class);
+//        removeRoute("/toBeDeleted");
+//        addRoute("/stream", StreamUrl.class);
     }
 
 

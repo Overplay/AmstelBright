@@ -1,7 +1,9 @@
 package io.ourglass.amstelbright2.core;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -24,5 +26,12 @@ public class ABApplication extends Application {
 
         Realm.setDefaultConfiguration(config);
     }
+
+    public static void dbToast(Context context, String message){
+        if (OGConstants.SHOW_DB_TOASTS){
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 }
