@@ -23,6 +23,7 @@ public class OGConstants {
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
 
+
     // When manually pushing
     // Keep separate from DEMO release so we can run both on the same H/W
     public static final String PATH_TO_ABWL = "/wwwaqui";
