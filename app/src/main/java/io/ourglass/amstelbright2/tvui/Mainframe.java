@@ -448,18 +448,18 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         String appId = null;
         String appType = null;
-        String screenName = null;
+        String appName = null;
 
         try {
             appId = app.getString("appId");
             appType = app.getString("appType");
-            screenName = app.getString("screenName");
+            appName = app.getString("appName");
 
         } catch (Exception e){
             raiseRedFlag("Could not launch app. Error parsing JSON");
         }
 
-        mListener.uiAlert(new UIMessage("Launching "+ screenName));
+        mListener.uiAlert(new UIMessage("Launching "+ appName));
         // OK, so at this point we need to concern ourselves with the type, URL, and slotNumber
         switch (appType){
             case "crawler":
