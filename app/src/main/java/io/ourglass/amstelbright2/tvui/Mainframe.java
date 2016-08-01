@@ -68,8 +68,8 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         public void moveWidgetFromTo(Point fromTranslation, Point toTranslation);
         public void moveCrawlerFrom(float fromY, float toY);
-        public void scaleCrawler( float scale );
-        public void scaleWidget( float scale );
+        public void adjustCrawler( float scale, int xAdjust, int yAdjust );
+        public void adjustWidget( float scale, int xAdjust, int yAdjust );
         public void killCrawler();
         public void killWidget();
         public void launchCrawler(String urlPathToApp);
@@ -448,18 +448,18 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         String appId = null;
         String appType = null;
-        String screenName = null;
+        String appName = null;
 
         try {
             appId = app.getString("appId");
             appType = app.getString("appType");
-            screenName = app.getString("screenName");
+            appName = app.getString("appName");
 
         } catch (Exception e){
             raiseRedFlag("Could not launch app. Error parsing JSON");
         }
 
-        mListener.uiAlert(new UIMessage("Launching "+ screenName));
+        mListener.uiAlert(new UIMessage("Launching "+ appName));
         // OK, so at this point we need to concern ourselves with the type, URL, and slotNumber
         switch (appType){
             case "crawler":
@@ -513,14 +513,14 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         }
     }
 
-    private void scaleApp(JSONObject app, float scale){
+    private void adjustApp(JSONObject app, float scale, int xAdjust, int yAdjust){
 
         try {
 
             if (app.getString("appType").equalsIgnoreCase("crawler")){
-                mListener.scaleCrawler(scale);
+                mListener.adjustCrawler(scale, xAdjust, yAdjust);
             } else {
-                mListener.scaleWidget(scale);
+                mListener.adjustWidget(scale, xAdjust, yAdjust);
             }
 
         } catch (Exception e){
@@ -578,9 +578,11 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     killApp(app);
                     break;
 
-                case "scale":
+                case "adjust":
                     float scale = intent.getFloatExtra("scale", 1f);
-                    scaleApp(app, scale);
+                    int xAdjust = intent.getIntExtra("xAdjust", 0);
+                    int yAdjust = intent.getIntExtra("yAdjust", 0);
+                    adjustApp(app, scale, xAdjust, yAdjust);
                     break;
             }
 

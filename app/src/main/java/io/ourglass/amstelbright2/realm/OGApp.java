@@ -27,14 +27,13 @@ public class OGApp extends RealmObject {
     public String appType;
 
     @Required
-    public String screenName;
+    public String appName;
 
     int primaryColor;
     int secondaryColor;
     String icon;
 
     public boolean running = false;
-    public boolean onLauncher = true;
 
     public int slotNumber = 0;
     public float scale = 1;
@@ -88,18 +87,13 @@ public class OGApp extends RealmObject {
 
             rval.put("appId", this.appId);
             rval.put("appType", this.appType);
+            rval.put("appName", this.appName);
             rval.put("running", this.running);
-            rval.put("onLauncher", this.onLauncher);
             rval.put("slotNumber", this.slotNumber);
-//            rval.put("xPos", this.xPos);
-//            rval.put("yPos", this.yPos);
             rval.put("height", this.height);
             rval.put("width", this.width);
-            rval.put("screenName", this.screenName);
-            rval.put("primaryColor", this.primaryColor);
-            rval.put("primaryColorHex", String.format("#%06X", (0xFFFFFF & this.primaryColor)));
 
-            rval.put("secondaryColor", this.secondaryColor);
+            rval.put("primaryColorHex", String.format("#%06X", (0xFFFFFF & this.primaryColor)));
             rval.put("secondaryColorHex", String.format("#%06X", (0xFFFFFF & this.secondaryColor)));
 
             rval.put("icon", this.icon);
@@ -185,7 +179,7 @@ public class OGApp extends RealmObject {
         try {
             return candidate.has("appId") && !candidate.getString("appId").isEmpty()
                     && candidate.has("appType") && !candidate.getString("appType").isEmpty()
-                    && candidate.has("screenName") && !candidate.getString("screenName").isEmpty();
+                    && candidate.has("appName") && !candidate.getString("appName").isEmpty();
         } catch(JSONException e){
             return false;
         }

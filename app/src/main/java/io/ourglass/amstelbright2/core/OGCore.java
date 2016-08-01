@@ -22,6 +22,7 @@ import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 /**
@@ -238,9 +239,34 @@ public class OGCore {
 
     }
 
-    public void scaleApp(float scale) {
+    public static void adjustApp(Realm realm, String appId, float scale, int xAdjust, int yAdjust) throws OGServerException{
+        Log.d(TAG, "scaling app");
 
-        // TODO implement scaling
+        final OGApp target = OGApp.getApp(realm, appId);
+
+        if (target == null) {
+            throw new OGServerException("No such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
+        }
+
+        if (!target.running)
+            throw new OGServerException("App not currently running")
+                    .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
+
+        realm.beginTransaction();
+
+        Intent intent = new Intent();
+        intent.setAction("com.ourglass.amstelbrightserver");
+        intent.putExtra("command", "adjust");
+        intent.putExtra("appId", target.appId);
+        intent.putExtra("app", target.getAppAsJson().toString());
+        intent.putExtra("scale", scale);
+        intent.putExtra("xAdjust", xAdjust);
+        intent.putExtra("yAdjust", yAdjust);
+        AmstelBrightService.context.sendBroadcast(intent);
+
+        realm.commitTransaction();
+
 
     }
 
@@ -309,6 +335,9 @@ public class OGCore {
         //check the existing realm Apps and delete whatever is not in the jsonAppArray
         removeUninstalledAppsFromRealm(jsonAppArr);
 
+        //set public data to initialValue for existingApps if they don't have any appdata
+        setAppDataIfEmpty(jsonAppArr);
+
         //commit both of these arrays into realm
         Realm realm = Realm.getDefaultInstance();
 
@@ -319,7 +348,6 @@ public class OGCore {
                 bgRealm.createOrUpdateAllFromJson(OGScraper.class, scrapeArr);
             }
         }, null, null);
-
 
         realm.close();
 
@@ -365,6 +393,27 @@ public class OGCore {
             }
         }
         realm.close();
+    }
+
+    private static void setAppDataIfEmpty(JSONArray newApps){
+        for (int i = 0 ; i < newApps.length(); i++) {
+            try {
+                JSONObject obj = newApps.getJSONObject(i);
+                String appId = obj.getString("appId");
+                Realm tempRealm = Realm.getDefaultInstance();
+                OGApp foundApp = OGApp.getApp(tempRealm, appId);
+                if(foundApp == null || foundApp.getPublicData().toString().equals("{}")){
+                    Log.v(TAG, "there was no appdata for " + appId + " so setting it to initialValue");
+                    JSONObject initValue = obj.getJSONObject("initialValue");
+                    obj.put("publicData", initValue);
+                }
+                obj.remove("initialValue");
+            } catch(org.json.JSONException e){
+                Log.e(TAG, "there was a problem with JSON parsing, " +
+                        "will probably affect the information in the realm database pertaining to apps" +
+                        "\n" + e.getMessage());
+            }
+        }
     }
 
     private static ArrayList<String> getNamesOfAppsFromSd(){
@@ -415,91 +464,6 @@ public class OGCore {
         Log.v(TAG, toReturn);
         return toReturn;
     }
-
-//    public static void installStockApps(Context context) {
-//
-//        Log.d(TAG, "Installing stock apps");
-//
-//        final JSONArray appArr = new JSONArray();
-//        final JSONArray scrapeArr = new JSONArray();
-//
-//        try {
-//
-//
-//            JSONObject pubCrawlerJson = new JSONObject()
-//                    .put("appId", "io.ourglass.pubcrawler")
-//                    .put("appType", "crawler")
-//                    .put("screenName", "PubCrawler")
-//                    .put("onLauncher", true)
-//                    .put("primaryColor", context.getResources().getColor(R.color.Green))
-//                    .put("icon", "pub.png");
-//
-//
-//            appArr.put(pubCrawlerJson);
-//
-//
-//            JSONObject shuffle = new JSONObject()
-//                    .put("appId", "io.ourglass.shuffleboard")
-//                    .put("appType", "widget")
-//                    .put("screenName", "Shuffleboard")
-//                    .put("onLauncher", true)
-//                    .put("primaryColor", context.getResources().getColor(R.color.DarkGray))
-//                    .put("icon", "shuffle.png");
-//            ;
-//
-//            appArr.put(shuffle);
-//
-////            JSONObject babs = new JSONObject()
-////                    .put("appId", "io.ourglass.babylon")
-////                    .put("appType", "widget")
-////                    .put("screenName", "Babylon")
-////                    .put("onLauncher", true)
-////                    .put("primaryColor", context.getResources().getColor(R.color.AntiqueWhite))
-////                    .put("icon", "babs.png");
-////            ;
-////
-////            appArr.put(babs);
-////
-//
-//            JSONObject waitingList = new JSONObject()
-//                    .put("appId", "io.ourglass.waitinglist")
-//                    .put("appType", "widget")
-//                    .put("screenName", "WaitingList")
-//                    .put("onLauncher", true)
-//                    .put("primaryColor", context.getResources().getColor(R.color.SkyBlue))
-//                    .put("icon", "wl.png");
-//
-//            appArr.put(waitingList);
-//
-//            JSONObject scrapeTwitter = new JSONObject()
-//                    .put("source", "twitter")
-//                    .put("query", "\"Steph Curry\"")
-//                    .put("appId", "io.ourglass.pubcrawler");
-//
-//            scrapeArr.put(scrapeTwitter);
-//
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "You screwed up your stock app Json, fix it!");
-//        }
-//
-//        Realm realm = Realm.getDefaultInstance();
-//
-//        realm.executeTransactionAsync(new Realm.Transaction() {
-//            @Override
-//            public void execute(Realm bgRealm) {
-//
-//                bgRealm.createOrUpdateAllFromJson(OGApp.class, appArr);
-//                bgRealm.createOrUpdateAllFromJson(OGScraper.class, scrapeArr);
-//
-//
-//            }
-//        }, null, null);
-//
-//
-//        realm.close();
-//
-//    }
 
     public static void getApps() {
 

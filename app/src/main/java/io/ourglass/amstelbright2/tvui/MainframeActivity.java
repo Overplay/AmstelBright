@@ -26,6 +26,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -48,6 +52,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
     private static final String TAG = "MFActivity";
     private static final boolean FLASHY = true;
+    private static final long SCALE_ANIM_DURATION = 1000;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -574,13 +579,56 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     }
 
     @Override
-    public void scaleWidget(float scale){
+    public void adjustWidget(float scale, int xAdjust, int yAdjust){
+        AnimationSet moveAndScale = new AnimationSet(true);
 
+        Animation translate = new TranslateAnimation(mWidgetWebView.getX(), mWidgetWebView.getX() + xAdjust, mWidgetWebView.getY(), mWidgetWebView.getY() + yAdjust);
+        translate.setDuration(SCALE_ANIM_DURATION);
+        translate.setFillAfter(true);
+
+        moveAndScale.addAnimation(translate);
+
+        ScaleAnimation scaling = new ScaleAnimation(
+                mWidgetWebView.getScaleX(), scale,
+                mWidgetWebView.getScaleY(), scale,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        scaling.setFillAfter(true);
+        scaling.setDuration(1000);
+
+        moveAndScale.addAnimation(scaling);
+        moveAndScale.setFillAfter(true);
+        mWidgetWebView.startAnimation(moveAndScale);
     }
 
     @Override
-    public void scaleCrawler(float scale){
+    public void adjustCrawler(float scale, int xAdjust, int yAdjust){
+        /*AnimationSet moveAndScale = new AnimationSet(true);
 
+        Animation translate = new TranslateAnimation(mCrawlerWebView.getX(), mCrawlerWebView.getX() + xAdjust, mCrawlerWebView.getY(), mCrawlerWebView.getY() + yAdjust);
+        translate.setDuration(SCALE_ANIM_DURATION);
+        translate.setFillAfter(true);
+
+        moveAndScale.addAnimation(translate);
+
+        ScaleAnimation scaling = new ScaleAnimation(
+                mCrawlerWebView.getScaleX(), scale,
+                mCrawlerWebView.getScaleY(), scale,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        scaling.setFillAfter(true);
+        scaling.setDuration(1000);
+
+        moveAndScale.addAnimation(scaling);
+        moveAndScale.setFillAfter(true);
+
+        mCrawlerWebView.startAnimation(moveAndScale); */
+        mCrawlerWebView.setX(mCrawlerWebView.getX() + xAdjust);
+        mCrawlerWebView.setY(mCrawlerWebView.getY() + yAdjust);
+        mCrawlerWebView.setScaleX(scale);
+        mCrawlerWebView.setScaleY(scale);
     }
 
     @Override
