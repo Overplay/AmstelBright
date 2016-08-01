@@ -239,9 +239,34 @@ public class OGCore {
 
     }
 
-    public void scaleApp(float scale) {
+    public static void adjustApp(Realm realm, String appId, float scale, int xAdjust, int yAdjust) throws OGServerException{
+        Log.d(TAG, "scaling app");
 
-        // TODO implement scaling
+        final OGApp target = OGApp.getApp(realm, appId);
+
+        if (target == null) {
+            throw new OGServerException("No such app")
+                    .ofType(OGServerException.ErrorType.NO_SUCH_APP);
+        }
+
+        if (!target.running)
+            throw new OGServerException("App not currently running")
+                    .ofType(OGServerException.ErrorType.APP_NOT_RUNNING);
+
+        realm.beginTransaction();
+
+        Intent intent = new Intent();
+        intent.setAction("com.ourglass.amstelbrightserver");
+        intent.putExtra("command", "adjust");
+        intent.putExtra("appId", target.appId);
+        intent.putExtra("app", target.getAppAsJson().toString());
+        intent.putExtra("scale", scale);
+        intent.putExtra("xAdjust", xAdjust);
+        intent.putExtra("yAdjust", yAdjust);
+        AmstelBrightService.context.sendBroadcast(intent);
+
+        realm.commitTransaction();
+
 
     }
 

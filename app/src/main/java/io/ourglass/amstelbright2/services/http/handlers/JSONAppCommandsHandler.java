@@ -1,5 +1,10 @@
 package io.ourglass.amstelbright2.services.http.handlers;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGCore;
@@ -120,12 +125,50 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
                     }
 
+                    case "adjust":
+                    {
+                        float scale;
+                        int xAdjust, yAdjust;
 
+                        try {
+                            JSONObject body = getBodyAsJSONObject(session);
+                            scale = Float.valueOf(body.get("scale").toString());
+                            try {
+                                xAdjust = body.getInt("xAdjust");
+                            } catch(JSONException e){
+                                Log.v("JSONAppCommandsHandler", "xAdjust not supplied, setting to 0");
+                                xAdjust = 0;
+                            }
+                            try {
+                                yAdjust = body.getInt("yAdjust");
+                            } catch(JSONException e) {
+                                Log.v("JSONAppCommandsHandler", "yAdjust not supplied, setting to 0");
+                                yAdjust = 0;
+                            }
+                        } catch(Exception e){
+                            responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
+                            return e.toString();
+                        }
 
+                        OGApp scaledApp;
+                        Realm realm = Realm.getDefaultInstance();
 
-                    //TODO add scaling. Pass scale in JSON body so same slug can be used
+                        try {
+                            OGCore.adjustApp(realm, appId, scale, xAdjust, yAdjust);
 
-                    case "scale":
+                            responseStatus = NanoHTTPD.Response.Status.OK;
+
+                            return "success";
+                        } catch (OGServerException e) {
+
+                            return processOGException(e);
+
+                        } finally {
+                            realm.close();
+                        }
+
+                    }
+
                     default:
 
                         responseStatus = NanoHTTPD.Response.Status.NOT_FOUND;
