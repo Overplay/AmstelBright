@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.realm.Realm;
@@ -110,10 +111,7 @@ public class CloudScraperService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        OGConstants.dbToast(this, "Starting Cloud Scraper");
-
-
-
+        ABApplication.dbToast(this, "Starting Cloud Proxy");
 
         mScrapeThread.start();
         mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());

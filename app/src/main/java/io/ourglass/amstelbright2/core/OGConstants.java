@@ -1,12 +1,12 @@
 package io.ourglass.amstelbright2.core;
 
-import android.content.Context;
-import android.widget.Toast;
-
 /**
  * Created by mkahn on 5/17/16.
  */
 public class OGConstants {
+
+    public static final boolean TEST_MODE = true;
+    public static final boolean SHOW_DB_TOASTS = true;
 
     /**
      * Networking constants
@@ -20,21 +20,15 @@ public class OGConstants {
     public static final int TV_POLL_INTERVAL = 2500;
 
 
-    public static final boolean SHOW_DB_TOASTS = true;
-
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
 
-    // When manually psushing
+
+    // When manually pushing
+    // Keep separate from DEMO release so we can run both on the same H/W
     public static final String PATH_TO_ABWL = "/wwwaqui";
 
-    public static void dbToast(Context context, String message){
-        if (SHOW_DB_TOASTS){
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    public static final String STB_ENDPOINT = "http://10.1.10.38:8080/tv/getTuned";
 
     public static enum BootState {
         ABS_START(0),
@@ -53,7 +47,17 @@ public class OGConstants {
         }
     }
 
-    public static final boolean TEST_MODE = true;
+
+    /**
+     * Endpoints for STBs
+     */
+
+    public static final String DIRECTV_CHANNEL_GET_ENDPOINT = "/tv/getTuned";
+    public static final int DIRECTV_PORT = 8080;
+
+    // HARD CODED for DEMO
+    public static final String STB_ENDPOINT = "http://10.1.10.38:8080/tv/getTuned";
+
 
     public static final String TEST_DIRECT_TV_INFO =
                  "{\n" +

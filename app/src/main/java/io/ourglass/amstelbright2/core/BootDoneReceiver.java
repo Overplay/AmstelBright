@@ -6,6 +6,9 @@ import android.content.Intent;
 
 import io.ourglass.amstelbright2.tvui.MainframeActivity;
 
+/**
+ * Not sure this is needed any longer, but I'll leave it for now.
+ */
 public class BootDoneReceiver extends BroadcastReceiver {
     public BootDoneReceiver() {
     }

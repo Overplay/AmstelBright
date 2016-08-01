@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import okhttp3.Call;
@@ -65,7 +66,7 @@ public class STBService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        OGConstants.dbToast(this, "STB: onStartCommand");
+        ABApplication.dbToast(this, "STB: onStartCommand");
 
         mTVPollThread.start();
         mTVThreadHandler = new Handler(mTVPollThread.getLooper());
@@ -82,8 +83,7 @@ public class STBService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        OGConstants.dbToast(this, "STB: onDestroy");
-
+        ABApplication.dbToast(this, "STB: onDestroy");
     }
 
     @Nullable
