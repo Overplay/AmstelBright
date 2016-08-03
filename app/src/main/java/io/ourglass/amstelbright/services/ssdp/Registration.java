@@ -52,7 +52,8 @@ public class Registration {
                 clientInfo.getExtraResponseHeaders().add("BAd", "BADDD");
                 return;
             }
-            Toast.makeText(AmstelBrightService.context, clientAddress.toString() + " successfully registered", Toast.LENGTH_SHORT);
+            //Toast.makeText(AmstelBrightService.context, clientAddress.toString() + " successfully registered", Toast.LENGTH_SHORT).show();
+            Log.v("Registration", "device successfully registered");
             registeredIpAddresses.add(clientAddress.toString());
             clientInfo.getExtraResponseHeaders().add("Auth-token", "ABCDEFG");
 

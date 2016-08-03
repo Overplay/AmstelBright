@@ -171,16 +171,17 @@ public class SSDPService extends Service implements PropertyChangeListener {
     protected LocalDevice createDevice()
             throws ValidationException, LocalServiceBindingException {
 
-        String deviceName = "alphabox";
-
-        Log.v("find me", deviceName);
-
         DeviceType type =
-                new UDADeviceType(deviceName, 1);
+                new UDADeviceType("OurglassBox", 1);
 
 
         Realm realm = Realm.getDefaultInstance();
         OGDevice device = OGCore.getDeviceAsObject(realm);
+
+        String deviceName = device.name;
+        if(deviceName == null){
+            device.name = "OurglassBox";
+        }
 
         DeviceDetails details =
                 new DeviceDetails(
