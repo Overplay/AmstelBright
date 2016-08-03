@@ -17,7 +17,7 @@ import java.util.List;
 
 import java.net.InetAddress;
 
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 /**
  * Created by ethan on 8/2/16.
