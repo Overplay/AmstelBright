@@ -28,6 +28,9 @@
             android:name="io.ourglass.amstelbright2.services.udp.UDPBeaconService"
             android:enabled="true" />
         <service
+            android:name="io.ourglass.amstelbright2.services.udp.UDPListenAndRespond"
+            android:enabled="true" />
+        <service
             android:name="io.ourglass.amstelbright2.services.stbservice.STBService"
             android:enabled="true" />
         <service
