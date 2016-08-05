@@ -48,4 +48,5 @@ dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-client', version:'8.1.18.v20150929'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version:'1.7.14'
 
+    compile 'io.jsonwebtoken:jjwt:0.6.0'
 }

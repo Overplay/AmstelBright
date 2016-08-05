@@ -58,6 +58,12 @@ public class OGConstants {
     // HARD CODED for DEMO
     public static final String STB_ENDPOINT = "http://10.1.10.38:8080/tv/getTuned";
 
+    /**
+     * constants for JWT
+     */
+
+    public static final int JWT_LIFESPAN = 1 /*day*/ * 24 /*hours*/ * 60 /*minutes*/ * 60 /*seconds*/ * 1000 /*milliseconds*/;
+    public enum AUTH_LEVEL {PATRON, OWNER, OG};
 
     public static final String TEST_DIRECT_TV_INFO =
                  "{\n" +
