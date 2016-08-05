@@ -21,7 +21,7 @@ public class JSONAppDataHandler extends JSONHandler {
 
         //these operations require patron level permissions
         String tok = session.getHeaders().get("Authorization");
-        if(tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.PATRON)) {
+        if(!OGConstants.USE_JWT && (tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.PATRON))) {
             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
             return "";
         }

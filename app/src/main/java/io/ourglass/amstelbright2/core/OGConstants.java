@@ -62,6 +62,7 @@ public class OGConstants {
      * constants for JWT
      */
 
+    public static boolean USE_JWT = true;
     public static final int JWT_LIFESPAN = 1 /*day*/ * 24 /*hours*/ * 60 /*minutes*/ * 60 /*seconds*/ * 1000 /*milliseconds*/;
     public enum AUTH_LEVEL {PATRON, OWNER, OG};
 

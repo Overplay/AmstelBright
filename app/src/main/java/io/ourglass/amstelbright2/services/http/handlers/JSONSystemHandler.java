@@ -29,7 +29,7 @@ public class JSONSystemHandler extends JSONHandler {
 
         //these operations require owner level permissions
         String tok = session.getHeaders().get("authorization");
-        if(tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER)) {
+        if(!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
             return "";
         }

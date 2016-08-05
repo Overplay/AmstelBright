@@ -50,10 +50,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.ourglass.amstelbright.R;
-import io.ourglass.amstelbright.core.OGCore;
-import io.ourglass.amstelbright.realm.OGDevice;
-import io.ourglass.amstelbright.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.realm.OGDevice;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.realm.Realm;
 
 /**
