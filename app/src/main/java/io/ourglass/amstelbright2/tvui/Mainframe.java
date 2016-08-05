@@ -11,7 +11,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import okhttp3.Callback;
@@ -32,7 +42,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     private static final boolean REPLACE_OURGLASS = true;
 
-    private final OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client;
 
     private Rect mScreenRect;
 
@@ -52,6 +62,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     private JSONObject mRunningWidget;
     private int mRunningWidgetSlot = 0;
 
+    private final String BASE_URL = OGConstants.USE_HTTPS ? "https://localhost:" : "http://localhost:";
 
     // TODO this should be combined with mAllApps so there is a single native array with all app info
     public ArrayList<AppIcon> appIcons = new ArrayList<>();
@@ -75,7 +86,6 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         public void launchCrawler(String urlPathToApp);
         public void launchWidget(String urlPathToApp, int width, int height);
         public void uiAlert(UIMessage message);
-
     }
 
     // Constructor
@@ -89,6 +99,44 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         IntentFilter filter2 = new IntentFilter("com.ourglass.amstelbrightserver.status");
         mContext.registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
+
+        //if using https, then install custom certificate checker that trusts everything
+        if(OGConstants.USE_HTTPS) {
+            try {
+                final TrustManager[] trustAllCerts = new TrustManager[]{
+                        new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                            }
+
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                            }
+
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
+                            }
+                        }
+                };
+                final SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                //create an ssl socket facotry with our all-trusting manager
+                final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                builder.sslSocketFactory(sslSocketFactory);
+                builder.hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+                client = builder.build();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
 
     }
 
@@ -176,24 +224,24 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     public String urlForApp(String appId){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
     }
 
     public String urlForAppInfo(String appId){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
     }
 
     public String urlForAppIcon(String appId, String iconName){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
     }
 
     public void getApps() throws Exception {
 
         // TODO: Should we do this thru service calls now??
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/system/apps")
+                .url(BASE_URL + SERVER_PORT +"/api/system/apps")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -322,7 +370,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
 
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/system/apps")
+                .url(BASE_URL + SERVER_PORT + "/api/system/apps")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -598,7 +646,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         RequestBody body = RequestBody.create(JSON, "{}");
 
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/app/"+appId+"/launch")
+                .url(BASE_URL + SERVER_PORT + "/api/app/"+appId+"/launch")
                 .post(body)
                 .build();
 
