@@ -18,8 +18,8 @@ import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.cloudscraper.OGTweetScraper;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
-import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
-
+//import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
+import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
 /**
  * This is the parent server class that kicks off everybody else: UDP, Bluetooth, HTTP
@@ -134,12 +134,16 @@ public class AmstelBrightService extends Service  {
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
-        Intent udpIntent = new Intent(this, UDPBeaconService.class)
+        /*Intent udpIntent = new Intent(this, UDPBeaconService.class)
                 .putExtra("data", "some data to broadcast")
                 .putExtra("port", 9091)
                 .putExtra("beaconFreq", 2000);
 
-        startService(udpIntent);
+        startService(udpIntent);*/
+
+        Intent udpIntent = new Intent(this, UDPListenAndRespond.class)
+        		.putExtra("port", 9091);
+		startService(udpIntent);
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
