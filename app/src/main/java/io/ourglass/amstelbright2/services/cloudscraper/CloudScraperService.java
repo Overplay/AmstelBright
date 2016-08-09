@@ -16,6 +16,10 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 /**
+ *  MAK
+ *  Some time in July, Two-thousand-and-sixteen
+ *
+ *  Only does Twitter right now, but could be extended for IG and FB I imagine...
  *
  */
 public class CloudScraperService extends Service {
@@ -29,8 +33,6 @@ public class CloudScraperService extends Service {
 
     HandlerThread mScrapeThread = new HandlerThread("scrapeLooper");
     private Handler mScrapeThreadHandler;
-
-
 
 
     private void logd(String message){
