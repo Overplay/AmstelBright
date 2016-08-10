@@ -14,7 +14,6 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
 
-
 public class OGNanolets extends OGRouterNanoHTTPD {
 
     private static final int PORT = 9090;
@@ -25,6 +24,14 @@ public class OGNanolets extends OGRouterNanoHTTPD {
      */
     public OGNanolets(HTTPDService httpServer) throws IOException {
         super(PORT);
+        if(OGConstants.USE_HTTPS) {
+            File f = new File(OGConstants.SSL_KEYSTORE);
+
+            System.setProperty("javax.net.ssl.trustStore", f.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStorePassword", OGConstants.SSL_KEY_PASSWORD);
+            this.makeSecure(NanoHTTPD.makeSSLSocketFactory("/" + f.getName(), OGConstants.SSL_KEY_PASSWORD.toCharArray()), null);
+            this.setServerSocketFactory(new SecureServerSocketFactory(NanoHTTPD.makeSSLSocketFactory("/" + f.getName(), OGConstants.SSL_KEY_PASSWORD.toCharArray()), null));
+        }
         mHTTPServer = httpServer;
         addMappings();
         start();

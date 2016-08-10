@@ -4,17 +4,19 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 
-import io.ourglass.amstelbright2.core.ABApplication;
+import org.json.JSONObject;
+
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
-import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
-
+//import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
+import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
 /**
  * This is the parent server class that kicks off everybody else: UDP, Bluetooth, HTTP
@@ -63,6 +65,7 @@ public class AmstelBrightService extends Service  {
         OGCore.sendStatusIntent("STATUS", "Starting Services",
                 OGConstants.BootState.ABS_START.getValue());
 
+
         startChildServices();
 
         return mStartMode;
@@ -74,9 +77,17 @@ public class AmstelBrightService extends Service  {
         OGCore.sendStatusIntent("STATUS", "Installing stock apps",
                 OGConstants.BootState.UPGRADE_START.getValue());
 
-        Intent udpIntent = new Intent(this, UDPBeaconService.class);
 
-        startService(udpIntent);
+        /*Intent udpIntent = new Intent(this, UDPBeaconService.class)
+                .putExtra("data", "some data to broadcast")
+                .putExtra("port", 9091)
+                .putExtra("beaconFreq", 2000);
+
+        startService(udpIntent);*/
+
+        Intent udpIntent = new Intent(this, UDPListenAndRespond.class)
+        		.putExtra("port", 9091);
+		startService(udpIntent);
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
