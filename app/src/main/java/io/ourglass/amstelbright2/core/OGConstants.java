@@ -8,7 +8,7 @@ public class OGConstants {
     public static final boolean TEST_MODE = true;
     public static final boolean SHOW_DB_TOASTS = true;
 
-    public static final boolean USE_HTTPS = true;
+    public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
     public static final String SSL_KEYSTORE = "src/main/resources/keystore2.jks";
     /**

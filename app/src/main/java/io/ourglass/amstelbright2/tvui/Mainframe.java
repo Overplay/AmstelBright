@@ -20,7 +20,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
@@ -170,8 +169,12 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         float ytop = 0.12f * mScreenRect.height;
         float ybot = (0.88f * mScreenRect.height) - widgetHeight;
 
-        float xleft = 0.013f * mScreenRect.width;
-        float xright = 0.987f * mScreenRect.width - widgetWidth;
+//        float xleft = 0.013f * mScreenRect.width;
+//        float xright = 0.987f * mScreenRect.width - widgetWidth;
+
+        // Pinning to edge
+        float xleft = 0;
+        float xright = mScreenRect.width - widgetWidth;
 
         switch (slotNumber){
 

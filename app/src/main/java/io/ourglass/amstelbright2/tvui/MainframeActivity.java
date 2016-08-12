@@ -452,30 +452,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         });
 
-        // Attempt to speed up JS performance
-//        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-//        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-//        wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
-        // For now focusable will be set to false so this stuff is never called
-//        wv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//
-//            private AnimatorSet runningAnim;
-//
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (hasFocus) {
-//                    //runningAnim = animatePulse(v);
-//                    v.animate().scaleY(0.9f).scaleX(0.9f).setDuration(100).start();
-//
-//                } else {
-//                    v.animate().scaleY(1.0f).scaleX(1.0f).setDuration(100).start();
-////                    runningAnim.cancel();
-////                    v.setScaleX(1f);
-////                    v.setScaleY(1f);
-//                }
-//            }
-//        });
 
         WebSettings settings = wv.getSettings();
         settings.setLoadWithOverviewMode(true);

@@ -4,19 +4,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.util.Log;
 
-import org.json.JSONObject;
-
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
-//import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
+
+//import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
 /**
  * This is the parent server class that kicks off everybody else: UDP, Bluetooth, HTTP
@@ -107,55 +105,10 @@ public class AmstelBrightService extends Service  {
         Log.d(TAG, "In onDestroy()");
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-
-    // MAK: We aren't binding right now, but it's here for ref
-
-//    /** A client is binding to the service with bindService() */
-//    @Override
-//    public IBinder onBind(Intent intent) {
-//        return mMessenger.getBinder();
-//    }
-//
-//    /** Called when all clients have unbound with unbindService() */
-//    @Override
-//    public boolean onUnbind(Intent intent) {
-//        super.onUnbind(intent);
-//        return mAllowRebind;
-//    }
-
-
-
-
-//
-//
-//
-//    // TODO: Seriously with the leaks? This code is right from the Google site. FCOL
-//    private class IncomingHandler extends Handler {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            switch (msg.what) {
-//                case 1:
-//                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
-//                    break;
-//                case 2:
-//                    Toast.makeText(getApplicationContext(), "beer thirty!", Toast.LENGTH_SHORT).show();
-//                    break;
-//                default:
-//                    super.handleMessage(msg);
-//            }
-//        }
-//    }
-//
-//    private void logTweets(JSONObject jobj){
-//        Log.d(TAG, jobj.toString());
-//    }
-
 
 
 

@@ -3,6 +3,12 @@
 <resources>
     <!-- OG color palette -->
 
+    <color name="BLALPHA85">#d7000000</color>
+    <color name="BLALPHA75">#be000000</color>
+    <color name="BLALPHA65">#af000000</color>
+    <color name="BLALPHA50">#7f000000</color>
+
+
     <color name="Palette1">#45b350</color>
 
     <color name="Palette2">#e4fde1</color>
