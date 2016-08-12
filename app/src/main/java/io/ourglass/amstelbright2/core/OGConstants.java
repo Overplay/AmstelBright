@@ -16,7 +16,11 @@ public class OGConstants {
      */
 
     public static final int HTTP_PORT = 9090;
-    public static final int UDP_BEACON_PORT = 9191;
+
+    // Turn off UPNP to work with the old iOS app
+    public static final boolean USE_UPNP_DISCOVERY = false;
+
+    public static final int UDP_BEACON_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*60;

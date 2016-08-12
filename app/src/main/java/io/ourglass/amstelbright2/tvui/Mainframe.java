@@ -135,6 +135,13 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
+        } else {
+
+            // Ethan, you did not create a client for non-HTTPS mode, ffs!
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            client = builder.build();
+
+
         }
 
     }

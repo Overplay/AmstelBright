@@ -12,6 +12,7 @@ import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
+import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
 //import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
@@ -76,16 +77,11 @@ public class AmstelBrightService extends Service  {
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
-        /*Intent udpIntent = new Intent(this, UDPBeaconService.class)
-                .putExtra("data", "some data to broadcast")
-                .putExtra("port", 9091)
-                .putExtra("beaconFreq", 2000);
 
-        startService(udpIntent);*/
-
-        Intent udpIntent = new Intent(this, UDPListenAndRespond.class)
-        		.putExtra("port", 9091);
-		startService(udpIntent);
+        /* Choose either new (UPNP) or old (shout in the dark) discovery method */
+        Intent udpIntent = OGConstants.USE_UPNP_DISCOVERY ? new Intent(this, UDPListenAndRespond.class) :
+                new Intent(this, UDPBeaconService.class);
+        startService(udpIntent);
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
