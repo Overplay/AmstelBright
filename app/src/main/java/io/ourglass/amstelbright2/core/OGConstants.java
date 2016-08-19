@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.core;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by mkahn on 5/17/16.
  */
@@ -25,6 +27,17 @@ public class OGConstants {
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*60;
     public static final int TV_POLL_INTERVAL = 2500;
+    public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
+
+    public static final int UPNP_UDP_BROADCAST_PORT = 1900;
+    public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
+    public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
+    public static final String[] discoverPacket = new String[]{
+            "M-SEARCH * HTTP/1.1\r\n",
+            "Host:239.255.255.250:1900\r\n",
+            "ST:ssdp:all\r\n","Man:\"ssdp:discover\"\r\n",
+            "MX:3\r\n\r\n"
+    };
 
 
     // When using git, use the one below

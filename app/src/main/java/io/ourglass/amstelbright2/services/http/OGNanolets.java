@@ -13,6 +13,8 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
+
 
 public class OGNanolets extends OGRouterNanoHTTPD {
 
@@ -154,6 +156,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
+
+        addRoute("/api/stb/:command", JSONSTBHandler.class);
 
         File f = new File("/mnt/sdcard"+ OGConstants.PATH_TO_ABWL).getAbsoluteFile();
 

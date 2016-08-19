@@ -37,6 +37,10 @@ public class OGDevice extends RealmObject{
     @PrimaryKey
     public String uuid;
 
+    public boolean isPairedToSTB;
+
+    public String pairedSTBAddr;
+
     //TODO add field owners
 
     //TODO add field manager
@@ -78,6 +82,8 @@ public class OGDevice extends RealmObject{
 
         newDevice.uuid = UUID.randomUUID().toString();
 
+        newDevice.isPairedToSTB = false;
+
         //newDevice.owners = null;
         //newDevice.managers = null;
 
@@ -115,6 +121,10 @@ public class OGDevice extends RealmObject{
             deviceJSON.put("apiToken", device.apiToken);
             deviceJSON.put("uuid", device.uuid);
             deviceJSON.put("version", ">0.5.3");
+            deviceJSON.put("isPairedToSTB", device.isPairedToSTB);
+            if(device.isPairedToSTB){
+                deviceJSON.put("paired_stb_addr", device.pairedSTBAddr);
+            }
             //deviceJSON.put("owners", );
             //deviceJSON.put("managers", );
         } catch (JSONException e){
@@ -139,6 +149,32 @@ public class OGDevice extends RealmObject{
 
         realm.beginTransaction();
         device.locationWithinVenue = newLoc;
+        realm.copyToRealmOrUpdate(device);
+        realm.commitTransaction();
+    }
+
+    public static String getPairedSTBOrNull(Realm realm){
+        OGDevice device = getDevice(realm);
+
+        return device.isPairedToSTB ? device.pairedSTBAddr : null;
+    }
+
+    public static void setPairedSTB(Realm realm, String stbAddr){
+        OGDevice device = getDevice(realm);
+
+        realm.beginTransaction();
+        device.pairedSTBAddr = stbAddr;
+        device.isPairedToSTB = true;
+        realm.copyToRealmOrUpdate(device);
+        realm.commitTransaction();
+    }
+
+    public static void unpair(Realm realm){
+        OGDevice device = getDevice(realm);
+
+        realm.beginTransaction();
+        device.pairedSTBAddr = null;
+        device.isPairedToSTB = false;
         realm.copyToRealmOrUpdate(device);
         realm.commitTransaction();
     }
