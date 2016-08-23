@@ -11,9 +11,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -23,6 +25,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -408,6 +411,51 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 Log.d(TAG, "GET all apps complete");
                 processInboundApps();
 
+            }
+        });
+    }
+
+    public void getDirectvBoxesAndLaunchActivity(final Intent intent){
+        Request request = new Request.Builder()
+                .url(BASE_URL + SERVER_PORT + "/api/stb/available")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                //dtpa.setError("error");
+                Log.e(TAG, "GET stbs failed");
+                raiseRedFlag("Unable to get stb info from server");
+                intent.putExtra("success", false);
+                intent.putExtra("errMsg", e.getMessage());
+                AmstelBrightService.context.startActivity(intent);
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                String jString = response.body().string();
+
+                try {
+                    JSONObject obj = new JSONObject(jString);
+                    JSONArray devs = obj.getJSONArray("devices");
+
+                    ArrayList<String> toAttach = new ArrayList<String>();
+                    for(int i = 0; i < devs.length(); i++){
+                        toAttach.add(devs.getString(i));
+                    }
+                    intent.putExtra("success", true);
+                    intent.putExtra("devices", toAttach);
+                } catch (JSONException e) {
+                    intent.putExtra("success", false);
+                    //throw new IOException("Unexpected Json error " + e.toString());
+                } finally {
+                    AmstelBrightService.context.startActivity(intent);
+                }
             }
         });
     }

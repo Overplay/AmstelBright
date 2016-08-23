@@ -48,9 +48,9 @@ public class JSONSTBHandler extends JSONHandler {
                             return "{ message: 'device has not finished discovering devices', devices: [] }";
                         }
                         responseStatus = NanoHTTPD.Response.Status.OK;
-                        String response = "{ devices: [";
+                        String response = "{ \"devices\": [";
                         for(String foundDevice : STBService.foundIps){
-                            response += foundDevice + ", ";
+                            response += "\"" + foundDevice + "\", ";
                         }
                         response = response.substring(0, response.lastIndexOf(",")) + "] }";
                         return response;
@@ -145,16 +145,20 @@ public class JSONSTBHandler extends JSONHandler {
                             return e.getMessage();
                         }
 
-                        //unpairs the currently paired stb, if no stb is paired, then nothing happens
-                    case "unpair":
-                        OGDevice.unpair(Realm.getDefaultInstance());
-                        responseStatus = NanoHTTPD.Response.Status.OK;
-                        return "{'message': 'successfully unpaired'}";
-
                     default:
                         responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
                         return "no such command: " + cmd;
                 }
+            case DELETE:
+                switch(cmd){
+                    case "pair":
+                        OGDevice.unpair(Realm.getDefaultInstance());
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return "{'message': 'successfully unpaired'}";
+                }
+                OGDevice.unpair(Realm.getDefaultInstance());
+                responseStatus = NanoHTTPD.Response.Status.OK;
+                return "{'message': 'successfully unpaired'}";
             default:
                 // Only allowed verbs are GET/POST/PUT
                 responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;

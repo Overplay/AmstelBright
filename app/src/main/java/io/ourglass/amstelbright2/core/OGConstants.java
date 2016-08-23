@@ -76,7 +76,8 @@ public class OGConstants {
     public static final int DIRECTV_PORT = 8080;
 
     // HARD CODED for DEMO
-    public static final String STB_ENDPOINT = "http://10.1.10.38:8080/tv/getTuned";
+    public static final int STB_PORT = 8080;
+    public static final String STB_TUNED_ENDPOINT = "/tv/getTuned";
 
 
     public static final String TEST_DIRECT_TV_INFO =

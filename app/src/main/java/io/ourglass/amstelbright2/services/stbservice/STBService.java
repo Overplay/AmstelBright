@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.core.OGNotifications;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.realm.Realm;
 import okhttp3.Call;
@@ -288,8 +289,16 @@ public class STBService extends Service {
         if(stbAddr != null) {
             OkHttpClient client = new OkHttpClient();
 
+            final String pairedSTB = OGDevice.getPairedSTBOrNull(Realm.getDefaultInstance());
+            if(pairedSTB == null){
+                Log.v(TAG, "Attempted to poll, but there was no STB paired");
+                return;
+            }
+
+            String url = pairedSTB + ":" + OGConstants.STB_PORT + OGConstants.STB_TUNED_ENDPOINT;
+
             Request request = new Request.Builder()
-                    .url(OGConstants.STB_ENDPOINT)
+                    .url(url)
                     .build();
 
             client.newCall(request).enqueue(new Callback() {
@@ -298,14 +307,20 @@ public class STBService extends Service {
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                     Log.wtf(TAG, "Couldn't GET from STB!");
+                    OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                    OGDevice.unpair(Realm.getDefaultInstance());
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
 
-                    if (!response.isSuccessful())
-                        throw new IOException("Unexpected code " + response);
+                    if (!response.isSuccessful()) {
+                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
+                        OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                        OGDevice.unpair(Realm.getDefaultInstance());
 
+                        throw new IOException("Unexpected code " + response);
+                    }
                     //                Headers responseHeaders = response.headers();
                     //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
                     //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));

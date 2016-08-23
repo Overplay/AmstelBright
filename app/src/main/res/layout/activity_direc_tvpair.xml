@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_direc_tvpair"
+    android:layout_width="300dip"
+    android:layout_height="match_parent"
+    tools:context="io.ourglass.amstelbright2.tvui.DirecTVPairActivity"
+    android:background="#CC000000">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DirecTV Pairing"
+        android:textAllCaps="true"
+        android:textColor="@color/DodgerBlue"
+        android:textSize="30dip"
+        android:textAlignment="center"
+        android:id="@+id/directv_pair_title"
+        android:background="#242429"
+        android:paddingBottom="10dip"
+        android:paddingTop="10dip"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/error_msg"
+        android:layout_below="@+id/directv_pair_title"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/current_pair"
+        android:layout_below="@+id/error_msg"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/device_list_header"
+        android:text="Available devices:"
+        android:layout_below="@+id/current_pair"
+        />
+
+    <ListView
+        android:id="@+id/directv_devices_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/device_list_header">
+    </ListView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/empty_list_message"
+        android:text="There seem to be no devices on the network..."
+        android:visibility="gone"
+        android:layout_below="@+id/directv_devices_list"
+        android:textColor="@color/Red"/>
+</RelativeLayout>

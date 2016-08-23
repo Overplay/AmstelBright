@@ -220,6 +220,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
         }
 
+        if (keyCode == 8){
+            Intent intent = new Intent(this, DirecTVPairActivity.class);
+            startActivity(intent);
+        }
+
 
         showAlert(new UIMessage("You pushed key " + keyCode));
 
