@@ -25,6 +25,7 @@ import okhttp3.Response;
 
 public class STBService extends Service {
 
+    public static final long bootTime = System.currentTimeMillis();
     public static final String TAG = "STB";
     public static final boolean VERBOSE = true;
 

@@ -23,6 +23,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
+import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.realm.OGDevice;
+import io.realm.Realm;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -554,18 +557,20 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         }
     }
 
-    private void moveApp(JSONObject app){
+    private void moveApp(JSONObject app) {
 
         try {
             int newSlot = app.getInt("slotNumber");
 
-            if (app.getString("appType").equalsIgnoreCase("crawler")){
+            if (app.getString("appType").equalsIgnoreCase("crawler")) {
                 moveCrawlerIfNeeded(newSlot);
             } else {
                 moveWidgetIfNeeded(newSlot);
             }
 
-        } catch (Exception e){
+            //log the movement as placement override
+            OGCore.log_placementOverride(OGCore.channel, OGCore.programId, app.getString("appId"), newSlot);
+        } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");
         }
