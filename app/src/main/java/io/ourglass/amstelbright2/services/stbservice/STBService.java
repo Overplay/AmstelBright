@@ -43,6 +43,7 @@ import static io.ourglass.amstelbright2.core.OGConstants.LOC_PATTERN;
 
 public class STBService extends Service {
 
+    public static final long bootTime = System.currentTimeMillis();
     public static final String TAG = "STB";
     public static final boolean VERBOSE = true;
 

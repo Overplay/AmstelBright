@@ -18,8 +18,10 @@ import java.util.ArrayList;
 import io.ourglass.amstelbright2.core.exceptions.OGServerException;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.realm.OGDevice;
+import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -48,6 +50,9 @@ public class OGCore {
                 OGCore.programId.equalsIgnoreCase(programId) &&
                     OGCore.programTitle.equalsIgnoreCase(programTitle) )
             return false;
+
+        //log the changed information
+        log_channelChange(OGCore.channel, OGCore.programId, OGCore.programTitle, channel, programId, programTitle);
 
         OGCore.channel = channel;
         OGCore.programId = programId;
@@ -465,9 +470,20 @@ public class OGCore {
         return toReturn;
     }
 
-    public static void getApps() {
+    public static String[] getApps() {
+        String[] toReturn;
 
+        Realm realm = Realm.getDefaultInstance();
 
+        RealmResults<OGApp> allApps = realm.where(OGApp.class).findAll();
+        toReturn = new String[allApps.size()];
+
+        int i = 0;
+        for(OGApp app : allApps){
+            toReturn[i++] = app.appId;
+        }
+
+        return toReturn;
     }
 
     public void setChannel(String channel) {
@@ -502,6 +518,157 @@ public class OGCore {
 
         return rval;
 
+    }
+
+    public static void log_adImpression(String adId){
+        try {
+            JSONObject logData = new JSONObject();
+
+            logData.put("adId", adId);
+
+            systemLog("AD_IMPRESSION", logData);
+            Log.v(TAG, "Ad Impression logged");
+        } catch (JSONException e){
+            Log.w(TAG, "Ad Impression log could not be created\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * method to structure the passed in parameters into a HEARTBEAT type system log
+     *
+     * NOTE:some required information for the heartbeat is added automatically
+     * @param abVersion String of the Amstel Bright version installed at time of heartbeat
+     * @param aquiVersion String of the Aqui version installed at the time of heartbeat
+     * @param androidVersion String of the current build of android at time of the heartbeat
+     */
+    public static void log_heartbeat(String abVersion, String aquiVersion, String androidVersion){
+        //calculate the uptime
+        long uptime = System.currentTimeMillis() - STBService.bootTime;
+
+        //determine the apps currently installed
+        String[] installedApps = OGCore.getApps();
+
+        try {
+            JSONObject logData = new JSONObject(),
+               softwareVersions = new JSONObject();
+
+            logData.put("uptime", uptime);
+
+            softwareVersions.put("amstelBright", abVersion);
+            softwareVersions.put("aqui", aquiVersion);
+            softwareVersions.put("androidVersion", androidVersion);
+
+            logData.put("softwareVersions", softwareVersions);
+
+            JSONArray installedAppsJSONArray = new JSONArray(installedApps);
+            logData.put("installedApps", installedAppsJSONArray);
+
+            systemLog("HEARTBEAT", logData);
+            Log.v(TAG, "Heartbeat logged");
+       } catch (JSONException e) {
+            Log.w(TAG, "Heartbeat log could not be created\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * method to structure the passed in parameters into an ALERT type system log
+     * @param alertCause Cause of the alert (should be loosely enumerated)
+     * @param additionalInfo Additional info relating to the alert, if not applicable, pass in an empty string
+     */
+    public static void log_alert(String alertCause, String additionalInfo){
+        try {
+            JSONObject logData = new JSONObject();
+
+            logData.put("alertCause", alertCause);
+            logData.put("additionalInfo", additionalInfo);
+
+            systemLog("ALERT", logData);
+            Log.v(TAG, "Alert logged");
+        } catch (JSONException e){
+            Log.w(TAG, "Alert log could not be created\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * method to structure the passed in parameters into a CHANNEL_CHANGE type system log
+     * @param fromChannelId Id of the channel that was previously tuned
+     * @param fromProgramId Id of the program that was previously tuned
+     * @param fromProgramTitle Title of the program that was previously tuned to
+     * @param toChannelId Id of the channel that has been changed to
+     * @param toProgramId Id of the program that has been changed to
+     * @param toProgramTitle Title of the program that has been changed to
+     */
+    public static void log_channelChange(
+            String fromChannelId,
+            String fromProgramId,
+            String fromProgramTitle,
+            String toChannelId,
+            String toProgramId,
+            String toProgramTitle
+    ) {
+        try {
+            JSONObject logData = new JSONObject(),
+                    changedFrom = new JSONObject(),
+                    changedTo = new JSONObject();
+
+            changedFrom.put("channelId", fromChannelId);
+            changedFrom.put("programId", fromProgramId);
+            changedFrom.put("programTitle", fromProgramTitle);
+
+            changedTo.put("channelId", toChannelId);
+            changedTo.put("programId", toProgramId);
+            changedTo.put("programTitle", toProgramTitle);
+
+            logData.put("changedFrom", changedFrom);
+            logData.put("changedTo", changedTo);
+
+            systemLog("CHANNEL_CHANGE", logData);
+            Log.v(TAG, "channel change logged");
+        } catch (JSONException e){
+            Log.w(TAG, "Channel change could not be created\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * method to structure the passed in parameters into a OVERRIDE_PLACEMENT type system log
+     * @param channelId Channel programmed to when the placement override event occurred
+     * @param programId Id of the program that was being watched when the placement override event occurred
+     * @param appId Id of the app which was moved
+     * @param movedTo Slot that the app was moved to
+     */
+    public static void log_placementOverride(String channelId, String programId, String appId, int movedTo){
+        try {
+            JSONObject logData = new JSONObject();
+
+            logData.put("channelId", channelId);
+            logData.put("programId", programId);
+            logData.put("appId", appId);
+            logData.put("movedTo", movedTo);
+
+            systemLog("PLACEMENT_OVERRIDE", logData);
+            Log.v(TAG, "placement override logged");
+        } catch (JSONException e){
+            Log.w(TAG, "Placement override log could not be created\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * method to create an OGLog object given a type and messageBody
+     * this is private to force people to use the more structured public methods which call this method
+     *
+     * NOTE: that OGLog automatically sets the timeLogged and deviceId upon object creation
+     * @param type Type of log message
+     * @param logData Payload of the log
+     */
+    private static void systemLog(String type, JSONObject logData){
+        OGLog log = new OGLog();
+        log.setType(type);
+        log.setData(logData);
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(log);
+        realm.commitTransaction();
     }
 
 }
