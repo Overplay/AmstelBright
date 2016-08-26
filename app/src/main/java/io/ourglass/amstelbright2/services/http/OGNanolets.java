@@ -9,6 +9,7 @@ import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.handlers.JSONAdHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
@@ -158,6 +159,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
 
         addRoute("/api/stb/:command", JSONSTBHandler.class);
+
+        addRoute("/api/ad", JSONAdHandler.class);
 
         File f = new File("/mnt/sdcard"+ OGConstants.PATH_TO_ABWL).getAbsoluteFile();
 

@@ -39,6 +39,10 @@ public class OGConstants {
             "MX:3\r\n\r\n"
     };
 
+    public static final String ASAHI_ADDRESS = "http://104.131.145.36";
+    public static final String ASAHI_API_ENDPOINT = "/api/v1/";
+    public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
+
 
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
