@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.squareup.picasso.Picasso;
 
@@ -99,7 +100,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.mainframe_layout);
+        setContentView(R.layout.mainframe_layout_demo);
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
@@ -145,6 +146,12 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             // The color change doesn't seem to do anything...:(.. not worth stressing.
             mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+
+            VideoView vv = (VideoView) findViewById(R.id.videoView);
+            if ( vv != null ){
+                vv.setVideoPath("/sdcard/gswandroid.mp4");
+                vv.start();
+            }
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
@@ -215,8 +222,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             return false;
         }
 
-        // Launch settings from button 0 on remote
-        if (keyCode == 7){
+        // Launch settings from button 0 on remote or right mouse
+        if (keyCode == 7 || keyCode == 4){
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
         }
 

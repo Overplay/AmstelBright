@@ -62,6 +62,7 @@ public class CloudScraperService extends Service {
                 for (final OGScraper s : mScrapeTasks) {
                     String appis = s.appId;
                     Log.d(TAG, "Gonna scrape for " + appis );
+                    Log.d(TAG, "Query is: "+s.getQuery());
                     mTweetScraper.getTweets(s.getQuery(), new OGTweetScraper.TwitterDataCallback() {
                         @Override
                         public void results(final String results) {

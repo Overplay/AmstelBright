@@ -29,17 +29,37 @@ public class JSONAppScrapeHandler extends JSONHandler {
 
             case GET: {
 
-                Realm realm = Realm.getDefaultInstance();
-                String results = OGScraper.getScrape(realm, appId);
-                realm.close();
+                if (appId.equalsIgnoreCase("all")){
 
-                if (results==null){
-                    results = "{}";
-                    responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    Realm realm = Realm.getDefaultInstance();
+                    String results = OGScraper.getAllScrapes(realm).toString();
+                    realm.close();
+
+                    if (results==null){
+                        results = "[]";
+                        responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    } else {
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                    }
+                    return results;
+
+
                 } else {
-                    responseStatus = NanoHTTPD.Response.Status.OK;
+
+                    Realm realm = Realm.getDefaultInstance();
+                    String results = OGScraper.getScrape(realm, appId);
+                    realm.close();
+
+                    if (results==null){
+                        results = "{}";
+                        responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    } else {
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                    }
+                    return results;
+
                 }
-                return results;
+
 
             }
 

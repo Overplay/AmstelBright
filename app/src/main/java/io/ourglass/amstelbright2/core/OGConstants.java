@@ -6,7 +6,7 @@ package io.ourglass.amstelbright2.core;
 public class OGConstants {
 
     public static final boolean TEST_MODE = true;
-    public static final boolean SHOW_DB_TOASTS = true;
+    public static final boolean SHOW_DB_TOASTS = false;
 
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
@@ -18,12 +18,12 @@ public class OGConstants {
     public static final int HTTP_PORT = 9090;
 
     // Turn off UPNP to work with the old iOS app
-    public static final boolean USE_UPNP_DISCOVERY = false;
+    public static final boolean USE_UPNP_DISCOVERY = true;
 
     public static final int UDP_BEACON_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
-    public static final int CLOUD_SCRAPE_INTERVAL = 1000*60;
+    public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
     public static final int TV_POLL_INTERVAL = 2500;
 
 
