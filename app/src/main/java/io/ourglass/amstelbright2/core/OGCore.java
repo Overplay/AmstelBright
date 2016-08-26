@@ -667,7 +667,8 @@ public class OGCore {
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        realm.copyToRealmOrUpdate(log);
+        realm.copyToRealm(log);
+//        realm.copyToRealmOrUpdate(log);
         realm.commitTransaction();
     }
 

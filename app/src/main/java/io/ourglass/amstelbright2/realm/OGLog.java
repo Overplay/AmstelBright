@@ -3,7 +3,10 @@ package io.ourglass.amstelbright2.realm;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
 import static android.R.attr.required;
@@ -19,6 +22,9 @@ public class OGLog extends RealmObject {
 
     @Required
     private String data = "{}";
+
+    @PrimaryKey
+    private String uuid = UUID.randomUUID().toString();
 
     Long createdAt = System.currentTimeMillis();
 
