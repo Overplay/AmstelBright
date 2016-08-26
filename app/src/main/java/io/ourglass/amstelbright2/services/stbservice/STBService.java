@@ -308,8 +308,8 @@ public class STBService extends Service {
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                     Log.wtf(TAG, "Couldn't GET from STB!");
-                    OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
-                    OGDevice.unpair(Realm.getDefaultInstance());
+                    //OGNotifications.sendStatusIntent("message", "Could not get information about that channel"/*"Lost connection to STB"*/, 0);
+                    //OGDevice.unpair(Realm.getDefaultInstance());
                 }
 
                 @Override
@@ -317,8 +317,9 @@ public class STBService extends Service {
 
                     if (!response.isSuccessful()) {
                         Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
-                        OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
-                        OGDevice.unpair(Realm.getDefaultInstance());
+                        //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                        //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
+                        //OGDevice.unpair(Realm.getDefaultInstance());
 
                         throw new IOException("Unexpected code " + response);
                     }
