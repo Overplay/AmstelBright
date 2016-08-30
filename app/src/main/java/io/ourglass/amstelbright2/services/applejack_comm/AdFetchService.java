@@ -60,7 +60,7 @@ public class AdFetchService extends Service {
             public void run() {
                 Log.d(TAG, "In ad scraping runnable");
 
-                String url = OGConstants.ASAHI_ADDRESS + OGConstants.ASAHI_API_ENDPOINT + "ad";
+                String url = OGConstants.ASAHI_ADDRESS + OGConstants.ASAHI_ACCEPTED_AD_ENDPOINT;
 
                 Request request = new Request.Builder()
                         .url(url)
@@ -109,8 +109,12 @@ public class AdFetchService extends Service {
                 //create a new ad for the Advertisement id
                 OGAdvertisement newAd = new OGAdvertisement(adId);
 
+
+                //added this for the new ad JSON from Asahi
+                JSONObject advertJSON = adJSON.getJSONObject("advert");
+
                 //iterate through the text ads on the JSON array and incrementally add them to the newAd
-                JSONArray textAds = adJSON.getJSONArray("text");
+                JSONArray textAds = advertJSON.getJSONArray("text");
                 for (int j = 0; j < textAds.length(); j++) {
                     try {
                         //may throw class cast exception if text array contains something other than strings
@@ -121,9 +125,10 @@ public class AdFetchService extends Service {
                     }
                 }
 
+
                 JSONObject mediaJSON = null;
                 try {
-                    mediaJSON = adJSON.getJSONObject("media");
+                    mediaJSON = advertJSON.getJSONObject("media");
                 } catch (JSONException e) {
                     Log.w(TAG, "There seem to be no associated media. This is likely a problem");
                 }

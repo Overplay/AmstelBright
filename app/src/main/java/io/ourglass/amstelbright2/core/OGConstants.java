@@ -41,10 +41,11 @@ public class OGConstants {
 
     public static final String ASAHI_ADDRESS = "http://104.131.145.36";
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
+    public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
     public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
 
     public static final String INTERNAL_PATH_TO_MEDIA = "/data/data/io.ourglass.amstelbright2/media/";
-    public static final String EXTERNAL_PATH_TO_MEDIA = "/api/admedia";
+    public static final String EXTERNAL_PATH_TO_MEDIA = "/api/admedia/";
 
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
