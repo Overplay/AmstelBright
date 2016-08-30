@@ -9,6 +9,7 @@ import android.util.Log;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
@@ -91,6 +92,9 @@ public class AmstelBrightService extends Service  {
 
         Intent stbIntent = new Intent(this, STBService.class);
         startService(stbIntent);
+
+        Intent advertisementIntent = new Intent(this, AdFetchService.class);
+        startService(advertisementIntent);
 
     }
 

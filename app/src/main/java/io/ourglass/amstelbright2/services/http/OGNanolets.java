@@ -160,12 +160,14 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 
         addRoute("/api/stb/:command", JSONSTBHandler.class);
 
-        addRoute("/api/ad", JSONAdHandler.class);
+        addRoute("/api/ad/", JSONAdHandler.class);
 
         File f = new File("/mnt/sdcard"+ OGConstants.PATH_TO_ABWL).getAbsoluteFile();
+        File mediaFileDir = new File("/data/data/io.ourglass.amstelbright2/media").getAbsoluteFile();
 
         // Static pages (AmstelBrightWithLime)
         addRoute("/www/(.)+", StaticPageTestHandler.class, f.getAbsoluteFile());
+        addRoute("/api/admedia/(.)+", StaticPageTestHandler.class, mediaFileDir.getAbsoluteFile());
 
         // Examples
 //        addRoute("/user", UserHandler.class);
