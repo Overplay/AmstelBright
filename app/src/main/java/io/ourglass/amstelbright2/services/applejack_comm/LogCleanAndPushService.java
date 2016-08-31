@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.realm.OGLog;
-import io.ourglass.amstelbright2.services.cloudscraper.OGTweetScraper;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import okhttp3.MediaType;
@@ -86,10 +85,13 @@ public class LogCleanAndPushService extends Service {
         for(final OGLog log : logArr){
             String postBody = log.getLogAsJSON().toString();
 
+            RequestBody body = RequestBody.create(type, postBody);
+            Log.v(TAG, postBody);
+
             //todo replace with OGConstants upon merge with ads branch
             Request request = new Request.Builder()
-                    .url("104.131.145.36/OGLog/upload")
-                    .post(RequestBody.create(type, postBody))
+                    .url("http://104.131.145.36/OGLog/upload")
+                    .post(body)
                     .build();
             try {
                 Response response = client.newCall(request).execute();
@@ -105,7 +107,7 @@ public class LogCleanAndPushService extends Service {
                 });
                 numReaped++;
             } catch (Exception e){
-                Log.w(TAG, "there was an error uploading log will not delete");
+                Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not delete");
                 //error uploading do not delete this log
             }
         }

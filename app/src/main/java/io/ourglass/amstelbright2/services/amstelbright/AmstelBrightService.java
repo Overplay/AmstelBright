@@ -3,18 +3,25 @@ package io.ourglass.amstelbright2.services.amstelbright;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 //import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
@@ -26,6 +33,9 @@ import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
  */
 
 public class AmstelBrightService extends Service  {
+
+    //used to keep track of uptime
+    public static final long bootTime = System.currentTimeMillis();
 
     // This is here as a reliable ref to context for the Realm stuff.
     public static Context context;
@@ -40,6 +50,7 @@ public class AmstelBrightService extends Service  {
 
     //final Messenger mMessenger = new Messenger(new IncomingHandler());
 
+    private Timer mHeartbeatTimer;
 
     public AmstelBrightService() {
     }
@@ -96,6 +107,16 @@ public class AmstelBrightService extends Service  {
         Intent logReapIntent = new Intent(this, LogCleanAndPushService.class);
         startService(logReapIntent);
 
+        //start the heartbeat timertask
+        mHeartbeatTimer = new Timer();
+        //mHeartbeatTimer.cancel();
+        mHeartbeatTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.v(TAG, "logging heartbeat now");
+                OGCore.log_heartbeat("", "", Build.VERSION.RELEASE);
+            }
+        }, 1, OGConstants.HEARTBEAT_TIMER_INTERVAL);
     }
 
     /** Called when The service is no longer used and is being destroyed */

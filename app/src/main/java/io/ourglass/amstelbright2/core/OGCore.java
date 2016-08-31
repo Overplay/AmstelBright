@@ -543,7 +543,7 @@ public class OGCore {
      */
     public static void log_heartbeat(String abVersion, String aquiVersion, String androidVersion){
         //calculate the uptime
-        long uptime = System.currentTimeMillis() - STBService.bootTime;
+        long uptime = System.currentTimeMillis() - AmstelBrightService.bootTime;
 
         //determine the apps currently installed
         String[] installedApps = OGCore.getApps();
