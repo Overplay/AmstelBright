@@ -547,7 +547,7 @@ public class OGCore {
      */
     public static void log_heartbeat(String abVersion, String aquiVersion, String androidVersion){
         //calculate the uptime
-        long uptime = System.currentTimeMillis() - STBService.bootTime;
+        long uptime = System.currentTimeMillis() - AmstelBrightService.bootTime;
 
         //determine the apps currently installed
         String[] installedApps = OGCore.getApps();
@@ -671,7 +671,8 @@ public class OGCore {
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        realm.copyToRealmOrUpdate(log);
+        realm.copyToRealm(log);
+//        realm.copyToRealmOrUpdate(log);
         realm.commitTransaction();
     }
 

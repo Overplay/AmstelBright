@@ -29,6 +29,8 @@ public class OGConstants {
     public static final int TV_POLL_INTERVAL = 2500;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
+    public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
+
     public static final int UPNP_UDP_BROADCAST_PORT = 1900;
     public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
     public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
