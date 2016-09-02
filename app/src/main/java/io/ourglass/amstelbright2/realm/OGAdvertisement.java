@@ -68,7 +68,7 @@ public class OGAdvertisement extends RealmObject{
             //toReturn.put("crawlerImg_location", crawlerImgFileLoc);
         }
         if(widgetImg != null) {
-            toReturn.put("widgetURL", widgetURL);
+            toReturn.put("widgetUrl", widgetURL);
             //toReturn.put("widgetImg_location", widgetImgFileLoc);
         }
         return toReturn;

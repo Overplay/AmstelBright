@@ -41,6 +41,10 @@
             android:name=".services.amstelbright.AmstelBrightService"
             android:exported="false" />
 
+        <service
+            android:name=".services.applejack_comm.AdFetchService"
+            android:enabled="true" />
+
         <activity android:name=".tvui.MainframeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
