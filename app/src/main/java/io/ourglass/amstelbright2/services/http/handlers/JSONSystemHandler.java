@@ -14,6 +14,7 @@ import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
 
 
@@ -23,7 +24,15 @@ import io.realm.Realm;
 public class JSONSystemHandler extends JSONHandler {
 
 
+
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+
+        //these operations require owner level permissions
+        String tok = session.getHeaders().get("authorization");
+        if(!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
+            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+            return "";
+        }
 
         String cmd = urlParams.get("command");
 
