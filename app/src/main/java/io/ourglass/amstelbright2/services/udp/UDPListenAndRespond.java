@@ -58,8 +58,8 @@ public class UDPListenAndRespond extends Service {
         realm.close();
 
         //get port
-        mPort = intent != null ? intent.getIntExtra("port", OGConstants.UDP_BEACON_PORT) :
-                OGConstants.UDP_BEACON_PORT;
+        mPort = intent != null ? intent.getIntExtra("port", OGConstants.UDP_LISTEN_AND_RESPOND_PORT) :
+                OGConstants.UDP_LISTEN_AND_RESPOND_PORT;
 
         threadAlive = true;
         udpListenThread = new Thread(new Runnable(){

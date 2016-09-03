@@ -79,9 +79,13 @@ public class AmstelBrightService extends Service  {
 
 
         /* Choose either new (UPNP) or old (shout in the dark) discovery method */
-        Intent udpIntent = OGConstants.USE_UPNP_DISCOVERY ? new Intent(this, UDPListenAndRespond.class) :
-                new Intent(this, UDPBeaconService.class);
-        startService(udpIntent);
+//        Intent udpIntent = OGConstants.USE_UPNP_DISCOVERY ? new Intent(this, UDPListenAndRespond.class) :
+//                new Intent(this, UDPBeaconService.class);
+//        startService(udpIntent);
+
+        // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
+        startService( new Intent(this, UDPListenAndRespond.class));
+        startService( new Intent(this, UDPBeaconService.class));
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
