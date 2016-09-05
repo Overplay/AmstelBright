@@ -32,9 +32,10 @@ public class OGLog extends RealmObject {
         try {
             JSONObject toReturn = new JSONObject();
 
-            toReturn.put("type", this.type);
-            toReturn.put("data", new JSONObject(data));
-            toReturn.put("createdAt", createdAt);
+            toReturn.put("logType", this.type.toLowerCase());
+            toReturn.put("message", new JSONObject(data));
+            toReturn.put("loggedAt", createdAt);
+            toReturn.put("deviceUniqueId", uuid);
 
             return toReturn;
         } catch (JSONException e){

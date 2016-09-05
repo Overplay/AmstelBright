@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
@@ -165,6 +166,10 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         appTray.setRotationX(90f);
         appTray.setTranslationX(-1000f);
         mShowingMenu = false;
+
+        Log.v(TAG, "Creating system alert log for restart");
+        //log the restart
+        OGCore.log_alert("System cold boot", "Logged in onCreate of Mainframe");
 
         Log.d(TAG, "onCreate done");
 

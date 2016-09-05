@@ -2,6 +2,7 @@ package io.ourglass.amstelbright2.core;
 
 import android.content.Intent;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import io.ourglass.amstelbright2.core.exceptions.OGServerException;
+import io.ourglass.amstelbright2.realm.OGAdvertisement;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.realm.OGLog;
@@ -43,6 +45,8 @@ public class OGCore {
     public static String channel = "";
     public static String programId = "";
     public static String programTitle = "";
+
+    private static int adIndex = 0;
 
     public static boolean setChannelInfo(String channel, String programId, String programTitle){
 
@@ -543,7 +547,7 @@ public class OGCore {
      */
     public static void log_heartbeat(String abVersion, String aquiVersion, String androidVersion){
         //calculate the uptime
-        long uptime = System.currentTimeMillis() - STBService.bootTime;
+        long uptime = System.currentTimeMillis() - AmstelBrightService.bootTime;
 
         //determine the apps currently installed
         String[] installedApps = OGCore.getApps();
@@ -670,6 +674,24 @@ public class OGCore {
         realm.copyToRealm(log);
 //        realm.copyToRealmOrUpdate(log);
         realm.commitTransaction();
+    }
+
+    @Nullable
+    public static OGAdvertisement getAdvertisement(){
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmResults<OGAdvertisement> ads = realm.where(OGAdvertisement.class).findAll();
+        //OGAdvertisement[] adArr = (OGAdvertisement[]) ads.toArray();
+        Object[] adArr = ads.toArray();
+
+        if(adArr.length == 0){
+            Log.w(TAG, "Attempted to get advertisement and there are none in the database");
+            return null;
+        }
+
+        //insert code to log previous advertisement
+
+        return (OGAdvertisement) adArr[(adIndex = (adIndex + 1) % adArr.length)];
     }
 
 }

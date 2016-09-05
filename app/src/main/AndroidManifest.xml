@@ -40,6 +40,17 @@
         <service
             android:name=".services.amstelbright.AmstelBrightService"
             android:exported="false" />
+        <service
+            android:name=".services.applejack_comm.LogCleanAndPushService"
+            android:enabled="true"
+            android:exported="true" />
+        <!--service
+            android:name=".services.applejack_comm.AdFetchService"
+            android:enabled="true" /-->
+
+        <service
+            android:name=".services.applejack_comm.AdFetchService"
+            android:enabled="true" />
 
         <activity android:name=".tvui.MainframeActivity">
             <intent-filter>
@@ -60,9 +71,13 @@
         <!-- </intent-filter> -->
         <!-- </receiver> -->
 
-        <activity android:name=".tvui.DirecTVPairActivity"
+        <activity
+            android:name=".tvui.DirecTVPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-        ></activity>
+            >
+        </activity>
+
+
     </application>
 
 </manifest>

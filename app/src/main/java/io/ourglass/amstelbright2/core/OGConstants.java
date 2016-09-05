@@ -31,6 +31,8 @@ public class OGConstants {
     public static final int TV_POLL_INTERVAL = 2500;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
+    public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
+
     public static final int UPNP_UDP_BROADCAST_PORT = 1900;
     public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
     public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
@@ -41,6 +43,13 @@ public class OGConstants {
             "MX:3\r\n\r\n"
     };
 
+    public static final String ASAHI_ADDRESS = "http://104.131.145.36";
+    public static final String ASAHI_API_ENDPOINT = "/api/v1/";
+    public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
+    public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
+
+    public static final String INTERNAL_PATH_TO_MEDIA = "/data/data/io.ourglass.amstelbright2/media/";
+    public static final String EXTERNAL_PATH_TO_MEDIA = "/api/admedia/";
 
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
