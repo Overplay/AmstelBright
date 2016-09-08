@@ -23,10 +23,8 @@ import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 /**
@@ -674,6 +672,9 @@ public class OGCore {
         realm.copyToRealm(log);
 //        realm.copyToRealmOrUpdate(log);
         realm.commitTransaction();
+
+        // This should have realm.close(), no?
+
     }
 
     @Nullable
