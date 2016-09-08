@@ -99,6 +99,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainframe_layout);
 
@@ -113,7 +114,15 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         mMf = new Mainframe(this, this);
 
-        startService(new Intent(getBaseContext(), AmstelBrightService.class));
+        //check if service was started in test mode
+        Intent currentIntent = getIntent();
+        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+
+        //pass testMode onto abService, defaults to false
+        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+        abServiceIntent.putExtra("testMode", testMode);
+
+        startService(abServiceIntent);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
