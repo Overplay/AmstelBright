@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
@@ -56,13 +57,25 @@ public class LogCleanAndPushService extends Service {
                 Log.d(TAG, "In log reaping runnable");
 
                 Realm realm = Realm.getDefaultInstance();
-                RealmResults<OGLog> logs = realm.where(OGLog.class).findAll();
+
+                //find all logs that haven't been uploaded
+                RealmResults<OGLog> logs = realm.where(OGLog.class).equalTo("uploaded", -1L).findAll();
                 if(logs.size() != 0){
                     uploadLogs(logs);
                 }
                 else {
                     Log.v(TAG, "There are no logs to upload");
                 }
+
+                logs = getOldLogs();
+
+                if(logs.size() != 0) {
+                    realm.beginTransaction();
+                    reapLogs(logs);
+                    realm.commitTransaction();
+                }
+                else
+                    Log.v(TAG, "There are no logs ready to be reaped");
 
                 realm.close();
 
@@ -75,9 +88,20 @@ public class LogCleanAndPushService extends Service {
         mWorkerThreadHandler.post(run);
     }
 
-    private void uploadLogs(RealmResults<OGLog> logs){
+    public RealmResults<OGLog> getOldLogs(){
+        //todo in the future, change week calculation to configurable setting
+
+        Realm realm = Realm.getDefaultInstance();
+
+        long weekAgo = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7);
+        RealmResults<OGLog> oldLogs = realm.where(OGLog.class).lessThan("uploaded", weekAgo).findAll();
+
+        return oldLogs;
+    }
+
+    public void uploadLogs(RealmResults<OGLog> logs){
         OGLog[] logArr = logs.toArray(new OGLog[logs.size()]);
-        int numReaped = 0;
+        int numUploaded = 0;
 
         final Realm realm = Realm.getDefaultInstance();
         final OkHttpClient client = new OkHttpClient();
@@ -97,22 +121,29 @@ public class LogCleanAndPushService extends Service {
                 Response response = client.newCall(request).execute();
                 if(!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-                //this was successful, now going to delete log
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm){
-                        log.deleteFromRealm();
-                        Log.v(TAG, "successfully reaped log from database");
-                    }
-                });
-                numReaped++;
+                Log.v(TAG, "successfully uploaded log to Asahi, will now mark the upload time");
+                realm.beginTransaction();
+                log.setUploaded(System.currentTimeMillis());
+                realm.commitTransaction();
+
+                numUploaded++;
             } catch (Exception e){
-                Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not delete");
-                //error uploading do not delete this log
+                Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not mark as uploaded");
             }
         }
         realm.close();
-        Log.v(TAG, "Reaped a total of " + numReaped + " logs");
+        Log.v(TAG, "Uploaded a total of " + numUploaded + " logs");
+    }
+
+    /**
+     * NOTE: make sure that you are inside a transaction
+     * @param logs OGLogs to delete
+     */
+    public void reapLogs(RealmResults<OGLog> logs){
+        int numToReap = logs.size();
+        logs.deleteAllFromRealm();
+
+        Log.v(TAG, "Successfully reaped " + numToReap + " old logs from the database");
     }
 
     @Override
