@@ -528,7 +528,7 @@ public class OGCore {
 
             logData.put("adId", adId);
 
-            systemLog("AD_IMPRESSION", logData);
+            systemLog("IMPRESSION", logData);
             Log.v(TAG, "Ad Impression logged");
         } catch (JSONException e){
             Log.w(TAG, "Ad Impression log could not be created\n" + e.getMessage());
@@ -624,7 +624,7 @@ public class OGCore {
             logData.put("changedFrom", changedFrom);
             logData.put("changedTo", changedTo);
 
-            systemLog("CHANNEL_CHANGE", logData);
+            systemLog("CHANNEL", logData);
             Log.v(TAG, "channel change logged");
         } catch (JSONException e){
             Log.w(TAG, "Channel change could not be created\n" + e.getMessage());
@@ -647,7 +647,7 @@ public class OGCore {
             logData.put("appId", appId);
             logData.put("movedTo", movedTo);
 
-            systemLog("PLACEMENT_OVERRIDE", logData);
+            systemLog("PLACEMENT", logData);
             Log.v(TAG, "placement override logged");
         } catch (JSONException e){
             Log.w(TAG, "Placement override log could not be created\n" + e.getMessage());

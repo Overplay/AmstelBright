@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.realm;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +28,9 @@ public class OGLog extends RealmObject {
     @PrimaryKey
     private String uuid = UUID.randomUUID().toString();
 
-    Long createdAt = System.currentTimeMillis();
+    private Long createdAt = System.currentTimeMillis();
+
+    private Long uploaded = -1L;
 
     public JSONObject getLogAsJSON(){
         try {
@@ -58,5 +62,29 @@ public class OGLog extends RealmObject {
         } catch (JSONException e){
             return null;
         }
+    }
+
+    /**
+     * note make sure you are in a transaction or else will explode
+     * @param timeUploadedAt time the upload was completed
+     */
+    public void setUploaded(Long timeUploadedAt){
+        if(timeUploadedAt < 0){
+            Log.e("OGLog", "invalid uploaded time entered, ignoring");
+            return;
+        }
+        //check if uploaded has already been set, should only be set once by log clean and push service
+        if(this.uploaded != -1L){
+            Log.e("OGLog", "uploaded has already been set, " +
+                    "if this error is coming from LogCleanAndPushService, " +
+                    "then there is probably something bad going on");
+            return;
+        }
+
+        this.uploaded = timeUploadedAt;
+    }
+
+    public boolean isUploaded(){
+        return this.uploaded != -1L;
     }
 }

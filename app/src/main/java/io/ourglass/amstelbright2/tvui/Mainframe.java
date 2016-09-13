@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -25,9 +24,7 @@ import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
-import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.realm.Realm;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -178,7 +175,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         //y padding on widget is .12f (because of crawler)
         //x padding on widget is .013f
 
-        float ytop = 0.12f * mScreenRect.height;
+        float ytop = 0.08f * mScreenRect.height;
         float ybot = (0.88f * mScreenRect.height) - widgetHeight;
 
 //        float xleft = 0.013f * mScreenRect.width;

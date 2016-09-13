@@ -25,6 +25,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -55,6 +56,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     private static final String TAG = "MFActivity";
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
+
+    private SurfaceView surfaceView;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -100,6 +103,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainframe_layout);
 
@@ -124,7 +128,15 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         mMf = new Mainframe(this, this);
 
-        startService(new Intent(getBaseContext(), AmstelBrightService.class));
+        //check if service was started in test mode
+        Intent currentIntent = getIntent();
+        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+
+        //pass testMode onto abService, defaults to false
+        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+        abServiceIntent.putExtra("testMode", testMode);
+
+        startService(abServiceIntent);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
@@ -155,8 +167,14 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         if (!OGSystem.enableHDMI()) {
             // The color change doesn't seem to do anything...:(.. not worth stressing.
+
+            surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+            surfaceView.setVisibility(View.INVISIBLE);
+
             mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+
+
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);

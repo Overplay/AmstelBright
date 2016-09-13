@@ -10,6 +10,7 @@ import android.util.Log;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.ourglass.amstelbright2.BuildConfig;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
@@ -68,6 +69,8 @@ public class AmstelBrightService extends Service  {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        boolean testMode = intent.getBooleanExtra("testMode", false);
+
         ABApplication.dbToast(this, "Starting Background Services");
 
         // Create global static ref for code that needs Context
@@ -77,8 +80,12 @@ public class AmstelBrightService extends Service  {
         OGCore.sendStatusIntent("STATUS", "Starting Services",
                 OGConstants.BootState.ABS_START.getValue());
 
-
-        startChildServices();
+        if(!testMode) {
+            startChildServices();
+        }
+        else {
+            Log.v(TAG, "Starting AmstelBright service in test mode, will not start child services");
+        }
 
         return mStartMode;
     }
@@ -119,7 +126,7 @@ public class AmstelBrightService extends Service  {
             @Override
             public void run() {
                 Log.v(TAG, "logging heartbeat now");
-                OGCore.log_heartbeat("", "", Build.VERSION.RELEASE);
+                OGCore.log_heartbeat(BuildConfig.VERSION_NAME, "", Build.VERSION.RELEASE);
             }
         }, 1, OGConstants.HEARTBEAT_TIMER_INTERVAL);
 
