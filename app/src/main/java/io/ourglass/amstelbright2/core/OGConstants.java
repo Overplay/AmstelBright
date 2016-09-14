@@ -7,6 +7,9 @@ import java.util.regex.Pattern;
  */
 public class OGConstants {
 
+    // Set to true to use the most stable ASAHI server
+    public static final boolean USE_DEMO_ASAHI = true;
+
     public static final boolean TEST_MODE = true;
     public static final boolean SHOW_DB_TOASTS = false;
 
@@ -43,7 +46,7 @@ public class OGConstants {
             "MX:3\r\n\r\n"
     };
 
-    public static final String ASAHI_ADDRESS = "http://104.131.145.36";
+    public static final String ASAHI_ADDRESS = USE_DEMO_ASAHI ? "http://107.170.209.248" : "http://104.131.145.36";
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
     public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
     public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";

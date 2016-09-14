@@ -9,6 +9,8 @@ import com.mstar.android.tvapi.common.TvManager;
 import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
 
+import io.ourglass.amstelbright2.tvui.WidthHeight;
+
 /**
  * Created by mkahn on 7/25/16.
  *
@@ -16,6 +18,8 @@ import com.mstar.android.tvapi.common.vo.TvOsType;
  *
  */
 public class OGSystem {
+
+    public static WidthHeight screenResolution = new WidthHeight(0,0);
 
     public static final String TAG = "OGSystem";
 
@@ -73,7 +77,14 @@ public class OGSystem {
 
         }
 
+    }
 
+    public static void setCurrentResolution(WidthHeight rez){
+        screenResolution = rez;
+    }
+
+    public static String getCurrentResolution(){
+        return ""+screenResolution.width+"x"+screenResolution.height;
     }
 
     /*******************************************************************************

@@ -3,6 +3,7 @@ package io.ourglass.amstelbright2.services.http.handlers;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
@@ -54,6 +56,20 @@ public class JSONSystemHandler extends JSONHandler {
 
                         Realm realm2 = Realm.getDefaultInstance();
                         JSONObject obj = OGDevice.getDeviceAsJSON(realm2);
+
+                        //TODO: Don't feel good about the warning below
+                        try {
+                            obj.put("currentResolution", OGSystem.getCurrentResolution());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            obj.put("tvinfo", OGCore.getCurrentChannel());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                         realm2.close();
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return obj.toString();
@@ -139,7 +155,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                         }
                         //endpoint to discover installed apps, useful if there are new apps installed while running
-                    case "discover-apps":
+                    case "refreshapps":
                         JSONArray installedApps = OGCore.installStockApps();
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return "Apps currently installed\n" + installedApps.toString();

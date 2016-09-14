@@ -331,8 +331,8 @@ public class OGCore {
         try{
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")
-                    .put("query", "\"Steph Curry\"")
-                    .put("appId", "io.ourglass.pubcrawler");
+                    .put("query", "iOS10")
+                    .put("appId", "io.ourglass.ogcrawler");
 
             scrapeArr.put(scrapeTwitter);
         } catch (JSONException e){

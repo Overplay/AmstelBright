@@ -5,12 +5,12 @@ package io.ourglass.amstelbright2.tvui;
  */
 public class Frame {
     public Point location;
-    public Rect size;
+    public WidthHeight size;
 
     public Frame(float x, float y, float width, float height) {
 
         location = new Point(x, y);
-        size = new Rect(width, height);
+        size = new WidthHeight(width, height);
 
     }
 }

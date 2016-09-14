@@ -157,7 +157,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             public void onGlobalLayout() {
 
                 Log.d(TAG, "Layout done, updating Mainframe screen sizing.");
-                mScreenHeight = mMainLayout.getHeight();
+                // Need to figure out when the status bar is actually in the mix. Probably base size on x res only
+                mScreenHeight = mMainLayout.getHeight(); //+getStatusBarHeight();
                 mScreenWidth = mMainLayout.getWidth();
                 mMf.setTVScreenSize(mScreenWidth, mScreenHeight);
                 mMainLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -190,6 +191,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         OGCore.log_alert("System cold boot", "Logged in onCreate of Mainframe");
 
         Log.d(TAG, "onCreate done");
+
+        Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
 
     }
 
@@ -260,7 +263,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
 
-        showAlert(new UIMessage("You pushed key " + keyCode));
+        //showAlert(new UIMessage("You pushed key " + keyCode));
 
         return false;
     }
@@ -778,5 +781,14 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
     }
 
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 
 }

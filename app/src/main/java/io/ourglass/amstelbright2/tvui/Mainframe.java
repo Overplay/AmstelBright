@@ -24,6 +24,7 @@ import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -45,7 +46,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     private OkHttpClient client;
 
-    private Rect mScreenRect;
+    public WidthHeight mScreenWidthHeight;
 
     private int mWidgetMarginTop = 20;
     private int mWidgetMarginBottom = 20;
@@ -54,8 +55,8 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     private int mNumWidgetSlots = 4; // this may become programmable later
     private int mNumCrawlerSlots = 2; // this may become programmable later
 
-    private Rect mCurrentWidgetRect;
-    private Rect mCurrentCrawlerRect;
+    private WidthHeight mCurrentWidgetWidthHeight;
+    private WidthHeight mCurrentCrawlerWidthHeight;
 
     private JSONObject mRunningCrawler;
     private int mRunningCrawlerSlot = 0;
@@ -152,7 +153,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     private float crawlerTranslationY(int slotNumber){
 
-        return ((float)slotNumber * 0.915f ) *  mScreenRect.height;
+        return ((float)slotNumber * 0.915f ) *  mScreenWidthHeight.height;
 
     }
 
@@ -175,15 +176,15 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         //y padding on widget is .12f (because of crawler)
         //x padding on widget is .013f
 
-        float ytop = 0.08f * mScreenRect.height;
-        float ybot = (0.88f * mScreenRect.height) - widgetHeight;
+        float ytop = 0.095f * mScreenWidthHeight.height;
+        float ybot = (0.88f * mScreenWidthHeight.height) - widgetHeight;
 
-//        float xleft = 0.013f * mScreenRect.width;
-//        float xright = 0.987f * mScreenRect.width - widgetWidth;
+//        float xleft = 0.013f * mScreenWidthHeight.width;
+//        float xright = 0.987f * mScreenWidthHeight.width - widgetWidth;
 
         // Pinning to edge
         float xleft = 0;
-        float xright = mScreenRect.width - widgetWidth;
+        float xright = mScreenWidthHeight.width - widgetWidth;
 
         switch (slotNumber){
 
@@ -210,8 +211,8 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 break;
 
             default:
-                x = 0.5f * mScreenRect.width;
-                y = 0.5f * mScreenRect.height;
+                x = 0.5f * mScreenWidthHeight.width;
+                y = 0.5f * mScreenWidthHeight.height;
 
         }
 
@@ -229,8 +230,9 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     public void setTVScreenSize( float width, float height){
 
-        mScreenRect = new Rect(width, height);
-        Log.d(TAG, "TV size set to: "+mScreenRect.toString());
+        mScreenWidthHeight = new WidthHeight(width, height);
+        OGSystem.setCurrentResolution(mScreenWidthHeight);
+        Log.d(TAG, "TV size set to: "+ mScreenWidthHeight.toString());
 
     }
 
