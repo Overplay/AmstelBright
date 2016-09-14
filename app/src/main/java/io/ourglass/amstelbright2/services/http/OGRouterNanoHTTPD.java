@@ -357,7 +357,7 @@ public class OGRouterNanoHTTPD extends NanoHTTPD {
         }
 
         public Response process(Map<String, String> urlParams, IHTTPSession session) {
-            String error = "General error!";
+            String error = "General er  ror!";
             if (handler != null) {
                 try {
                     Object object = handler.newInstance();

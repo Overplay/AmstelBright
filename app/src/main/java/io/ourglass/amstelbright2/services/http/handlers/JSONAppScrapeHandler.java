@@ -41,7 +41,13 @@ public class JSONAppScrapeHandler extends JSONHandler {
                 Realm realm = Realm.getDefaultInstance();
                 String results = OGScraper.getScrape(realm, appId);
                 realm.close();
-                responseStatus = NanoHTTPD.Response.Status.OK;
+
+                if (results==null){
+                    results = "{}";
+                    responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                } else {
+                    responseStatus = NanoHTTPD.Response.Status.OK;
+                }
                 return results;
 
             }

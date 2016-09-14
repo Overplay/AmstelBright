@@ -3,23 +3,29 @@ package io.ourglass.amstelbright2.services.amstelbright;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
+import android.os.Build;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.util.Log;
-import android.widget.Toast;
 
-import org.json.JSONObject;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import io.ourglass.amstelbright2.BuildConfig;
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
+import io.ourglass.amstelbright2.realm.OGLog;
+import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
-import io.ourglass.amstelbright2.services.cloudscraper.OGTweetScraper;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
+import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
+//import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
 /**
  * This is the parent server class that kicks off everybody else: UDP, Bluetooth, HTTP
@@ -30,39 +36,42 @@ import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
 public class AmstelBrightService extends Service  {
 
-    public static final String TAG = "ABS";
-
-    OGTweetScraper twatter;
-
-    // For debug toasts
-    public static final Boolean DEBUG = false;
-
-    //Context mContext = getApplicationContext();
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
+    //used to keep track of uptime
+    public static final long bootTime = System.currentTimeMillis();
 
     // This is here as a reliable ref to context for the Realm stuff.
     public static Context context;
 
-    public AmstelBrightService() {
-    }
+    public static final String TAG = "ABService";
 
     /** indicates how to behave if the service is killed */
     int mStartMode = START_STICKY;
 
     /** indicates whether onRebind should be used */
-    boolean mAllowRebind = true;
+    //boolean mAllowRebind = true;
+
+    //final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    private Timer mHeartbeatTimer;
+
+    public AmstelBrightService() {
+    }
+
 
     /** Called when the service is being created. */
     @Override
     public void onCreate() {
-
+        super.onCreate();
+        Log.d(TAG, "In onCreate()");
     }
 
     /** The service is starting, due to a call to startService() */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        dbToastr("ABS: onStartCommand");
+        boolean testMode = intent.getBooleanExtra("testMode", false);
+
+        ABApplication.dbToast(this, "Starting Background Services");
 
         // Create global static ref for code that needs Context
         context = getApplicationContext();
@@ -71,74 +80,27 @@ public class AmstelBrightService extends Service  {
         OGCore.sendStatusIntent("STATUS", "Starting Services",
                 OGConstants.BootState.ABS_START.getValue());
 
-
-        startChildServices();
+        if(!testMode) {
+            startChildServices();
+        }
+        else {
+            Log.v(TAG, "Starting AmstelBright service in test mode, will not start child services");
+        }
 
         return mStartMode;
     }
 
-    /** A client is binding to the service with bindService() */
-    @Override
-    public IBinder onBind(Intent intent) {
-        dbToastr("ABS: binding");
-        return mMessenger.getBinder();
-    }
-
-    /** Called when all clients have unbound with unbindService() */
-    @Override
-    public boolean onUnbind(Intent intent) {
-        super.onUnbind(intent);
-        dbToastr("ABS: unbinding");
-        return mAllowRebind;
-    }
-
-
-    /** Called when The service is no longer used and is being destroyed */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        dbToastr("ABS: onDestroy");
-
-    }
-
-
-
-
-    // TODO: Seriously with the leaks? This code is right from the Google site. FCOL
-    private class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 1:
-                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
-                    break;
-                case 2:
-                    Toast.makeText(getApplicationContext(), "beer thirty!", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-
-    private void logTweets(JSONObject jobj){
-        Log.d(TAG, jobj.toString());
-    }
-
     private void startChildServices(){
-
-
 
         OGCore.installStockApps();
         OGCore.sendStatusIntent("STATUS", "Installing stock apps",
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
-        Intent udpIntent = new Intent(this, UDPBeaconService.class)
-                .putExtra("data", "some data to broadcast")
-                .putExtra("port", 9091)
-                .putExtra("beaconFreq", 2000);
 
+        /* Choose either new (UPNP) or old (shout in the dark) discovery method */
+        Intent udpIntent = OGConstants.USE_UPNP_DISCOVERY ? new Intent(this, UDPListenAndRespond.class) :
+                new Intent(this, UDPBeaconService.class);
         startService(udpIntent);
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
@@ -150,14 +112,37 @@ public class AmstelBrightService extends Service  {
         Intent stbIntent = new Intent(this, STBService.class);
         startService(stbIntent);
 
+        Intent logReapIntent = new Intent(this, LogCleanAndPushService.class);
+        startService(logReapIntent);
+
+        //start the heartbeat timertask
+        mHeartbeatTimer = new Timer();
+        //mHeartbeatTimer.cancel();
+        mHeartbeatTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.v(TAG, "logging heartbeat now");
+                OGCore.log_heartbeat(BuildConfig.VERSION_NAME, "", Build.VERSION.RELEASE);
+            }
+        }, 1, OGConstants.HEARTBEAT_TIMER_INTERVAL);
+
+        Intent advertisementIntent = new Intent(this, AdFetchService.class);
+        startService(advertisementIntent);
+
+    }
+
+    /** Called when The service is no longer used and is being destroyed */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "In onDestroy()");
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
 
-    private void dbToastr(String msg){
 
-        if (DEBUG){
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-        }
-
-    }
 }

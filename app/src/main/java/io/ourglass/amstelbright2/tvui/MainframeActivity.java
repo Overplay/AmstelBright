@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
@@ -43,6 +44,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
@@ -98,8 +100,13 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.mainframe_layout);
+
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
@@ -112,7 +119,15 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         mMf = new Mainframe(this, this);
 
-        startService(new Intent(getBaseContext(), AmstelBrightService.class));
+        //check if service was started in test mode
+        Intent currentIntent = getIntent();
+        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+
+        //pass testMode onto abService, defaults to false
+        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+        abServiceIntent.putExtra("testMode", testMode);
+
+        startService(abServiceIntent);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
@@ -154,6 +169,10 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         appTray.setRotationX(90f);
         appTray.setTranslationX(-1000f);
         mShowingMenu = false;
+
+        Log.v(TAG, "Creating system alert log for restart");
+        //log the restart
+        OGCore.log_alert("System cold boot", "Logged in onCreate of Mainframe");
 
         Log.d(TAG, "onCreate done");
 
@@ -218,6 +237,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         // Launch settings from button 0 on remote
         if (keyCode == 7){
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+        }
+
+        if (keyCode == 8){
+            Intent intent = new Intent(this, DirecTVPairActivity.class);
+            startActivity(intent);
         }
 
 
@@ -452,30 +476,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         });
 
-        // Attempt to speed up JS performance
-//        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-//        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-//        wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
-        // For now focusable will be set to false so this stuff is never called
-//        wv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//
-//            private AnimatorSet runningAnim;
-//
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (hasFocus) {
-//                    //runningAnim = animatePulse(v);
-//                    v.animate().scaleY(0.9f).scaleX(0.9f).setDuration(100).start();
-//
-//                } else {
-//                    v.animate().scaleY(1.0f).scaleX(1.0f).setDuration(100).start();
-////                    runningAnim.cancel();
-////                    v.setScaleX(1f);
-////                    v.setScaleY(1f);
-//                }
-//            }
-//        });
 
         WebSettings settings = wv.getSettings();
         settings.setLoadWithOverviewMode(true);

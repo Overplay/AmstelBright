@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.core;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by mkahn on 5/17/16.
  */
@@ -8,17 +10,45 @@ public class OGConstants {
     public static final boolean TEST_MODE = true;
     public static final boolean SHOW_DB_TOASTS = true;
 
+    public static final boolean USE_HTTPS = false;
+    public static final String SSL_KEY_PASSWORD = "password";
+    public static final String SSL_KEYSTORE = "src/main/resources/keystore2.jks";
     /**
      * Networking constants
      */
 
     public static final int HTTP_PORT = 9090;
-    public static final int UDP_BEACON_PORT = 9191;
+
+    // Turn off UPNP to work with the old iOS app
+    public static final boolean USE_UPNP_DISCOVERY = false;
+
+    public static final int UDP_BEACON_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*60;
     public static final int TV_POLL_INTERVAL = 2500;
+    public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
+    public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
+
+    public static final int UPNP_UDP_BROADCAST_PORT = 1900;
+    public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
+    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 2000; //every two seconds upon completion
+    public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
+    public static final String[] discoverPacket = new String[]{
+            "M-SEARCH * HTTP/1.1\r\n",
+            "Host:239.255.255.250:1900\r\n",
+            "ST:ssdp:all\r\n","Man:\"ssdp:discover\"\r\n",
+            "MX:3\r\n\r\n"
+    };
+
+    public static final String ASAHI_ADDRESS = "http://104.131.145.36";
+    public static final String ASAHI_API_ENDPOINT = "/api/v1/";
+    public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
+    public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
+
+    public static final String INTERNAL_PATH_TO_MEDIA = "/data/data/io.ourglass.amstelbright2/media/";
+    public static final String EXTERNAL_PATH_TO_MEDIA = "/api/admedia/";
 
     // When using git, use the one below
     //public static final String PATH_TO_ABWL = "/Android/data/me.sheimi.sgit/files/repo/AmstelBrightLimeWWW";
@@ -56,7 +86,8 @@ public class OGConstants {
     public static final int DIRECTV_PORT = 8080;
 
     // HARD CODED for DEMO
-    public static final String STB_ENDPOINT = "http://10.1.10.38:8080/tv/getTuned";
+    public static final int STB_PORT = 8080;
+    public static final String STB_TUNED_ENDPOINT = "/tv/getTuned";
 
     /**
      * constants for JWT

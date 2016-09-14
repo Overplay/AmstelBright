@@ -51,7 +51,8 @@
         android:layout_marginBottom="100dip"
         android:background="@drawable/popup_bkg"
         android:focusable="false"
-        android:padding="15dip" />
+        android:padding="15dip"
+        android:textColor="#ffffff" />
 
     <TextView
         android:layout_width="400dip"

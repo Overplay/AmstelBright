@@ -8,8 +8,6 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,6 +25,7 @@ import io.realm.Realm;
 /**
  * Created by atorres on 4/19/16.
  */
+
 public class UDPBeaconService extends Service {
 
     static final String TAG = "UDPBeaconService";
@@ -41,8 +40,8 @@ public class UDPBeaconService extends Service {
     HandlerThread udpLooperThread = new HandlerThread("udpBeaconLooper");
     private Handler mUdpThreadHandler;
 
-    private void logd(String message){
-        if (VERBOSE){
+    private void logd(String message) {
+        if (VERBOSE) {
             Log.d(TAG, message);
         }
     }
@@ -132,44 +131,23 @@ public class UDPBeaconService extends Service {
         mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
 
 
-        if (intent != null) {
+        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        String mac = manager.getConnectionInfo().getMacAddress();
 
-            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            String mac = manager.getConnectionInfo().getMacAddress();
+        Realm realm = Realm.getDefaultInstance();
+        OGDevice device = OGCore.getDeviceAsObject(realm);
 
-            Realm realm = Realm.getDefaultInstance();
+        mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
+                device.name, device.locationWithinVenue, mac);
 
-            OGDevice device = OGCore.getDeviceAsObject(realm);
+        realm.close();
 
-            mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                    device.name, device.locationWithinVenue, mac);
+        mPort = OGConstants.UDP_BEACON_PORT;
+        mBeaconFreq = OGConstants.UDP_BEACON_FREQ;
 
-            realm.close();
-
-            mPort = intent.getIntExtra("port", OGConstants.UDP_BEACON_PORT);
-            mBeaconFreq = intent.getIntExtra("beaconFreq",OGConstants.UDP_BEACON_FREQ);
-
-        } else {
-
-            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            String mac = manager.getConnectionInfo().getMacAddress();
-
-            Realm realm = Realm.getDefaultInstance();
-            OGDevice device = OGCore.getDeviceAsObject(realm);
-
-            mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                    device.name, device.locationWithinVenue, mac);
-
-            realm.close();
-
-            mPort = OGConstants.UDP_BEACON_PORT;
-            mBeaconFreq = OGConstants.UDP_BEACON_FREQ;
-
-        }
 
         Log.d(TAG, mMessage + " " + mPort + " " + mBeaconFreq);
 
-        //startBeacon();
         startBeaconLooper();
 
         OGCore.sendStatusIntent("STATUS", "Starting beacon", OGConstants.BootState.UDP_START.getValue());
@@ -188,22 +166,5 @@ public class UDPBeaconService extends Service {
         return null;
     }
 
-
-    private class UDPLooperThread extends Thread {
-        public Handler mHandler;
-        private static final String TAG = "UDPLooperThread";
-
-        public void run() {
-            Looper.prepare();
-
-            mHandler = new Handler() {
-                public void handleMessage(Message msg) {
-                    Log.d(TAG, msg.toString());
-                }
-            };
-
-            Looper.loop();
-        }
-    }
 
 }

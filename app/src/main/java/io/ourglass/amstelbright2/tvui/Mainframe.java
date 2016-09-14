@@ -11,9 +11,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.OGConstants;
+import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.realm.OGDevice;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.realm.Realm;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -32,7 +46,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     private static final boolean REPLACE_OURGLASS = true;
 
-    private final OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client;
 
     private Rect mScreenRect;
 
@@ -52,6 +66,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     private JSONObject mRunningWidget;
     private int mRunningWidgetSlot = 0;
 
+    private final String BASE_URL = OGConstants.USE_HTTPS ? "https://localhost:" : "http://localhost:";
 
     // TODO this should be combined with mAllApps so there is a single native array with all app info
     public ArrayList<AppIcon> appIcons = new ArrayList<>();
@@ -75,7 +90,6 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         public void launchCrawler(String urlPathToApp);
         public void launchWidget(String urlPathToApp, int width, int height);
         public void uiAlert(UIMessage message);
-
     }
 
     // Constructor
@@ -89,6 +103,51 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         IntentFilter filter2 = new IntentFilter("com.ourglass.amstelbrightserver.status");
         mContext.registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
+
+        //if using https, then install custom certificate checker that trusts everything
+        if(OGConstants.USE_HTTPS) {
+            try {
+                final TrustManager[] trustAllCerts = new TrustManager[]{
+                        new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                            }
+
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                            }
+
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
+                            }
+                        }
+                };
+                final SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                //create an ssl socket facotry with our all-trusting manager
+                final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                builder.sslSocketFactory(sslSocketFactory);
+                builder.hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+                client = builder.build();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        } else {
+
+            // Ethan, you did not create a client for non-HTTPS mode, ffs!
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            client = builder.build();
+
+
+        }
 
     }
 
@@ -122,8 +181,12 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         float ytop = 0.12f * mScreenRect.height;
         float ybot = (0.88f * mScreenRect.height) - widgetHeight;
 
-        float xleft = 0.013f * mScreenRect.width;
-        float xright = 0.987f * mScreenRect.width - widgetWidth;
+//        float xleft = 0.013f * mScreenRect.width;
+//        float xright = 0.987f * mScreenRect.width - widgetWidth;
+
+        // Pinning to edge
+        float xleft = 0;
+        float xright = mScreenRect.width - widgetWidth;
 
         switch (slotNumber){
 
@@ -176,24 +239,24 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     public String urlForApp(String appId){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
     }
 
     public String urlForAppInfo(String appId){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
     }
 
     public String urlForAppIcon(String appId, String iconName){
 
-        return "http://localhost:" + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
     }
 
     public void getApps() throws Exception {
 
         // TODO: Should we do this thru service calls now??
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/system/apps")
+                .url(BASE_URL + SERVER_PORT +"/api/system/apps")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -322,7 +385,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
 
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/system/apps")
+                .url(BASE_URL + SERVER_PORT + "/api/system/apps")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -350,6 +413,51 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 Log.d(TAG, "GET all apps complete");
                 processInboundApps();
 
+            }
+        });
+    }
+
+    public void getDirectvBoxesAndLaunchActivity(final Intent intent){
+        Request request = new Request.Builder()
+                .url(BASE_URL + SERVER_PORT + "/api/stb/available")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                //dtpa.setError("error");
+                Log.e(TAG, "GET stbs failed");
+                raiseRedFlag("Unable to get stb info from server");
+                intent.putExtra("success", false);
+                intent.putExtra("errMsg", e.getMessage());
+                AmstelBrightService.context.startActivity(intent);
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                String jString = response.body().string();
+
+                try {
+                    JSONObject obj = new JSONObject(jString);
+                    JSONArray devs = obj.getJSONArray("devices");
+
+                    ArrayList<String> toAttach = new ArrayList<String>();
+                    for(int i = 0; i < devs.length(); i++){
+                        toAttach.add(devs.getString(i));
+                    }
+                    intent.putExtra("success", true);
+                    intent.putExtra("devices", toAttach);
+                } catch (JSONException e) {
+                    intent.putExtra("success", false);
+                    //throw new IOException("Unexpected Json error " + e.toString());
+                } finally {
+                    AmstelBrightService.context.startActivity(intent);
+                }
             }
         });
     }
@@ -496,18 +604,20 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         }
     }
 
-    private void moveApp(JSONObject app){
+    private void moveApp(JSONObject app) {
 
         try {
             int newSlot = app.getInt("slotNumber");
 
-            if (app.getString("appType").equalsIgnoreCase("crawler")){
+            if (app.getString("appType").equalsIgnoreCase("crawler")) {
                 moveCrawlerIfNeeded(newSlot);
             } else {
                 moveWidgetIfNeeded(newSlot);
             }
 
-        } catch (Exception e){
+            //log the movement as placement override
+            OGCore.log_placementOverride(OGCore.channel, OGCore.programId, app.getString("appId"), newSlot);
+        } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");
         }
@@ -598,7 +708,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         RequestBody body = RequestBody.create(JSON, "{}");
 
         Request request = new Request.Builder()
-                .url("http://localhost:9090/api/app/"+appId+"/launch")
+                .url(BASE_URL + SERVER_PORT + "/api/app/"+appId+"/launch")
                 .post(body)
                 .build();
 

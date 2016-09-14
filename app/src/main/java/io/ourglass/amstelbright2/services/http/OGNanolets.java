@@ -9,11 +9,13 @@ import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.handlers.JSONAdHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
-import io.ourglass.amstelbright2.services.http.handlers.JSONJWTHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
+
 
 public class OGNanolets extends OGRouterNanoHTTPD {
 
@@ -25,6 +27,14 @@ public class OGNanolets extends OGRouterNanoHTTPD {
      */
     public OGNanolets(HTTPDService httpServer) throws IOException {
         super(PORT);
+        if(OGConstants.USE_HTTPS) {
+            File f = new File(OGConstants.SSL_KEYSTORE);
+
+            System.setProperty("javax.net.ssl.trustStore", f.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStorePassword", OGConstants.SSL_KEY_PASSWORD);
+            this.makeSecure(NanoHTTPD.makeSSLSocketFactory("/" + f.getName(), OGConstants.SSL_KEY_PASSWORD.toCharArray()), null);
+            this.setServerSocketFactory(new SecureServerSocketFactory(NanoHTTPD.makeSSLSocketFactory("/" + f.getName(), OGConstants.SSL_KEY_PASSWORD.toCharArray()), null));
+        }
         mHTTPServer = httpServer;
         addMappings();
         start();
@@ -147,12 +157,17 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
-        addRoute("/user/jwt", JSONJWTHandler.class);
+
+        addRoute("/api/stb/:command", JSONSTBHandler.class);
+
+        addRoute("/api/ad/", JSONAdHandler.class);
 
         File f = new File("/mnt/sdcard"+ OGConstants.PATH_TO_ABWL).getAbsoluteFile();
+        File mediaFileDir = new File("/data/data/io.ourglass.amstelbright2/media").getAbsoluteFile();
 
         // Static pages (AmstelBrightWithLime)
         addRoute("/www/(.)+", StaticPageTestHandler.class, f.getAbsoluteFile());
+        addRoute("/api/admedia/(.)+", StaticPageTestHandler.class, mediaFileDir.getAbsoluteFile());
 
         // Examples
 //        addRoute("/user", UserHandler.class);
