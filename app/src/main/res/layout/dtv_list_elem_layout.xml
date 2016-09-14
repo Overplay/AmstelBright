@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dtv_list_elem_friendlyName"
+        android:textColor="@color/DodgerBlue"
+        android:textAlignment="center"
+        android:textSize="20dip"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dtv_list_elem_curPlaying"
+        android:textSize="20dip"
+        android:layout_marginLeft="25dip"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dtv_list_elem_ipAddr"
+        android:textSize="20dip"
+        android:layout_marginLeft="25dip"/>
+
+</LinearLayout>

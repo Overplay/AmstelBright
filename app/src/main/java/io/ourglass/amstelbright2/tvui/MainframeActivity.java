@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
@@ -101,7 +102,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.mainframe_layout);
+
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));

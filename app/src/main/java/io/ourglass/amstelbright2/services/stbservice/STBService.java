@@ -2,9 +2,12 @@ package io.ourglass.amstelbright2.services.stbservice;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -24,13 +27,18 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
+import io.ourglass.amstelbright2.BuildConfig;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGNotifications;
 import io.ourglass.amstelbright2.realm.OGDevice;
+import io.ourglass.amstelbright2.tvui.DirecTVPairActivity;
 import io.realm.Realm;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -47,7 +55,70 @@ public class STBService extends Service {
     public static final boolean VERBOSE = true;
 
     public static boolean hasSearched = false;
-    public static ArrayList<String> foundIps;
+
+    public class DirectvBoxInfo {
+        public String ipAddr;
+        public String friendlyName;
+        public String curPlaying;
+        public boolean channelIsNew = false;
+        public HandlerThread channelCheckThread;
+        public Handler mChannelChangeHandler;
+        public OkHttpClient client;
+
+        public DirectvBoxInfo(final String ipAddr, String friendlyName) {
+            this.ipAddr = ipAddr;
+            this.friendlyName = friendlyName;
+            this.channelCheckThread = new HandlerThread(ipAddr + "_channelCheckThread");
+            this.channelCheckThread.start();
+            this.mChannelChangeHandler = new Handler(channelCheckThread.getLooper());
+            this.client = new OkHttpClient.Builder()
+                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
+                    .writeTimeout(3000, TimeUnit.MILLISECONDS)
+                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .build();
+
+            final DirectvBoxInfo _this = this;
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    String curChannel = refreshWhatsPlaying();
+                    if(curChannel != null){
+                        if(!curChannel.equals(_this.curPlaying))
+                            _this.channelIsNew = true;
+                        _this.curPlaying = curChannel;
+                    }
+                    _this.mChannelChangeHandler.postDelayed(this, OGConstants.STB_SERVICE_CHANNEL_POLL_INTERVAL);
+                }
+            };
+            mChannelChangeHandler.post(runnable);
+
+        }
+
+        public String refreshWhatsPlaying(){
+            Request req = new Request.Builder()
+                    .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                    .build();
+            try {
+                Response response = this.client.newCall(req).execute();
+                if(!response.isSuccessful()) {
+                    return null;
+                }
+
+                JSONObject responseObj = new JSONObject(response.body().string());
+                return responseObj.getString("callsign");
+
+            } catch (IOException e){
+                return null;
+            } catch (JSONException e){
+                return null;
+            }
+
+//            }
+        }
+    }
+
+    public static ArrayList<DirectvBoxInfo> foundBoxes;
+
     private boolean mListening = false;
 
     int mTVPollInterval = OGConstants.TV_POLL_INTERVAL;
@@ -128,7 +199,6 @@ public class STBService extends Service {
      */
     private void startSTBFinding(){
         Log.v(TAG, "finding stbs");
-
         Runnable findRunnable = new Runnable(){
 
             @Override
@@ -176,7 +246,7 @@ public class STBService extends Service {
 
             mListenSocket.setSoTimeout(10000);
             final ArrayList<String> foundDeviceList = new ArrayList<String>();
-            final ArrayList<String> verifiedDeviceList = new ArrayList<String>();
+            final ArrayList<String> verifiedDeviceIps = new ArrayList<String>();
             new Thread(new Runnable(){
                 @Override
                 public void run() {
@@ -203,11 +273,13 @@ public class STBService extends Service {
                         new Thread(new Runnable(){
                             @Override
                             public void run(){
+                                ArrayList<DirectvBoxInfo> newFoundBoxes = new ArrayList<DirectvBoxInfo>();
                                 for(final String ip  : foundDeviceList){
-                                    verifyBoxAndAdd(ip, verifiedDeviceList);
+                                    verifyBoxAndAdd(ip, newFoundBoxes);
                                 }
+
                                 hasSearched = true;
-                                foundIps = verifiedDeviceList;
+                                foundBoxes = newFoundBoxes;
                             }
                         }).start();
 
@@ -251,12 +323,14 @@ public class STBService extends Service {
      * accesses ip address (through the assumed directv api) and if connection is refused returns null,
      * else returns information about the box
      * @param ip the ip address (including path to xml file)
-     * @param verifiedDeviceList list to add DirecTV ip addresses to
+     * @param verifiedDeviceList list to add DirecTV info objs to
      */
-    private void verifyBoxAndAdd(String ip, ArrayList<String> verifiedDeviceList){
+    private void verifyBoxAndAdd(String ip, ArrayList<DirectvBoxInfo> verifiedDeviceList){
         String baseIp = ip.substring(ip.indexOf("http"), ip.lastIndexOf(":"));
-        if(verifiedDeviceList.contains(baseIp))
-            return;
+        for(DirectvBoxInfo b : verifiedDeviceList) {
+            if(ip.contains(b.ipAddr))
+                return;
+        }
 
         String response = "";
         try {
@@ -275,10 +349,18 @@ public class STBService extends Service {
             }
             huc.disconnect();
             if(response.contains("<manufacturer>DIRECTV</manufacturer>")) {
-                verifiedDeviceList.add(baseIp);
+                String friendlyName = "";
+                final String friendlyNameTag = "<friendlyName>";
+                if(response.contains(friendlyNameTag)){
+                    friendlyName = response.substring(
+                            response.indexOf(friendlyNameTag) + friendlyNameTag.length(),
+                            response.indexOf("</friendlyName>")
+                    );
+                }
+                verifiedDeviceList.add(new DirectvBoxInfo(baseIp, friendlyName));
             }
         } catch(Exception e){
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "" + e.getMessage());
             return;
         }
     }
@@ -287,7 +369,11 @@ public class STBService extends Service {
         Realm realm = Realm.getDefaultInstance();
         String stbAddr = OGDevice.getPairedSTBOrNull(realm);
         if(stbAddr != null) {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
+                    .writeTimeout(3000, TimeUnit.MILLISECONDS)
+                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .build();
 
             final String pairedSTB = OGDevice.getPairedSTBOrNull(Realm.getDefaultInstance());
             if(pairedSTB == null){
@@ -307,15 +393,13 @@ public class STBService extends Service {
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                     Log.wtf(TAG, "Couldn't GET from STB!");
-                    //OGNotifications.sendStatusIntent("message", "Could not get information about that channel"/*"Lost connection to STB"*/, 0);
-                    //OGDevice.unpair(Realm.getDefaultInstance());
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
 
                     if (!response.isSuccessful()) {
-                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
+//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
                         //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
                         //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
                         //OGDevice.unpair(Realm.getDefaultInstance());
