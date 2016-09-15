@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.tvui;
+package io.ourglass.amstelbright2.tvui.stb;
 
 import android.content.Context;
 import android.text.SpannableString;

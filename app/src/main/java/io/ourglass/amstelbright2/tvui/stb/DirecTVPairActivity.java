@@ -1,50 +1,29 @@
-package io.ourglass.amstelbright2.tvui;
+package io.ourglass.amstelbright2.tvui.stb;
 
-import android.Manifest;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.nfc.Tag;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.daimajia.easing.linear.Linear;
-
-import org.json.JSONArray;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGNotifications;
 import io.ourglass.amstelbright2.realm.OGDevice;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
 
 public class DirecTVPairActivity extends AppCompatActivity {
 
@@ -98,6 +77,8 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 });
                 contentWrapper.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
+
+
             }
         });
 
@@ -119,22 +100,14 @@ public class DirecTVPairActivity extends AppCompatActivity {
         deviceListHeader.setTypeface(exo2Typeface);
         emptyListMessage.setTypeface(exo2Typeface);
 
+        directvDevicesList.setAdapter(new DirectvDevicesAdapter(this, STBService.foundBoxes));
+
         String pairedSTB = OGDevice.getPairedSTBOrNull(Realm.getDefaultInstance());
         if(pairedSTB != null){
             setCurrentPair(pairedSTB);
         }
         else{
             nullifyCurrentPair();
-        }
-
-        devicesAdapter = new DirectvDevicesAdapter(this, STBService.foundBoxes);
-        directvDevicesList.setAdapter(devicesAdapter);
-        boolean ready = STBService.hasSearched;
-        if(ready){
-            setDirectvDevicesList();
-        }
-        else {
-            setErrorMsg("Not ready yet");
         }
         startCheckLoop();
     }
@@ -145,7 +118,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
     }
 
     public void setDirectvDevicesList(){
-        devicesAdapter.notifyDataSetChanged();
+//        devicesAdapter.notifyDataSetChanged();
 
         final Activity _this = this;
 //        runOnUiThread(new Runnable() {
@@ -211,6 +184,9 @@ public class DirecTVPairActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 OGDevice.setPairedSTB(Realm.getDefaultInstance(), ip);
                                 setCurrentPair(ip);
+
+                                OGNotifications.sendStatusIntent("","Successfully paired with " + ip, 0);
+                                finish();
                             }
                         });
                         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -247,14 +223,10 @@ public class DirecTVPairActivity extends AppCompatActivity {
         final Handler h = new Handler();
         h.postDelayed(new Runnable()
         {
-            private long time = 0;
-
             @Override
             public void run()
             {
                 if(STBService.hasSearched){
-//                    errorMsg.setText("");
-//                    errorMsg.setVisibility(View.GONE);
                     emptyListMessage.setText("");
                     emptyListMessage.setVisibility(View.GONE);
 

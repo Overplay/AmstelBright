@@ -72,9 +72,15 @@
         <!-- </receiver> -->
 
         <activity
-            android:name=".tvui.DirecTVPairActivity"
+            android:name=".tvui.stb.DirecTVPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
             >
+        </activity>
+
+        <activity
+            android:name=".tvui.wifi.WifiManageActivity"
+            android:theme="@style/Theme.AppCompat.Translucent">
+
         </activity>
 
 
