@@ -7,7 +7,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -247,7 +246,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
         // Launch settings from button 0 on remote
-        if ( keyCode == 7 || keyCOde == 4 ){
+        if ( keyCode == 7 || keyCode == 4 ){
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
         }
 

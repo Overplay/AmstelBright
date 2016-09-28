@@ -1,9 +1,7 @@
 package io.ourglass.amstelbright2.services.udp;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -15,9 +13,7 @@ import java.net.InetAddress;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.ourglass.amstelbright2.core.OGCore;
-import io.ourglass.amstelbright2.realm.OGDevice;
-import io.realm.Realm;
+import io.ourglass.amstelbright2.core.OGSystem;
 
 /**
  * Created by ethan on 8/3/16.
@@ -44,18 +40,6 @@ public class UDPListenAndRespond extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         ABApplication.dbToast(this, "starting udp listener");
-
-        //prepare message
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        String mac = manager.getConnectionInfo().getMacAddress();
-
-        Realm realm = Realm.getDefaultInstance();
-        OGDevice device = OGCore.getDeviceAsObject(realm);
-
-        mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                device.name, device.locationWithinVenue, mac);
-
-        realm.close();
 
         //get port
         mPort = intent != null ? intent.getIntExtra("port", OGConstants.UDP_LISTEN_AND_RESPOND_PORT) :
@@ -99,6 +83,10 @@ public class UDPListenAndRespond extends Service {
 
     private void respondToUDP(InetAddress receivedFrom){
         try {
+            mMessage = OGSystem.getSystemInfo().toString();
+//            if (mMessage==null){
+//                mMessage = "{ \"error\": \"Invalid system data\"";
+//            }
             DatagramPacket packet = new DatagramPacket(mMessage.getBytes(), mMessage.length(), receivedFrom, mPort);
             mSocket.send(packet);
         } catch (IOException e){
