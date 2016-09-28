@@ -32,7 +32,6 @@ public class OGApp extends RealmObject {
     @Required
     public String version;
 
-    @Required
     public long installDate;
 
     int primaryColor;
