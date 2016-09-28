@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
@@ -105,17 +106,10 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.mainframe_layout);
-
-        View decorView = getWindow().getDecorView();
-        // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-        // Remember that you should never show the action bar if the
-        // status bar is hidden, so hide that too if necessary.
-        ActionBar actionBar = getActionBar();
-        if(actionBar != null) actionBar.hide();
-
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
@@ -252,8 +246,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             return false;
         }
 
-        // Launch settings from button 0 on remote or right mouse
-        if (keyCode == 7 || keyCode == 4){
+        // Launch settings from button 0 on remote
+        if ( keyCode == 7 || keyCOde == 4 ){
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
         }
 
