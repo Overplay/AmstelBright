@@ -49,10 +49,12 @@ public class JSONSTBHandler extends JSONHandler {
                         }
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         String response = "{ \"devices\": [";
-                        for(String foundDevice : STBService.foundIps){
-                            response += "\"" + foundDevice + "\", ";
+                        for(STBService.DirectvBoxInfo foundDevice : STBService.foundBoxes){
+                            response += "\"" + foundDevice.ipAddr + "\", ";
                         }
-                        response = response.substring(0, response.lastIndexOf(",")) + "] }";
+                        int idx = response.lastIndexOf(",");
+                        idx = idx == -1 ? response.length() : idx;
+                        response = response.substring(0, idx) + "] }";
                         return response;
 
                     //return the status of the current pairing

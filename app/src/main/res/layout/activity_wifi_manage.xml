@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_wifi_manage"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!-- content wrapper -->
+    <RelativeLayout
+        android:id="@+id/wifi_manage_content_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/popup_bkg">
+
+        <!-- Title/Header -->
+        <TextView
+            android:id="@+id/wifi_pair_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/directv_header_bkg"
+            android:paddingBottom="10dip"
+            android:paddingTop="10dip"
+            android:text="Wifi Configuration"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/DodgerBlue"
+            android:textSize="30dip" />
+
+        <!-- Status Message -->
+        <LinearLayout
+            android:id="@+id/wifi_status_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_pair_title"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="10dip"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/wifi_status_head"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Status: "
+                android:textColor="@color/DodgerBlue"
+                android:textSize="24dip" />
+
+            <TextView
+                android:id="@+id/wifi_current_connection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="24dip" />
+
+        </LinearLayout>
+
+        <!-- <hr> equivalent -->
+        <View
+            android:id="@+id/wifi_hr"
+            android:layout_width="fill_parent"
+            android:layout_height="4dp"
+            android:layout_below="@+id/wifi_status_line"
+            android:layout_marginTop="10dip"
+            android:background="#ffffff" />
+
+        <!-- List Header -->
+        <TextView
+            android:id="@+id/wifi_list_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_hr"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="20dip"
+            android:text="Available Networks:"
+            android:textColor="@color/DodgerBlue"
+            android:textSize="24dip" />
+
+        <!-- list of wifi devices -->
+        <ListView
+            android:id="@+id/wifi_networks_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_list_header" />
+
+        <!-- empty list message -->
+        <TextView
+            android:id="@+id/empty_list_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_networks_list"
+            android:text="There seem to be no devices on the network..."
+            android:textAlignment="center"
+            android:textColor="@color/Red"
+            android:textSize="30dip"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+</RelativeLayout>

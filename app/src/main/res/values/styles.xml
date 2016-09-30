@@ -18,5 +18,12 @@
         <item name="android:activityCloseEnterAnimation">@anim/hold</item>
         <item name="android:activityCloseExitAnimation">@anim/slideinleft_exit</item>
     </style>
+
+    <style name="CustomEditTextTheme">
+        <!-- Used for the bottom line when not selected / focused -->
+        <item name="colorControlNormal">@color/DodgerBlue</item>
+        <item name="colorControlActivated">@color/DodgerBlue</item>
+        <item name="colorControlHighlight">@color/DodgerBlue</item>
+    </style>
 </resources>
 

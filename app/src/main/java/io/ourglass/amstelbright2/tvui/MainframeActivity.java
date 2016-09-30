@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
@@ -47,6 +48,8 @@ import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.tvui.stb.DirecTVPairActivity;
+import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
 
 @SuppressLint("SetJavaScriptEnabled")
 
@@ -104,7 +107,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.mainframe_layout);
+
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
@@ -245,6 +252,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         if (keyCode == 8){
             Intent intent = new Intent(this, DirecTVPairActivity.class);
+            startActivity(intent);
+        }
+
+        if (keyCode == 9){
+            Intent intent = new Intent(this, WifiManageActivity.class);
             startActivity(intent);
         }
 

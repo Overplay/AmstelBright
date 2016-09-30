@@ -33,6 +33,7 @@ public class OGConstants {
 
     public static final int UPNP_UDP_BROADCAST_PORT = 1900;
     public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
+    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 2000; //every two seconds upon completion
     public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
     public static final String[] discoverPacket = new String[]{
             "M-SEARCH * HTTP/1.1\r\n",
@@ -83,6 +84,9 @@ public class OGConstants {
 
     public static final String DIRECTV_CHANNEL_GET_ENDPOINT = "/tv/getTuned";
     public static final int DIRECTV_PORT = 8080;
+    public static final int DIRECTV_API_CONNECTION_TIMEOUT = 15000;
+
+    public static final String[] WIFI_STRENGTH_LEVELS = new String[]{"None", "Poor", "Fair", "Good", "Excellent"};
 
     // HARD CODED for DEMO
     public static final int STB_PORT = 8080;
