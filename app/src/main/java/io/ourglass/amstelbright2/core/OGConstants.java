@@ -86,6 +86,8 @@ public class OGConstants {
     public static final int DIRECTV_PORT = 8080;
     public static final int DIRECTV_API_CONNECTION_TIMEOUT = 15000;
 
+    public static final String[] WIFI_STRENGTH_LEVELS = new String[]{"None", "Poor", "Fair", "Good", "Excellent"};
+
     // HARD CODED for DEMO
     public static final int STB_PORT = 8080;
     public static final String STB_TUNED_ENDPOINT = "/tv/getTuned";

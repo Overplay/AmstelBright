@@ -29,7 +29,6 @@ public class OGApp extends RealmObject {
     @Required
     public String appName;
 
-    @Required
     public String version;
 
     public long installDate;
