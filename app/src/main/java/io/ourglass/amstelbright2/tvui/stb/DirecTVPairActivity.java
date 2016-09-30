@@ -269,9 +269,10 @@ public class DirecTVPairActivity extends AppCompatActivity {
 
         //the '1' button. Button press that opened this activity should also return to previous
         //activity if pressed again
-        if (keyCode == 8){
+        if (keyCode == 8 || keyCode == 4){
             finish();
         }
+
         return false;
     }
 }
