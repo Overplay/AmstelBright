@@ -81,12 +81,14 @@
         <activity
             android:name=".tvui.stb.DirecTVPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-            >
         </activity>
 
-        <activity
-            android:name=".tvui.wifi.WifiManageActivity"
+        <activity android:name=".tvui.stb.DirecTVConfirmActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
+
+        </activity>
+        <activity
+            android:name=".tvui.wifi.WifiManageActivity">
 
         </activity>
 
