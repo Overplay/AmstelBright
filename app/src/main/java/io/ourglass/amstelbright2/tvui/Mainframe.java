@@ -534,7 +534,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             String appId = appJson.getString("appId");
             int slotNumber = appJson.getInt("slotNumber");
 
-            //get the height and width and pass to launchWidget
+            //get the height and width AS PERCENTAGES OF SCREEN-HEIGHT and pass to launchWidget
             int width = appJson.getInt("width"), height = appJson.getInt("height");
 
             mRunningWidget = appJson;

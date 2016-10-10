@@ -642,6 +642,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         mCrawlerWebView.setScaleY(scale);
     }
 
+    //todo I think that this needs resizing functionality
     @Override
     public void launchCrawler(final String urlPathToApp) {
 
@@ -649,10 +650,19 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
     }
 
+    /**
+     * @param urlPathToApp
+     * @param width percentages of the screen width (0-100)
+     * @param height percentages of the screen height (0-100)
+     */
     @Override
     public void launchWidget(final String urlPathToApp, int width, int height) {
         int curWidth = mWidgetWebView.getLayoutParams().width;
         int curHeight = mWidgetWebView.getLayoutParams().height;
+
+        width = (int) (mScreenWidth * (width / 100.0));
+        height = (int) (mScreenHeight* (height / 100.0));
+
         if(curWidth != width || curHeight != height){
             mWidgetWebView.getLayoutParams().height = height;
             mWidgetWebView.getLayoutParams().width = width;
@@ -672,8 +682,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void uiAlert(UIMessage message) {
         showAlert(message);
     }
-
-
 
 
     /*****************************************
