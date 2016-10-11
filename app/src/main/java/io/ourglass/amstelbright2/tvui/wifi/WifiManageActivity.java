@@ -128,7 +128,8 @@ public class WifiManageActivity extends AppCompatActivity{
         List<ScanResult> results = manager.getScanResults();
         networks = new ArrayList<>();
         for(ScanResult scan : results){
-            networks.add(new WifiNetworkInfo(scan));
+            if(scan.SSID != null && scan.SSID.length() != 0)
+                networks.add(new WifiNetworkInfo(scan));
         }
 
         Log.v(TAG, "There seem to be " + networks.size() + " on the network");
@@ -187,11 +188,17 @@ public class WifiManageActivity extends AppCompatActivity{
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 String ssid = wifiInfo.getSSID();
 
-                OGNotifications.sendStatusIntent("STATUS", "Connected to " + ssid, 0);
-                ((Activity)WifiManageActivity._this).finish();
+                if(ssid != null) {
+                    OGNotifications.sendStatusIntent("STATUS", "Connected to " + ssid, 0);
+                    ((Activity) WifiManageActivity._this).finish();
+                }
             }
             else {
-                OGNotifications.sendStatusIntent("STATUS", "Could not connect - " + info.getReason(), 0);
+                String errMsg = "Could not connect";
+                if(info.getReason() != null && !info.getReason().equals("null")){
+                    errMsg += " - " + info.getReason();
+                }
+                OGNotifications.sendStatusIntent("STATUS", errMsg, 0);
             }
         }
     }
