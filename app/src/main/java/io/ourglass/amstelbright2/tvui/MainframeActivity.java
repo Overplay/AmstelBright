@@ -24,6 +24,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -57,6 +58,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     private static final String TAG = "MFActivity";
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
+
+    private SurfaceView surfaceView;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -109,7 +112,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         setContentView(R.layout.mainframe_layout);
 
-
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
         Log.d(TAG, "Is real OG H/W? " + (OGSystem.isRealOG()?"YES":"NO"));
@@ -150,7 +152,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             public void onGlobalLayout() {
 
                 Log.d(TAG, "Layout done, updating Mainframe screen sizing.");
-                mScreenHeight = mMainLayout.getHeight();
+                // Need to figure out when the status bar is actually in the mix. Probably base size on x res only
+                mScreenHeight = mMainLayout.getHeight(); //+getStatusBarHeight();
                 mScreenWidth = mMainLayout.getWidth();
                 mMf.setTVScreenSize(mScreenWidth, mScreenHeight);
                 mMainLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -160,8 +163,14 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         if (!OGSystem.enableHDMI()) {
             // The color change doesn't seem to do anything...:(.. not worth stressing.
+
+            surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+            surfaceView.setVisibility(View.INVISIBLE);
+
             mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+
+
         }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
@@ -177,6 +186,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         OGCore.log_alert("System cold boot", "Logged in onCreate of Mainframe");
 
         Log.d(TAG, "onCreate done");
+
+        Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
 
     }
 
@@ -237,7 +248,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
         // Launch settings from button 0 on remote
-        if (keyCode == 7){
+        if ( keyCode == 7 || keyCode == 4 ){
             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
         }
 
@@ -252,7 +263,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
 
-        showAlert(new UIMessage("You pushed key " + keyCode));
+        //showAlert(new UIMessage("You pushed key " + keyCode));
 
         return false;
     }
@@ -638,6 +649,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         mCrawlerWebView.setScaleY(scale);
     }
 
+    //todo I think that this needs resizing functionality
     @Override
     public void launchCrawler(final String urlPathToApp) {
 
@@ -645,10 +657,19 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
     }
 
+    /**
+     * @param urlPathToApp
+     * @param width percentages of the screen width (0-100)
+     * @param height percentages of the screen height (0-100)
+     */
     @Override
     public void launchWidget(final String urlPathToApp, int width, int height) {
         int curWidth = mWidgetWebView.getLayoutParams().width;
         int curHeight = mWidgetWebView.getLayoutParams().height;
+
+        width = (int) (mScreenWidth * (width / 100.0));
+        height = (int) (mScreenHeight* (height / 100.0));
+
         if(curWidth != width || curHeight != height){
             mWidgetWebView.getLayoutParams().height = height;
             mWidgetWebView.getLayoutParams().width = width;
@@ -668,8 +689,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void uiAlert(UIMessage message) {
         showAlert(message);
     }
-
-
 
 
     /*****************************************
@@ -770,5 +789,14 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
     }
 
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 
 }

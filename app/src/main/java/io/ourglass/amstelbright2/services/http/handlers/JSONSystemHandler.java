@@ -11,9 +11,10 @@ import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.realm.OGApp;
-import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
 
 
@@ -23,7 +24,15 @@ import io.realm.Realm;
 public class JSONSystemHandler extends JSONHandler {
 
 
+
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+
+        //these operations require owner level permissions
+        String tok = session.getHeaders().get("authorization");
+        if(!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
+            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+            return "";
+        }
 
         String cmd = urlParams.get("command");
 
@@ -43,11 +52,8 @@ public class JSONSystemHandler extends JSONHandler {
 
                     case "device":
 
-                        Realm realm2 = Realm.getDefaultInstance();
-                        JSONObject obj = OGDevice.getDeviceAsJSON(realm2);
-                        realm2.close();
                         responseStatus = NanoHTTPD.Response.Status.OK;
-                        return obj.toString();
+                        return OGSystem.getSystemInfo().toString();
 
                     case "channel":
                         responseStatus = NanoHTTPD.Response.Status.OK;
@@ -93,34 +99,22 @@ public class JSONSystemHandler extends JSONHandler {
                         // TODO Treb was talking while I made these changes so they are probably f-d
 
                         final String json = files.get("postData");
+
                         try {
 
-                            Realm realm = Realm.getDefaultInstance();
+                            final JSONObject inboundParams = new JSONObject(json);
 
-                            final JSONObject obj = new JSONObject(json);
+                            if (inboundParams.has("name")) {
+                                OGSystem.setSystemName(inboundParams.getString("name"));
+                            }
 
-                            realm.executeTransactionAsync(new Realm.Transaction() {
-                                @Override
-                                public void execute(Realm bgRealm) {
-                                    OGDevice thisDevice = OGDevice.getDevice(bgRealm);
-                                    try {
-                                        if (obj.has("name")) {
-                                            thisDevice.name = obj.getString("name");
-                                        }
-                                        if (obj.has("locationWithinVenue")) {
-                                            thisDevice.locationWithinVenue = obj.getString("locationWithinVenue");
-                                        }
-                                    } catch (Exception e) {
-                                        Log.wtf("RealmUpdateDevice", "Fail updating realm");
-                                    }
-                                }
-                            }, null, null);
-
-                            realm.close();
+                            if (inboundParams.has("locationWithinVenue")) {
+                                OGSystem.setSystemLocation(inboundParams.getString("locationWithinVenue"));
+                            }
 
                             //TODO add mechanism to add paired Settop box info
                             responseStatus = NanoHTTPD.Response.Status.OK;
-                            return "{ \"status\":\"ok\"}";
+                            return OGSystem.getSystemInfo().toString();
 
                         } catch (Exception e) {
 
@@ -130,7 +124,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                         }
                         //endpoint to discover installed apps, useful if there are new apps installed while running
-                    case "discover-apps":
+                    case "refreshapps":
                         JSONArray installedApps = OGCore.installStockApps();
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return "Apps currently installed\n" + installedApps.toString();

@@ -4,8 +4,10 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
 import android.content.Intent;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
@@ -16,6 +18,13 @@ import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 public class JSONAppDataHandler extends JSONHandler {
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+
+        //these operations require patron level permissions
+        String tok = session.getHeaders().get("Authorization");
+        if(!OGConstants.USE_JWT && (tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.PATRON))) {
+            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+            return "";
+        }
 
         final String appId = urlParams.get("appid");
 

@@ -23,10 +23,8 @@ import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 /**
@@ -333,8 +331,8 @@ public class OGCore {
         try{
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")
-                    .put("query", "\"Steph Curry\"")
-                    .put("appId", "io.ourglass.pubcrawler");
+                    .put("query", "iOS10")
+                    .put("appId", "io.ourglass.ogcrawler");
 
             scrapeArr.put(scrapeTwitter);
         } catch (JSONException e){
@@ -674,6 +672,9 @@ public class OGCore {
         realm.copyToRealm(log);
 //        realm.copyToRealmOrUpdate(log);
         realm.commitTransaction();
+
+        // This should have realm.close(), no?
+
     }
 
     @Nullable

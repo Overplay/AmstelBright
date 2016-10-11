@@ -1,5 +1,12 @@
 package io.ourglass.amstelbright2.realm;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ListIterator;
+
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
@@ -33,6 +40,47 @@ public class OGScraper extends RealmObject {
 
     public String getQuery(){
         return query;
+    }
+
+    public static JSONArray getAllScrapes( Realm realm ){
+
+        RealmResults<OGScraper> result = realm.where(OGScraper.class)
+                .findAll();
+
+        ListIterator<OGScraper> litr = result.listIterator();
+
+        JSONArray rval = new JSONArray();
+
+        while (litr.hasNext()){
+            OGScraper scrape = litr.next();
+            rval.put(scrape.getJson());
+        }
+
+        return rval;
+
+    }
+
+    public  JSONObject getJson(){
+
+        JSONObject rval = new JSONObject();
+
+        try {
+
+            rval.put("appId", this.appId);
+            rval.put("query", this.query);
+            rval.put("lastUpdate", this.lastUpdate);
+            rval.put("data", this.data);
+
+
+        } catch (Exception e){
+
+            Log.e("OGScrape.model", "Failure converting to JSON");
+
+        }
+
+        return rval;
+
+
     }
 
     public static String getScrape(Realm realm, String appId) {

@@ -44,8 +44,11 @@ public class OGApp extends RealmObject {
 
     public int xPos = 0;
     public int yPos = 0;
-    public int height = 0;
-    public int width = 0;
+
+    //height and width are now percentages which can range
+    // from 1-100 which represents their percentage of the screen
+    public int height;
+    public int width;
 
     private String publicData = "{}";
     private String privateData = "{}";
@@ -187,11 +190,19 @@ public class OGApp extends RealmObject {
             return candidate.has("appId") && !candidate.getString("appId").isEmpty()
                     && candidate.has("appType") && !candidate.getString("appType").isEmpty()
                     && candidate.has("appName") && !candidate.getString("appName").isEmpty()
+                    && candidate.has("height") && heightOrWidthIsValidPercentage(candidate.getInt("height"))
+//                    && candidate.has("width") && heightOrWidthIsValidPercentage(candidate.getInt("width"))
+            ;
+                    && candidate.has("appName") && !candidate.getString("appName").isEmpty()
                     && candidate.has("version") && !candidate.getString("version").isEmpty()
                     && candidate.has("installDate") && candidate.getLong("installDate") != 0;
         } catch(JSONException e){
             return false;
         }
+    }
+
+    private static boolean heightOrWidthIsValidPercentage(int heightOrWidth){
+        return heightOrWidth > 0 && heightOrWidth <= 100;
     }
 
 }

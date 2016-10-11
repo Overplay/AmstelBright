@@ -7,8 +7,11 @@ import java.util.regex.Pattern;
  */
 public class OGConstants {
 
+    // Set to true to use the most stable ASAHI server
+    public static final boolean USE_DEMO_ASAHI = true;
+
     public static final boolean TEST_MODE = true;
-    public static final boolean SHOW_DB_TOASTS = true;
+    public static final boolean SHOW_DB_TOASTS = false;
 
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
@@ -20,12 +23,14 @@ public class OGConstants {
     public static final int HTTP_PORT = 9090;
 
     // Turn off UPNP to work with the old iOS app
-    public static final boolean USE_UPNP_DISCOVERY = false;
+    public static final boolean USE_UPNP_DISCOVERY = true;
 
     public static final int UDP_BEACON_PORT = 9091;
+    // MAK: Created a new port so both discovery methods can be used at same time
+    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9092;
     public static final int UDP_BEACON_FREQ = 2000;
 
-    public static final int CLOUD_SCRAPE_INTERVAL = 1000*60;
+    public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
     public static final int TV_POLL_INTERVAL = 2500;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
@@ -42,7 +47,7 @@ public class OGConstants {
             "MX:3\r\n\r\n"
     };
 
-    public static final String ASAHI_ADDRESS = "http://104.131.145.36";
+    public static final String ASAHI_ADDRESS = USE_DEMO_ASAHI ? "http://107.170.209.248" : "http://104.131.145.36";
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
     public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
     public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
@@ -92,6 +97,13 @@ public class OGConstants {
     public static final int STB_PORT = 8080;
     public static final String STB_TUNED_ENDPOINT = "/tv/getTuned";
 
+    /**
+     * constants for JWT
+     */
+
+    public static boolean USE_JWT = true;
+    public static final int JWT_LIFESPAN = 1 /*day*/ * 24 /*hours*/ * 60 /*minutes*/ * 60 /*seconds*/ * 1000 /*milliseconds*/;
+    public enum AUTH_LEVEL {PATRON, OWNER, OG};
 
     public static final String TEST_DIRECT_TV_INFO =
                  "{\n" +

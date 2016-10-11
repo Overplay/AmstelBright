@@ -16,6 +16,7 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
 
+import io.ourglass.amstelbright2.services.http.handlers.JSONJWTHandler;
 
 public class OGNanolets extends OGRouterNanoHTTPD {
 
@@ -157,6 +158,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
+        addRoute("/user/jwt", JSONJWTHandler.class);
 
         addRoute("/api/stb/:command", JSONSTBHandler.class);
 

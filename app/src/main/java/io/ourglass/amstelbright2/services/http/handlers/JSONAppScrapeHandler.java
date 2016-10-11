@@ -4,8 +4,10 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
+import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
 
 /**
@@ -15,6 +17,13 @@ Scrape endpoint
 public class JSONAppScrapeHandler extends JSONHandler {
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+
+        //these operations require patron level permissions
+        String tok = session.getHeaders().get("Authorization");
+        if(!OGConstants.USE_JWT && (tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.PATRON))) {
+            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+            return "";
+        }
 
         final String appId = urlParams.get("appid");
 
@@ -29,17 +38,37 @@ public class JSONAppScrapeHandler extends JSONHandler {
 
             case GET: {
 
-                Realm realm = Realm.getDefaultInstance();
-                String results = OGScraper.getScrape(realm, appId);
-                realm.close();
+                if (appId.equalsIgnoreCase("all")){
 
-                if (results==null){
-                    results = "{}";
-                    responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    Realm realm = Realm.getDefaultInstance();
+                    String results = OGScraper.getAllScrapes(realm).toString();
+                    realm.close();
+
+                    if (results==null){
+                        results = "[]";
+                        responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    } else {
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                    }
+                    return results;
+
+
                 } else {
-                    responseStatus = NanoHTTPD.Response.Status.OK;
+
+                    Realm realm = Realm.getDefaultInstance();
+                    String results = OGScraper.getScrape(realm, appId);
+                    realm.close();
+
+                    if (results==null){
+                        results = "{}";
+                        responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    } else {
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                    }
+                    return results;
+
                 }
-                return results;
+
 
             }
 

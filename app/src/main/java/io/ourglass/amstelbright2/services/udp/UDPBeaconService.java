@@ -19,6 +19,7 @@ import java.net.SocketException;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.realm.Realm;
 
@@ -131,16 +132,7 @@ public class UDPBeaconService extends Service {
         mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
 
 
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        String mac = manager.getConnectionInfo().getMacAddress();
-
-        Realm realm = Realm.getDefaultInstance();
-        OGDevice device = OGCore.getDeviceAsObject(realm);
-
-        mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                device.name, device.locationWithinVenue, mac);
-
-        realm.close();
+        mMessage = OGSystem.getSystemInfo().toString();
 
         mPort = OGConstants.UDP_BEACON_PORT;
         mBeaconFreq = OGConstants.UDP_BEACON_FREQ;
