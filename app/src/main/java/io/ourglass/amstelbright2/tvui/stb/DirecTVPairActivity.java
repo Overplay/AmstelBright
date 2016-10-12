@@ -189,9 +189,10 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 directvDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        //todo put this back in - testing purposes
-                        final String ip = "192.162.5.3";//STBService.foundBoxes.get(position).ipAddr;
-                        //final String ip = info.substring(0, info.indexOf('\n'));
+                        STBService.DirectvBoxInfo selectedBox = STBService.foundBoxes.get(position);
+                        final String ip = selectedBox.ipAddr;
+                        final String name = selectedBox.friendlyName;
+                        final String currentChannel = selectedBox.refreshWhatsPlaying();
 
                         view.setBackgroundColor(Color.WHITE);
 
@@ -215,8 +216,12 @@ public class DirecTVPairActivity extends AppCompatActivity {
                         intent.putExtra("width", width);
                         intent.putExtra("marginHor", contentMarginHor);
                         intent.putExtra("marginVer", contentMarginVer);
+                        intent.putExtra("ip", ip);
+                        intent.putExtra("friendlyName", name);
+                        intent.putExtra("currentChannel", currentChannel);
+                        intent.putExtra("number", position + 1);
 
-                        lastIpAddressClicked = ipAddr.getText().toString();
+                        lastIpAddressClicked = ip;
                         startActivityForResult(intent, REQUEST_CODE);
 
                     }
@@ -272,7 +277,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
     }
 
     public void setCurrentPair(String ip){
-        this.currentPair.setText("paired with " + ip);
+        this.currentPair.setText(ip);
     }
 
     public void nullifyCurrentPair(){
