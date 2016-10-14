@@ -1,1 +1,8 @@
 .idea/gradle.xml
+.gradle
+.idea
+AmstelBright.iml
+app/app.iml
+app/build
+build
+local.properties

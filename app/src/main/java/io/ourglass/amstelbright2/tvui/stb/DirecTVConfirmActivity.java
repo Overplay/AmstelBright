@@ -25,10 +25,10 @@ import io.ourglass.amstelbright2.core.OGConstants;
 
 public class DirecTVConfirmActivity extends AppCompatActivity {
 
-    TextView numberTextView = (TextView) findViewById(R.id.dtv_list_elem_idx_num);
-    TextView friendlyNameTextView = (TextView) findViewById(R.id.dtv_list_elem_friendlyName);
-    TextView currentlyPlayingTextView = (TextView) findViewById(R.id.dtv_list_elem_curPlaying);
-    TextView ipTextView = (TextView) findViewById(R.id.dtv_list_elem_ipAddr);
+    private TextView numberTextView;
+    private TextView friendlyNameTextView;
+    private TextView currentlyPlayingTextView;
+    private TextView ipTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,12 @@ public class DirecTVConfirmActivity extends AppCompatActivity {
         final int marginVer = extras.getInt("marginVer");
         final RelativeLayout inner = (RelativeLayout) findViewById(R.id.inner_wrapper);
 
+        numberTextView = (TextView) findViewById(R.id.dtv_list_elem_idx_num);
+        friendlyNameTextView = (TextView) findViewById(R.id.dtv_list_elem_friendlyName);
+        currentlyPlayingTextView = (TextView) findViewById(R.id.dtv_list_elem_curPlaying);
+        ipTextView = (TextView) findViewById(R.id.dtv_list_elem_ipAddr);
+
+
         String ip = extras.getString("ip");
         String friendlyName = extras.getString("friendlyName");
         String currentChannel = extras.getString("currentChannel");
@@ -52,7 +58,7 @@ public class DirecTVConfirmActivity extends AppCompatActivity {
 
         ipTextView.setText(ip);
         friendlyNameTextView.setText(friendlyName);
-        currentlyPlayingTextView.setText(currentChannel);
+        currentlyPlayingTextView.setText("Current channel: " + (currentChannel == null ? "not available" : currentChannel));
         numberTextView.setText(String.format("%02d", number));
 
         runOnUiThread(new Runnable() {

@@ -269,6 +269,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 realm.commitTransaction();
                 setCurrentPair(lastIpAddressClicked);
                 lastIpAddressClicked = "";
+                finish();
             }
             else if(result == OGConstants.DIRECTV_PAIR_CANCELED_RESULT_CODE){
                 lastIpAddressClicked = "";
@@ -289,50 +290,21 @@ public class DirecTVPairActivity extends AppCompatActivity {
         final Context _this = (Context)this;
         h.postDelayed(new Runnable()
         {
-            int count = 0;
             @Override
             public void run()
             {
-                //todo remove, this is just for testing purposes without access to directv boxes
-                if(++count == 10){
+                if(STBService.hasSearched){
                     emptyListMessage.setText("");
                     emptyListMessage.setVisibility(View.GONE);
 
-                    ArrayList<STBService.DirectvBoxInfo> fakeBoxes = new ArrayList<>();
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-                    fakeBoxes.add(null);
-
-                    directvDevicesList.setAdapter(new DirectvDevicesAdapter(_this, fakeBoxes, font, boldFont));
-                    ((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
-
                     setDirectvDevicesList();
 
+                    ((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
+
+                    //hide the scanning message
                     scanningMessage.setVisibility(View.GONE);
                     h.postDelayed(this, 1000);
-
                 }
-//                else if(STBService.hasSearched){
-//                    emptyListMessage.setText("");
-//                    emptyListMessage.setVisibility(View.GONE);
-//
-//                    setDirectvDevicesList();
-//
-//                    ((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
-//
-//                    //hide the scanning message
-//                    scanningMessage.setVisibility(View.GONE);
-//                    h.postDelayed(this, 1000);
-//                }
                 else {
                     h.postDelayed(this, 500);
                 }

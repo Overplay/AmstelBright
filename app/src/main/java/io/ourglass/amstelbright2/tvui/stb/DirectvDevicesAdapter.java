@@ -33,7 +33,7 @@ public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInf
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        //STBService.DirectvBoxInfo box = getItem(position);
+        STBService.DirectvBoxInfo box = getItem(position);
 
         if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.dtv_list_elem_layout, parent, false);
@@ -51,16 +51,16 @@ public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInf
         }
 
         if(indexFont != null){
-            idx.setTypeface(font);
+            idx.setTypeface(indexFont);
         }
         //SpannableString friendlyNameUnderlined = new SpannableString(box.friendlyName);
         //friendlyNameUnderlined.setSpan(new UnderlineSpan(), 0, friendlyNameUnderlined.length(), 0);
 
-//        friendlyName.setText(friendlyNameUnderlined );
-//        curPlaying.setText("Current channel: " + (box.curPlaying == null ? "not available" : box.curPlaying));
+        friendlyName.setText(box.friendlyName);
+        curPlaying.setText("Current channel: " + (box.curPlaying == null ? "not available" : box.curPlaying));
 
-//        String ip = box.ipAddr;
-//        ipAddr.setText(ip.replace("http://", "").replace("https://", ""));
+        String ip = box.ipAddr;
+        ipAddr.setText(ip.replace("http://", "").replace("https://", ""));
 
         //format to contain leading 0 for better aesthetics
         idx.setText(String.format("%02d", position + 1));

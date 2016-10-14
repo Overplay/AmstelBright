@@ -87,10 +87,10 @@ public class STBService extends Service {
         }
 
         public String refreshWhatsPlaying(){
-            Request req = new Request.Builder()
-                    .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
-                    .build();
             try {
+                Request req = new Request.Builder()
+                        .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                        .build();
                 Response response = this.client.newCall(req).execute();
                 if(!response.isSuccessful()) {
                     return null;
@@ -103,13 +103,13 @@ public class STBService extends Service {
                 return null;
             } catch (JSONException e){
                 return null;
+            } catch (Exception e){
+                return null;
             }
-
-//            }
         }
     }
 
-    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<>();
+    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<DirectvBoxInfo>();
 
     private boolean mListening = false;
 
@@ -156,23 +156,15 @@ public class STBService extends Service {
 
         ABApplication.dbToast(this, "STB: onStartCommand");
 
-        foundBoxes.add(new STBService.DirectvBoxInfo("1.3.4.3", "JKJIJJJKKJ"));
-        foundBoxes.add(new STBService.DirectvBoxInfo("1.3.4.3", "JKJJ"));
-        foundBoxes.add(new STBService.DirectvBoxInfo("1.3.33.6", "JKJIJ"));
-        foundBoxes.add(new STBService.DirectvBoxInfo("1.3.3.3", "JKJIJJJKKJ"));
-        foundBoxes.add(new STBService.DirectvBoxInfo("15.22.4.3", "JKJIJJJKKJ"));
-        foundBoxes.add(new STBService.DirectvBoxInfo("1.3.4.3", "JKJIJJJKKJ"));
+        mTVPollThread.start();
+        mTVThreadHandler = new Handler(mTVPollThread.getLooper());
 
-        STBService.hasSearched = true;
-//        mTVPollThread.start();
-//        mTVThreadHandler = new Handler(mTVPollThread.getLooper());
-//
-//        mTVDiscoveryThread.start();
-//        mTVThreadHandler2 = new Handler(mTVDiscoveryThread.getLooper());
-//
-//        startSTBFinding();
-//
-//        startSTBPolling();
+        mTVDiscoveryThread.start();
+        mTVThreadHandler2 = new Handler(mTVDiscoveryThread.getLooper());
+
+        startSTBFinding();
+
+        startSTBPolling();
 
         return mStartMode;
     }
