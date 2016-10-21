@@ -118,8 +118,14 @@ public class OGAdvertisement extends RealmObject{
         final String fileName = "/widget.png";
 
         File widgetImageFile = storeImage(this.widgetImg, fileName);
-        this.widgetImgFileLoc = widgetImageFile.getAbsolutePath();
-        this.widgetURL = OGConstants.EXTERNAL_PATH_TO_MEDIA + this.id + fileName;
+        if(widgetImageFile != null) {
+            this.widgetImgFileLoc = widgetImageFile.getAbsolutePath();
+            this.widgetURL = OGConstants.EXTERNAL_PATH_TO_MEDIA + this.id + fileName;
+        }
+        else {
+            //todo figure out why this just caused the app to crash for the first time out of the blue
+            Log.w("OGAdvertisement", "There was a null pointer exception that caused a crash earlier, need to figure out what is going on");
+        }
     }
 
     /**

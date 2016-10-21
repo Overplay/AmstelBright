@@ -88,7 +88,8 @@
 
         </activity>
         <activity
-            android:name=".tvui.wifi.WifiManageActivity">
+            android:name=".tvui.wifi.WifiManageActivity"
+            android:theme="@style/Theme.AppCompat.Translucent">
 
         </activity>
 

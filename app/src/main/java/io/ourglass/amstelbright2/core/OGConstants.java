@@ -92,8 +92,11 @@ public class OGConstants {
 
     public static final int DIRECTV_PAIR_ACTIVITY_BACKGROUND_GREEN = Color.parseColor("#51B85E");
 
+    public static final int WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE = Color.parseColor("#F6921E");
 
     public static final String[] WIFI_STRENGTH_LEVELS = new String[]{"None", "Poor", "Fair", "Good", "Excellent"};
+
+    public static final int BUTTON_CLICK_DEBOUNCE = 2000;
 
     // HARD CODED for DEMO
     public static final int STB_PORT = 8080;
