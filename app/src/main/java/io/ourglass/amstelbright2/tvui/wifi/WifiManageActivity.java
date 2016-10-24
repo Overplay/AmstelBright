@@ -191,10 +191,6 @@ public class WifiManageActivity extends AppCompatActivity{
         for(ScanResult scan : results){
             if(scan.SSID != null && scan.SSID.length() != 0) {
                 networks.add(new WifiNetworkInfo(scan));
-                scan.SSID = "FUARK";
-                networks.add(new WifiNetworkInfo(scan));
-                scan.SSID = "Overplay";
-                networks.add(new WifiNetworkInfo(scan));
             }
         }
 
