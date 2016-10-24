@@ -2,12 +2,9 @@ package io.ourglass.amstelbright2.services.stbservice;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -27,18 +24,13 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
-import io.ourglass.amstelbright2.BuildConfig;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
-import io.ourglass.amstelbright2.core.OGNotifications;
 import io.ourglass.amstelbright2.realm.OGDevice;
-import io.ourglass.amstelbright2.tvui.DirecTVPairActivity;
 import io.realm.Realm;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -72,9 +64,9 @@ public class STBService extends Service {
             this.channelCheckThread.start();
             this.mChannelChangeHandler = new Handler(channelCheckThread.getLooper());
             this.client = new OkHttpClient.Builder()
-                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
-                    .writeTimeout(3000, TimeUnit.MILLISECONDS)
-                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+                    .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+                    .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .build();
 
             final DirectvBoxInfo _this = this;
@@ -95,10 +87,10 @@ public class STBService extends Service {
         }
 
         public String refreshWhatsPlaying(){
-            Request req = new Request.Builder()
-                    .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
-                    .build();
             try {
+                Request req = new Request.Builder()
+                        .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                        .build();
                 Response response = this.client.newCall(req).execute();
                 if(!response.isSuccessful()) {
                     return null;
@@ -111,13 +103,13 @@ public class STBService extends Service {
                 return null;
             } catch (JSONException e){
                 return null;
+            } catch (Exception e){
+                return null;
             }
-
-//            }
         }
     }
 
-    public static ArrayList<DirectvBoxInfo> foundBoxes;
+    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<DirectvBoxInfo>();
 
     private boolean mListening = false;
 
@@ -279,7 +271,12 @@ public class STBService extends Service {
                                 }
 
                                 hasSearched = true;
-                                foundBoxes = newFoundBoxes;
+                                while(foundBoxes.size() > 0){
+                                    foundBoxes.remove(0);
+                                }
+                                for(DirectvBoxInfo info : newFoundBoxes){
+                                    foundBoxes.add(info);
+                                }
                             }
                         }).start();
 
@@ -370,9 +367,9 @@ public class STBService extends Service {
         String stbAddr = OGDevice.getPairedSTBOrNull(realm);
         if(stbAddr != null) {
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
-                    .writeTimeout(3000, TimeUnit.MILLISECONDS)
-                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+                    .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+                    .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .build();
 
             final String pairedSTB = OGDevice.getPairedSTBOrNull(Realm.getDefaultInstance());
@@ -383,53 +380,57 @@ public class STBService extends Service {
 
             String url = pairedSTB + ":" + OGConstants.STB_PORT + OGConstants.STB_TUNED_ENDPOINT;
 
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
+            try {
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
 
-            client.newCall(request).enqueue(new Callback() {
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                    Log.wtf(TAG, "Couldn't GET from STB!");
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                    if (!response.isSuccessful()) {
-//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
-                        //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
-                        //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
-                        //OGDevice.unpair(Realm.getDefaultInstance());
-
-                        throw new IOException("Unexpected code " + response);
-                    }
-                    //                Headers responseHeaders = response.headers();
-                    //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-                    //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                    //                }
-                    //
-                    //                System.out.println(response.body().string());
-
-                    // TODO feels brittle, need more error checking
-                    String resJson = response.body().string();
-                    try {
-
-                        JSONObject direcTVJson = new JSONObject(resJson);
-                        //                    OGCore.channel = (direcTVJson.getString("callsign"));
-                        //                    OGCore.programId = (direcTVJson.getString("programId"));
-                        //                    OGCore.programTitle= (direcTVJson.getString("title"));
-                        OGCore.setChannelInfo(direcTVJson.getString("callsign"),
-                                direcTVJson.getString("programId"),
-                                direcTVJson.getString("title"));
-
-                    } catch (JSONException e) {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
+                        Log.wtf(TAG, "Couldn't GET from STB!");
                     }
-                }
-            });
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+
+                        if (!response.isSuccessful()) {
+//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
+                            //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                            //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
+                            //OGDevice.unpair(Realm.getDefaultInstance());
+
+                            throw new IOException("Unexpected code " + response);
+                        }
+                        //                Headers responseHeaders = response.headers();
+                        //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
+                        //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                        //                }
+                        //
+                        //                System.out.println(response.body().string());
+
+                        // TODO feels brittle, need more error checking
+                        String resJson = response.body().string();
+                        try {
+
+                            JSONObject direcTVJson = new JSONObject(resJson);
+                            //                    OGCore.channel = (direcTVJson.getString("callsign"));
+                            //                    OGCore.programId = (direcTVJson.getString("programId"));
+                            //                    OGCore.programTitle= (direcTVJson.getString("title"));
+                            OGCore.setChannelInfo(direcTVJson.getString("callsign"),
+                                    direcTVJson.getString("programId"),
+                                    direcTVJson.getString("title"));
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            } catch (Exception e){
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

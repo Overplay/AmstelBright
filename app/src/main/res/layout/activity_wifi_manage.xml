@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_wifi_manage"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity"
+    android:background="#00FFFFFF">
+
+    <!-- content wrapper -->
+    <RelativeLayout
+        android:id="@+id/wifi_manage_content_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#333333">
+
+        <!-- Title/Header -->
+        <TextView
+            android:id="@+id/wifi_pair_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dip"
+            android:text="Connect"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textColor="@color/White"
+            android:textSize="50dip"
+            android:paddingLeft="70dip"
+            android:background="#333333"/>
+
+        <!-- Status Message -->
+        <LinearLayout
+            android:id="@+id/wifi_status_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_pair_title"
+            android:paddingLeft="70dip"
+            android:paddingBottom="20dip"
+            android:orientation="horizontal"
+            android:background="#333333">
+
+            <!--TextView
+                android:id="@+id/wifi_status_head"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Status: "
+                android:textColor="@color/White"
+                android:textSize="24dip" /-->
+
+            <TextView
+                android:id="@+id/wifi_current_connection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="24dip" />
+
+        </LinearLayout>
+
+        <!-- List Header -->
+        <!--TextView
+            android:id="@+id/wifi_list_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_status_line"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="20dip"
+            android:text="Available Networks:"
+            android:textColor="@color/DodgerBlue"
+            android:textSize="24dip" /-->
+
+        <!-- list of wifi devices -->
+        <ListView
+            android:id="@+id/wifi_networks_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_status_line"
+            android:listSelector="#00000000"/>
+
+        <!-- empty list message -->
+        <TextView
+            android:id="@+id/empty_list_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wifi_networks_list"
+            android:text="There seem to be no devices on the network..."
+            android:textAlignment="center"
+            android:textColor="@color/Red"
+            android:textSize="30dip"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wifi_password_box"
+            android:visibility="gone">
+            <EditText
+                android:layout_width="300dip"
+                android:layout_height="wrap_content"
+                android:id="@+id/wifi_password_edit_text"
+                android:background="@drawable/bottom_border"
+                android:inputType="textPassword"
+                android:textSize="24dip" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/wifi_password_prompt"
+                android:layout_below="@id/wifi_password_edit_text"
+                android:textSize="24dip"
+                android:text="wifi password"
+                android:textColor="@color/White"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/wifi_password_prompt"
+                android:id="@+id/wifi_password_toggle"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/toggle_show_password"
+                    android:checked="false"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show password"
+                    android:textColor="@color/White"/>
+            </LinearLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="connect"
+                android:id="@+id/wifi_connect_button"
+                android:enabled="false"
+                android:layout_below="@id/wifi_password_toggle"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

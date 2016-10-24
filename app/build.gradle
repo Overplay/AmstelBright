@@ -19,9 +19,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
-        abortOnError false
-    }
 }
 
 dependencies {
@@ -35,5 +32,6 @@ dependencies {
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.daimajia.easing:library:1.0.1@aar'
 
+    compile 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
     compile 'io.jsonwebtoken:jjwt:0.6.0'
 }

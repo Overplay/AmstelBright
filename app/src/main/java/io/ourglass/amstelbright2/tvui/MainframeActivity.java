@@ -47,6 +47,8 @@ import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.tvui.stb.DirecTVPairActivity;
+import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
 
 @SuppressLint("SetJavaScriptEnabled")
 
@@ -241,6 +243,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         if (keyCode == 8){
             Intent intent = new Intent(this, DirecTVPairActivity.class);
+            startActivity(intent);
+        }
+
+        if (keyCode == 9){
+            Intent intent = new Intent(this, WifiManageActivity.class);
             startActivity(intent);
         }
 

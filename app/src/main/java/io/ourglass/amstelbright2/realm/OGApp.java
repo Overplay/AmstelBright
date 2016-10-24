@@ -29,6 +29,10 @@ public class OGApp extends RealmObject {
     @Required
     public String appName;
 
+    public String version;
+
+    public long installDate;
+
     int primaryColor;
     int secondaryColor;
     String icon;
@@ -98,6 +102,9 @@ public class OGApp extends RealmObject {
 
             rval.put("icon", this.icon);
             rval.put("iconPath", "www/opp/"+this.appId+"/assets/icons/"+this.icon);
+
+            rval.put("version", this.version);
+            rval.put("installDate", this.installDate);
 
         } catch (Exception e){
 
@@ -179,7 +186,9 @@ public class OGApp extends RealmObject {
         try {
             return candidate.has("appId") && !candidate.getString("appId").isEmpty()
                     && candidate.has("appType") && !candidate.getString("appType").isEmpty()
-                    && candidate.has("appName") && !candidate.getString("appName").isEmpty();
+                    && candidate.has("appName") && !candidate.getString("appName").isEmpty()
+                    && candidate.has("version") && !candidate.getString("version").isEmpty()
+                    && candidate.has("installDate") && candidate.getLong("installDate") != 0;
         } catch(JSONException e){
             return false;
         }

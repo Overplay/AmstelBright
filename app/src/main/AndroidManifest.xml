@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.ourglass.amstelbright2">
 
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -71,10 +72,25 @@
         <!-- </intent-filter> -->
         <!-- </receiver> -->
 
+        <receiver android:name=".tvui.wifi.WifiManageActivity$WifiReceiver" >
+            <intent-filter android:priority="100">
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
+
         <activity
-            android:name=".tvui.DirecTVPairActivity"
+            android:name=".tvui.stb.DirecTVPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-            >
+        </activity>
+
+        <activity android:name=".tvui.stb.DirecTVConfirmActivity"
+            android:theme="@style/Theme.AppCompat.Translucent">
+
+        </activity>
+        <activity
+            android:name=".tvui.wifi.WifiManageActivity"
+            android:theme="@style/Theme.AppCompat.Translucent">
+
         </activity>
 
 

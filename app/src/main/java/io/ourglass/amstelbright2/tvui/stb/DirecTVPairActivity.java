@@ -1,8 +1,5 @@
-package io.ourglass.amstelbright2.tvui;
+package io.ourglass.amstelbright2.tvui.stb;
 
-import android.Manifest;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,53 +7,49 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.nfc.Tag;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.daimajia.easing.linear.Linear;
-
-import org.json.JSONArray;
-
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGConstants;
+import io.ourglass.amstelbright2.core.OGNotifications;
 import io.ourglass.amstelbright2.realm.OGDevice;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
 
 public class DirecTVPairActivity extends AppCompatActivity {
+
+    static final int REQUEST_CODE = 43;
 
     TextView title;
 
     RelativeLayout contentWrapper;
     TextView errorMsg;
     TextView currentPair;
-    TextView deviceListHeader;
+
     ListView directvDevicesList;
     TextView emptyListMessage;
     DirectvDevicesAdapter devicesAdapter;
+    View scanningMessage;
+
+    Typeface font;
+    Typeface boldFont;
+
+    int contentMarginHor;
+    int contentMarginVer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +72,8 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 int contentWidth = (int)(width * .8);
                 int contentHeight = (int)(height * .84);
 
-                int contentMarginHor = (int)(width * .1);
-                int contentMarginVer = (height - contentHeight) / 2;
+                contentMarginHor = (int)(width * .1);
+                contentMarginVer = (height - contentHeight) / 2;
 
                 RelativeLayout.LayoutParams contentWrapperParams = (RelativeLayout.LayoutParams)contentWrapper.getLayoutParams();
 
@@ -98,26 +91,30 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 });
                 contentWrapper.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
+
+
             }
         });
 
 
         //set the font to Exo
         AssetManager am = this.getApplicationContext().getAssets();
-        Typeface exo2Typeface = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Exo2-Medium.ttf"));
+        Typeface poppins = font = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Poppins-Regular.ttf"));
+        boldFont = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Poppins-Bold.ttf"));
 
         title = (TextView) findViewById(R.id.directv_pair_title);
         errorMsg = (TextView) findViewById(R.id.error_msg);
         currentPair = (TextView) findViewById(R.id.current_pair);
-        deviceListHeader = (TextView) findViewById(R.id.device_list_header);
         directvDevicesList = (ListView) findViewById(R.id.directv_devices_list);
         emptyListMessage = (TextView) findViewById(R.id.empty_list_message);
+        scanningMessage = findViewById(R.id.scanning_message);
 
-        title.setTypeface(exo2Typeface);
-        errorMsg.setTypeface(exo2Typeface);
-        currentPair.setTypeface(exo2Typeface);
-        deviceListHeader.setTypeface(exo2Typeface);
-        emptyListMessage.setTypeface(exo2Typeface);
+        title.setTypeface(boldFont);
+        errorMsg.setTypeface(poppins);
+        currentPair.setTypeface(poppins);
+        emptyListMessage.setTypeface(boldFont);
+
+        directvDevicesList.setAdapter(new DirectvDevicesAdapter(this, STBService.foundBoxes, poppins, boldFont));
 
         String pairedSTB = OGDevice.getPairedSTBOrNull(Realm.getDefaultInstance());
         if(pairedSTB != null){
@@ -125,16 +122,6 @@ public class DirecTVPairActivity extends AppCompatActivity {
         }
         else{
             nullifyCurrentPair();
-        }
-
-        devicesAdapter = new DirectvDevicesAdapter(this, STBService.foundBoxes);
-        directvDevicesList.setAdapter(devicesAdapter);
-        boolean ready = STBService.hasSearched;
-        if(ready){
-            setDirectvDevicesList();
-        }
-        else {
-            setErrorMsg("Not ready yet");
         }
         startCheckLoop();
     }
@@ -144,8 +131,10 @@ public class DirecTVPairActivity extends AppCompatActivity {
         emptyListMessage.setText(message);
     }
 
+    public String lastIpAddressClicked;
+
     public void setDirectvDevicesList(){
-        devicesAdapter.notifyDataSetChanged();
+//        devicesAdapter.notifyDataSetChanged();
 
         final Activity _this = this;
 //        runOnUiThread(new Runnable() {
@@ -200,92 +189,123 @@ public class DirecTVPairActivity extends AppCompatActivity {
                 directvDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        final String ip = STBService.foundBoxes.get(position).ipAddr;
-                        //final String ip = info.substring(0, info.indexOf('\n'));
+                        STBService.DirectvBoxInfo selectedBox = STBService.foundBoxes.get(position);
+                        final String ip = selectedBox.ipAddr;
+                        final String name = selectedBox.friendlyName;
+                        final String currentChannel = selectedBox.refreshWhatsPlaying();
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+                        view.setBackgroundColor(Color.WHITE);
 
-                        builder.setMessage("Are you sure you want to pair with " + ip + "?");
-                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                OGDevice.setPairedSTB(Realm.getDefaultInstance(), ip);
-                                setCurrentPair(ip);
-                            }
-                        });
-                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                //cancel the dialog
-                            }
-                        });
-                        AlertDialog dialog = builder.create();
+                        TextView friendlyName = (TextView) view.findViewById(R.id.dtv_list_elem_friendlyName);
+                        TextView curPlaying = (TextView) view.findViewById(R.id.dtv_list_elem_curPlaying);
+                        TextView ipAddr = (TextView) view.findViewById(R.id.dtv_list_elem_ipAddr);
+                        TextView idx = (TextView) view.findViewById(R.id.dtv_list_elem_idx_num);
+                        View divider = view.findViewById(R.id.divider);
 
-                        dialog.show();
+                        int green = OGConstants.DIRECTV_PAIR_ACTIVITY_BACKGROUND_GREEN;
+
+                        friendlyName.setTextColor(green);
+                        curPlaying.setTextColor(green);
+                        ipAddr.setTextColor(green);
+                        idx.setTextColor(green);
+                        divider.setBackgroundColor(green);
+
+                        int width = contentWrapper.getWidth();
+
+                        Intent intent = new Intent(_this, DirecTVConfirmActivity.class);
+                        intent.putExtra("width", width);
+                        intent.putExtra("marginHor", contentMarginHor);
+                        intent.putExtra("marginVer", contentMarginVer);
+                        intent.putExtra("ip", ip);
+                        intent.putExtra("friendlyName", name);
+                        intent.putExtra("currentChannel", currentChannel);
+                        intent.putExtra("number", position + 1);
+
+                        lastIpAddressClicked = ip;
+                        startActivityForResult(intent, REQUEST_CODE);
+
                     }
                 });
 
             }
         });
 
-        if(STBService.foundBoxes.size() == 0){
-            emptyListMessage.setText("There seem to be no boxes on the network");
-            emptyListMessage.setVisibility(View.VISIBLE);
-        }
+        //todo put this back in
+//        if(STBService.foundBoxes.size() == 0){
+//            emptyListMessage.setText("No boxes found");//("There seem to be no boxes on the network");
+//            emptyListMessage.setVisibility(View.VISIBLE);
+//        }
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int result, Intent data){
+        if(requestCode == REQUEST_CODE){
+            //regardless of the result, we will want to restore the color of the list
+            int length = directvDevicesList.getChildCount();
+            for(int i = 0; i < length; i++){
+                View child = directvDevicesList.getChildAt(i);
+                child.setBackgroundColor(OGConstants.DIRECTV_PAIR_ACTIVITY_BACKGROUND_GREEN);
+
+                TextView friendlyName = (TextView) child.findViewById(R.id.dtv_list_elem_friendlyName);
+                TextView curPlaying = (TextView) child.findViewById(R.id.dtv_list_elem_curPlaying);
+                TextView ipAddr = (TextView) child.findViewById(R.id.dtv_list_elem_ipAddr);
+                TextView idx = (TextView) child.findViewById(R.id.dtv_list_elem_idx_num);
+                View divider = child.findViewById(R.id.divider);
+
+                friendlyName.setTextColor(Color.WHITE);
+                curPlaying.setTextColor(Color.WHITE);
+                ipAddr.setTextColor(Color.WHITE);
+                idx.setTextColor(Color.WHITE);
+                divider.setBackgroundColor(Color.WHITE);
+            }
+
+            if(result == OGConstants.DIRECTV_PAIR_CONFIRMED_RESULT_CODE){
+                Realm realm = Realm.getDefaultInstance();
+                OGDevice device = realm.where(OGDevice.class).findFirst();
+
+                realm.beginTransaction();
+                device.pairedSTBAddr = lastIpAddressClicked;
+                device.isPairedToSTB = true;
+                realm.commitTransaction();
+                setCurrentPair(lastIpAddressClicked);
+                lastIpAddressClicked = "";
+                finish();
+            }
+            else if(result == OGConstants.DIRECTV_PAIR_CANCELED_RESULT_CODE){
+                lastIpAddressClicked = "";
+            }
+        }
     }
 
     public void setCurrentPair(String ip){
-        this.currentPair.setText("paired with " + ip);
+        this.currentPair.setText(ip);
     }
 
     public void nullifyCurrentPair(){
-        this.currentPair.setText("currently not paired");
+        this.currentPair.setText("N/A");
     }
 
     public void startCheckLoop(){
         final Handler h = new Handler();
+        final Context _this = (Context)this;
         h.postDelayed(new Runnable()
         {
-            private long time = 0;
-
             @Override
             public void run()
             {
                 if(STBService.hasSearched){
-//                    errorMsg.setText("");
-//                    errorMsg.setVisibility(View.GONE);
                     emptyListMessage.setText("");
                     emptyListMessage.setVisibility(View.GONE);
 
                     setDirectvDevicesList();
+
                     ((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
+
+                    //hide the scanning message
+                    scanningMessage.setVisibility(View.GONE);
                     h.postDelayed(this, 1000);
                 }
                 else {
-                    String msg = emptyListMessage.getText().toString();
-                    String msgTemplate = "Not ready yet";
-
-                    if(msg.contains("...")){
-                        msg = msgTemplate + "   ";
-                    }
-                    else if(msg.contains("..")){
-                        msg = msgTemplate + "...";
-                    }
-                    else if(msg.contains(".")){
-                        msg = msgTemplate + ".. ";
-                    }
-                    else{
-                        msg = msgTemplate + ".  ";
-                    }
-//                    int idx;
-//                    if((idx = msg.indexOf("...")) != -1){
-//                        msg = msg.substring(0, idx);
-//                    }
-//                    else {
-//                        msg += ".";
-//                    }
-                    setErrorMsg(msg);
                     h.postDelayed(this, 500);
                 }
             }
@@ -297,9 +317,10 @@ public class DirecTVPairActivity extends AppCompatActivity {
 
         //the '1' button. Button press that opened this activity should also return to previous
         //activity if pressed again
-        if (keyCode == 8){
+        if (keyCode == 8 || keyCode == 4){
             finish();
         }
+
         return false;
     }
 }
