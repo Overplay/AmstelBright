@@ -1,6 +1,8 @@
 package io.ourglass.amstelbright2.tvui.wifi;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
@@ -21,8 +24,12 @@ import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
  */
 
 public class WifiNetworksAdapter extends ArrayAdapter<WifiManageActivity.WifiNetworkInfo> {
+    Context _this;
+    boolean listDisabled = false;
+
     public WifiNetworksAdapter(Context context, ArrayList<WifiManageActivity.WifiNetworkInfo> networks){
         super(context, 0, networks);
+        _this = context;
     }
 
     @Override
@@ -35,8 +42,15 @@ public class WifiNetworksAdapter extends ArrayAdapter<WifiManageActivity.WifiNet
         }
 
         TextView ssid = (TextView) convertView.findViewById(R.id.wifi_list_elem_ssid);
-        TextView securityDescription = (TextView) convertView.findViewById(R.id.wifi_list_elem_security_desc);
+//        TextView securityDescription = (TextView) convertView.findViewById(R.id.wifi_list_elem_security_desc);
         ImageView wifiLevel = (ImageView) convertView.findViewById(R.id.image_wifi_level_unlocked);
+
+        //set the font to Exo
+        AssetManager am = _this.getApplicationContext().getAssets();
+        Typeface poppins = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Poppins-Regular.ttf"));
+
+        ssid.setTypeface(poppins);
+//        securityDescription.setTypeface(poppins);
 
         wifiLevel.setImageLevel(wifiNetworkInfo.signalStrength);
 
@@ -56,9 +70,14 @@ public class WifiNetworksAdapter extends ArrayAdapter<WifiManageActivity.WifiNet
         if(WifiManageActivity.CURRENT_CONNECTION_STRING.length() != 0 && wifiNetworkInfo.SSID.equals(WifiManageActivity.CURRENT_CONNECTION_STRING)){
             securityString = "Connected";
         }
-        securityDescription.setText(securityString);
+//        securityDescription.setText(securityString);
 
         return convertView;
+    }
+
+    @Override
+    public boolean isEnabled(int position){
+        return !listDisabled;
     }
 
 }

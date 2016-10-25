@@ -1,5 +1,6 @@
 package io.ourglass.amstelbright2.tvui.wifi;
 
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,8 +9,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -24,23 +27,33 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;
@@ -61,14 +74,28 @@ public class WifiManageActivity extends AppCompatActivity{
     
     TextView title;
     TextView currentConnection;
-    TextView wifiListHeader;
+//    TextView wifiListHeader;
     ListView wifiNetworksList;
     TextView emptyListMessage;
+
+    RelativeLayout passwordBox;
+    EditText passwordField;
+    TextView passwordPrompt;
+    Button wifiConnect;
+
+    int passwordFieldMarginTop;
 
     WifiManager manager;
     WifiInfo currentConnectionInfo = null;
 
+    WifiNetworkInfo selectedConnectionInfo = null;
+    Integer selectedConnectionIndex = null;
+
     IntentFilter intentFilter;
+    WifiReceiver wifiReceiver;
+
+    Typeface font;
+    Typeface boldFont;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -82,7 +109,7 @@ public class WifiManageActivity extends AppCompatActivity{
 
         final RelativeLayout outerLayout = (RelativeLayout) findViewById(R.id.activity_wifi_manage);
         final RelativeLayout contentWrapper = (RelativeLayout) findViewById(R.id.wifi_manage_content_wrapper);
-
+        contentWrapper.setBackgroundColor(OGConstants.WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE);
         //wait for outerLayout to settle
         outerLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -96,10 +123,23 @@ public class WifiManageActivity extends AppCompatActivity{
                 int contentMarginVer = (height - contentHeight) / 2;
 
                 RelativeLayout.LayoutParams contentWrapperParams = (RelativeLayout.LayoutParams)contentWrapper.getLayoutParams();
+                final RelativeLayout.LayoutParams wifiNetworksListParams = (RelativeLayout.LayoutParams)wifiNetworksList.getLayoutParams();
+                final RelativeLayout.LayoutParams passwordFieldParams = (RelativeLayout.LayoutParams)passwordBox.getLayoutParams();
 
                 contentWrapperParams.setMargins(contentMarginHor, contentMarginVer, contentMarginHor, contentMarginVer);
                 contentWrapperParams.width = contentWidth;
                 contentWrapperParams.height = contentHeight;
+
+                //set the wifiList to be 30% of the content wrapper with margin=35% each side
+                wifiNetworksListParams.width = (int)(.5 * contentWidth);
+                wifiNetworksListParams.setMargins((int)(.25 * contentWidth), 0, 0/*(int)(.25 * contentWidth)*/, 0);
+
+                //position the password field correctly
+                passwordFieldMarginTop = (int)(contentHeight * .45);
+                passwordFieldParams.leftMargin = (int)(.60 * contentWidth);
+                passwordFieldParams.topMargin = passwordFieldMarginTop;
+                passwordFieldParams.width = (int)(contentWidth * .35);
+                passwordBox.setLayoutParams(passwordFieldParams);
 
                 contentWrapper.setLayoutParams(contentWrapperParams);
                 //contentWrapper.setPadding(10, 10, 10, 10);
@@ -107,18 +147,39 @@ public class WifiManageActivity extends AppCompatActivity{
                     @Override
                     public void run() {
                         contentWrapper.requestLayout();
+                        wifiNetworksList.requestLayout();
+                        passwordField.requestLayout();
                     }
                 });
                 contentWrapper.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
+
             }
         });
+
+        //set the font to Exo
+        AssetManager am = this.getApplicationContext().getAssets();
+        Typeface poppins = font = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Poppins-Regular.ttf"));
+        boldFont = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "Poppins-Bold.ttf"));
+
         /* fetch all of the things from the xml */
         title = (TextView) findViewById(R.id.wifi_pair_title);
         currentConnection = (TextView) findViewById(R.id.wifi_current_connection);
-        wifiListHeader = (TextView) findViewById(R.id.wifi_list_header);
+        //wifiListHeader = (TextView) findViewById(R.id.wifi_list_header);
         wifiNetworksList = (ListView) findViewById(R.id.wifi_networks_list);
         emptyListMessage = (TextView) findViewById(R.id.empty_list_message);
+        passwordBox = (RelativeLayout) findViewById(R.id.wifi_password_box);
+        passwordField = (EditText) findViewById(R.id.wifi_password_edit_text);
+        passwordPrompt = (TextView) findViewById(R.id.wifi_password_prompt);
+        wifiConnect = (Button) findViewById(R.id.wifi_connect_button);
+
+        title.setTypeface(boldFont);
+        currentConnection.setTypeface(font);
+        //wifiListHeader.setTypeface(font);
+        emptyListMessage.setTypeface(font);
+        passwordField.setTypeface(font);
+        passwordPrompt.setTypeface(font);
+
 
         wifiNetworksList.setPadding(10, 10, 10, 10);
 
@@ -128,8 +189,9 @@ public class WifiManageActivity extends AppCompatActivity{
         List<ScanResult> results = manager.getScanResults();
         networks = new ArrayList<>();
         for(ScanResult scan : results){
-            if(scan.SSID != null && scan.SSID.length() != 0)
+            if(scan.SSID != null && scan.SSID.length() != 0) {
                 networks.add(new WifiNetworkInfo(scan));
+            }
         }
 
         Log.v(TAG, "There seem to be " + networks.size() + " on the network");
@@ -140,20 +202,122 @@ public class WifiManageActivity extends AppCompatActivity{
 
         wifiNetworksList.setAdapter(wifiNetworksAdapter);
         wifiNetworksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            long lastAcceptedClick = 0;
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //todo flush out the onclick code
-                WifiNetworkInfo info = networks.get(position);
-                if(info != null) {
-                    Log.v(TAG, "Attempting to connect to " + info.SSID);
-                    connectToNetwork(info);
+                long currentTime = Calendar.getInstance().getTimeInMillis();
+                if((currentTime - lastAcceptedClick) > OGConstants.BUTTON_CLICK_DEBOUNCE) {
+                    //reset the debounce timer
+                    lastAcceptedClick = currentTime;
+                    int newLeftMargin;
+                    //closing the password prompt
+                    if(selectedConnectionIndex != null && position == selectedConnectionIndex){
+                        selectedConnectionIndex = null;
+                        selectedConnectionInfo = null;
+                        view.setBackgroundColor(OGConstants.WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE);
+                        ((TextView)view.findViewById(R.id.wifi_list_elem_ssid)).setTextColor(Color.WHITE);
+                        ((ImageView)view.findViewById(R.id.image_wifi_level_unlocked)).setColorFilter(Color.WHITE);
+                        newLeftMargin = 250;
+                    }
+                    //opening the password prompt
+                    else {
+                        //if there is a previously highlighted view, then unhighlight
+                        if(selectedConnectionIndex != null){
+                            View previouslySelected = wifiNetworksList.getChildAt(selectedConnectionIndex);
+                            if(previouslySelected != null){
+                                previouslySelected.setBackgroundColor(OGConstants.WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE);
+                                ((TextView)previouslySelected.findViewById(R.id.wifi_list_elem_ssid)).setTextColor(Color.WHITE);
+                                ((ImageView)previouslySelected.findViewById(R.id.image_wifi_level_unlocked)).setColorFilter(Color.WHITE);
+                            }
+                        }
+                        //highlight the selected network
+                        view.setBackgroundColor(Color.WHITE);
+                        ((TextView)view.findViewById(R.id.wifi_list_elem_ssid)).setTextColor(OGConstants.WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE);
+                        ((ImageView)view.findViewById(R.id.image_wifi_level_unlocked)).setColorFilter(OGConstants.WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE);
+
+                        selectedConnectionIndex = position;
+                        selectedConnectionInfo = wifiNetworksAdapter.getItem(position);
+                        newLeftMargin = 50;
+                    }
+
+
+                    //move the listview accordingly
+                    final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) wifiNetworksList
+                            .getLayoutParams();
+                    final int newLeftMarginFinal = newLeftMargin;
+                    if(layoutParams.leftMargin != newLeftMargin) {
+                        ValueAnimator animator = ValueAnimator.ofInt(layoutParams.leftMargin, newLeftMargin);
+                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                layoutParams.leftMargin = (Integer) animation.getAnimatedValue();
+                                if(layoutParams.leftMargin == 50)
+                                    passwordBox.setVisibility(View.VISIBLE);
+                                else {
+                                    passwordBox.setVisibility(View.GONE);
+                                }
+                                wifiNetworksList.requestLayout();
+                            }
+                        });
+                        animator.setDuration(500);
+                        animator.start();
+                    }
+                    passwordField.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            if(s.length() >= 8){
+                                wifiConnect.setEnabled(true);
+                            }
+                            else {
+                                wifiConnect.setEnabled(false);
+                            }
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                        }
+                    });
+                    //set the onclick for the showpassword checkbox
+                    CheckBox showPass = (CheckBox) findViewById(R.id.toggle_show_password);
+                    showPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            //save cursor position
+                            EditText passField = (EditText)findViewById(R.id.wifi_password_edit_text);
+                            if(passField == null) {
+                                Log.w(TAG, "Password field could not be found");
+                                return;
+                            }
+
+                            int start = passField.getSelectionStart(), end = passField.getSelectionEnd();
+
+                            if(!isChecked){
+                                passField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                            }
+                            else{
+                                passField.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                            }
+                            passField.setSelection(start,end);
+                        }
+                    });
+
                 }
             }
         });
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        registerReceiver(new WifiReceiver(), intentFilter);
+
+        wifiReceiver = new WifiReceiver();
+        registerReceiver(wifiReceiver, intentFilter);
 
         ConnectivityManager connManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -168,6 +332,39 @@ public class WifiManageActivity extends AppCompatActivity{
                 currentConnection.setText("Not connected");
             }
         }
+
+        wifiConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(selectedConnectionInfo != null) {
+                    if (selectedConnectionInfo.secured) {
+
+                        String password = passwordField.getText().toString();
+                        Log.v(TAG, "Trying to connect to " + selectedConnectionInfo.SSID + " with " + password);
+                        if (selectedConnectionInfo.WEP) {
+                            WifiUtils.connectToWEPSecuredNetwork(selectedConnectionInfo.SSID, password, manager);
+                        } else if (selectedConnectionInfo.WPA || selectedConnectionInfo.WPA2) {
+                            WifiUtils.connectToWPASecuredNetwork(selectedConnectionInfo.SSID, password, manager);
+                        }
+//                        might need a different case here but I think it probably is the same as WPA
+//                        else if(info.WPA2){
+//
+//                        }
+                    } else {
+                        WifiUtils.connectToOpenNetwork(selectedConnectionInfo.SSID, manager);
+                    }
+                }
+                else {
+                    Log.w(TAG, "Tried to connect to a network, and there was not one currently selected");
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        unregisterReceiver(wifiReceiver);
     }
 
     /**
@@ -248,36 +445,6 @@ public class WifiManageActivity extends AppCompatActivity{
         }
     }
 
-    //todo flush out the refresh loop
-    //todo actually probably won't need this, and can get away with what we have at activityLaunchTime
-//    private void refreshWifiNetworksList(){
-//        String currentConnectionInformationStr = "Not connected";
-//
-//        networks = manager.getScanResults();
-//
-//        int state = manager.getWifiState();
-//
-//        this.currentConnectionInfo = manager.getConnectionInfo();
-//        if(currentConnectionInfo != null){;
-//            currentConnectionInformationStr = "Connected to " + currentConnectionInfo.getSSID().replace("\"", "");
-//        }
-//
-//        while(nets.size() > 0)
-//            nets.remove(0);
-//        for(ScanResult net : networks){
-//            nets.add(net.SSID);
-//        }
-//
-//        final String connectInfo = currentConnectionInformationStr;
-//        runOnUiThread(new Runnable(){
-//            @Override
-//            public void run(){
-//                currentConnection.setText(connectInfo);
-//                arrayAdapter.notifyDataSetChanged();
-//            }
-//        });
-//    }
-
     private void getCurrentConnection(){
         String currentConnectionInformationStr = "Not connected";
 
@@ -327,77 +494,8 @@ public class WifiManageActivity extends AppCompatActivity{
                 }
             });
 
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.dialog_wifi_manage_password, null);
-            builder.setView(dialogView);
-            final AlertDialog dialog = builder.create();
-            dialog.show();
-
-            dialog.getButton(AlertDialog.BUTTON1).setEnabled(false);
-
-            TextView signalStrength = (TextView) dialog.findViewById(R.id.signal_strength_field);
-            signalStrength.setText(info.getSignalStrengthString());
-
-            TextView securityField = (TextView) dialog.findViewById(R.id.security_field);
-            securityField.setText(info.capabilitiesShort);
-
-            EditText passField = (EditText) dialog.findViewById(R.id.wifi_password_edit_text);
-            passField.getBackground().mutate().setColorFilter(getResources().getColor(R.color.Crimson), PorterDuff.Mode.SRC_ATOP);
-            passField.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if(s.length() >= 8){
-                        dialog.getButton(AlertDialog.BUTTON1).setEnabled(true);
-                    }
-                    else {
-                        dialog.getButton(AlertDialog.BUTTON1).setEnabled(false);
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
-
-            TextView title = (TextView) dialog.findViewById(R.id.wifi_password_entry_title);
-            title.setText(info.SSID);
-
-            CheckBox showPass = (CheckBox) dialog.findViewById(R.id.toggle_show_password);
-            showPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    //save cursor position
-                    EditText passField = (EditText)dialog.findViewById(R.id.wifi_password_edit_text);
-                    if(passField == null) {
-                        Log.w(TAG, "Password field could not be found");
-                        return;
-                    }
-
-                    int start = passField.getSelectionStart(), end = passField.getSelectionEnd();
-
-                    if(!isChecked){
-                        passField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    }
-                    else{
-                        passField.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                    }
-                    passField.setSelection(start,end);
-                }
-            });
+//            EditText passField = (EditText) dialog.findViewById(R.id.wifi_password_edit_text);
+//            passField.getBackground().mutate().setColorFilter(getResources().getColor(R.color.Crimson), PorterDuff.Mode.SRC_ATOP);
 
         }
         else {

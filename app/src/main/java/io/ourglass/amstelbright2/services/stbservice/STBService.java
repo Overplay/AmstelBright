@@ -87,10 +87,10 @@ public class STBService extends Service {
         }
 
         public String refreshWhatsPlaying(){
-            Request req = new Request.Builder()
-                    .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
-                    .build();
             try {
+                Request req = new Request.Builder()
+                        .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                        .build();
                 Response response = this.client.newCall(req).execute();
                 if(!response.isSuccessful()) {
                     return null;
@@ -103,13 +103,13 @@ public class STBService extends Service {
                 return null;
             } catch (JSONException e){
                 return null;
+            } catch (Exception e){
+                return null;
             }
-
-//            }
         }
     }
 
-    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<>();
+    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<DirectvBoxInfo>();
 
     private boolean mListening = false;
 
@@ -380,53 +380,57 @@ public class STBService extends Service {
 
             String url = pairedSTB + ":" + OGConstants.STB_PORT + OGConstants.STB_TUNED_ENDPOINT;
 
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
+            try {
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
 
-            client.newCall(request).enqueue(new Callback() {
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                    Log.wtf(TAG, "Couldn't GET from STB!");
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                    if (!response.isSuccessful()) {
-//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
-                        //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
-                        //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
-                        //OGDevice.unpair(Realm.getDefaultInstance());
-
-                        throw new IOException("Unexpected code " + response);
-                    }
-                    //                Headers responseHeaders = response.headers();
-                    //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-                    //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                    //                }
-                    //
-                    //                System.out.println(response.body().string());
-
-                    // TODO feels brittle, need more error checking
-                    String resJson = response.body().string();
-                    try {
-
-                        JSONObject direcTVJson = new JSONObject(resJson);
-                        //                    OGCore.channel = (direcTVJson.getString("callsign"));
-                        //                    OGCore.programId = (direcTVJson.getString("programId"));
-                        //                    OGCore.programTitle= (direcTVJson.getString("title"));
-                        OGCore.setChannelInfo(direcTVJson.getString("callsign"),
-                                direcTVJson.getString("programId"),
-                                direcTVJson.getString("title"));
-
-                    } catch (JSONException e) {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
+                        Log.wtf(TAG, "Couldn't GET from STB!");
                     }
-                }
-            });
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+
+                        if (!response.isSuccessful()) {
+//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
+                            //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                            //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
+                            //OGDevice.unpair(Realm.getDefaultInstance());
+
+                            throw new IOException("Unexpected code " + response);
+                        }
+                        //                Headers responseHeaders = response.headers();
+                        //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
+                        //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                        //                }
+                        //
+                        //                System.out.println(response.body().string());
+
+                        // TODO feels brittle, need more error checking
+                        String resJson = response.body().string();
+                        try {
+
+                            JSONObject direcTVJson = new JSONObject(resJson);
+                            //                    OGCore.channel = (direcTVJson.getString("callsign"));
+                            //                    OGCore.programId = (direcTVJson.getString("programId"));
+                            //                    OGCore.programTitle= (direcTVJson.getString("title"));
+                            OGCore.setChannelInfo(direcTVJson.getString("callsign"),
+                                    direcTVJson.getString("programId"),
+                                    direcTVJson.getString("title"));
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            } catch (Exception e){
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.core;
 
+import android.graphics.Color;
+
 import java.util.regex.Pattern;
 
 /**
@@ -90,8 +92,16 @@ public class OGConstants {
     public static final String DIRECTV_CHANNEL_GET_ENDPOINT = "/tv/getTuned";
     public static final int DIRECTV_PORT = 8080;
     public static final int DIRECTV_API_CONNECTION_TIMEOUT = 15000;
+    public static final int DIRECTV_PAIR_CANCELED_RESULT_CODE = 0;
+    public static final int DIRECTV_PAIR_CONFIRMED_RESULT_CODE = 1;
+
+    public static final int DIRECTV_PAIR_ACTIVITY_BACKGROUND_GREEN = Color.parseColor("#51B85E");
+
+    public static final int WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE = Color.parseColor("#F6921E");
 
     public static final String[] WIFI_STRENGTH_LEVELS = new String[]{"None", "Poor", "Fair", "Good", "Excellent"};
+
+    public static final int BUTTON_CLICK_DEBOUNCE = 2000;
 
     // HARD CODED for DEMO
     public static final int STB_PORT = 8080;
