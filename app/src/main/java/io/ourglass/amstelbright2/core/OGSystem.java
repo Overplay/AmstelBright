@@ -7,6 +7,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.Log;
+import android.view.SurfaceView;
 
 import com.mstar.android.tv.TvCommonManager;
 import com.mstar.android.tvapi.common.TvManager;
@@ -35,6 +36,8 @@ public class OGSystem {
     private static SharedPreferences.Editor mEditor = mPrefs.edit();
 
     public static final String TAG = "OGSystem";
+
+    private static HDMIRxPlayer m_HDMIRxPlayer;
 
     /**
      *
@@ -73,9 +76,11 @@ public class OGSystem {
     }
 
 
-    public static boolean enableHDMI(){
+    public static boolean enableHDMI(Context c, SurfaceView rootView  ){
 
         if ( isRealOG() ){
+
+            m_HDMIRxPlayer = new HDMIRxPlayer(c, rootView, 1920, 1080);
 
             return false;
 

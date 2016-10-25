@@ -161,7 +161,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             }
         });
 
-        if (!OGSystem.enableHDMI()) {
+        if (!OGSystem.enableHDMI(this, (SurfaceView)findViewById(R.id.surfaceView))) {
             // The color change doesn't seem to do anything...:(.. not worth stressing.
 
             surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
@@ -798,5 +798,10 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
         return result;
     }
+
+    /* From Bob M's Work */
+
+
+
 
 }

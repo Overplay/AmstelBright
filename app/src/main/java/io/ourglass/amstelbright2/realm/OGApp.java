@@ -191,9 +191,6 @@ public class OGApp extends RealmObject {
                     && candidate.has("appType") && !candidate.getString("appType").isEmpty()
                     && candidate.has("appName") && !candidate.getString("appName").isEmpty()
                     && candidate.has("height") && heightOrWidthIsValidPercentage(candidate.getInt("height"))
-//                    && candidate.has("width") && heightOrWidthIsValidPercentage(candidate.getInt("width"))
-            ;
-                    && candidate.has("appName") && !candidate.getString("appName").isEmpty()
                     && candidate.has("version") && !candidate.getString("version").isEmpty()
                     && candidate.has("installDate") && candidate.getLong("installDate") != 0;
         } catch(JSONException e){
