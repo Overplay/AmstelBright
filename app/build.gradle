@@ -46,6 +46,6 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.daimajia.easing:library:1.0.1@aar'
-
     compile 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
+    compile 'io.jsonwebtoken:jjwt:0.7.0'
 }

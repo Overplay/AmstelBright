@@ -163,12 +163,12 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         float y;
 
         //default values
-        int widgetWidth = 300;
-        int widgetHeight = 300;
+        float widgetWidth = 300;
+        float widgetHeight = 300;
 
         try{
-            widgetWidth = mRunningWidget.getInt("width");
-            widgetHeight = mRunningWidget.getInt("height");
+            widgetWidth =  (float)mRunningWidget.getInt("width")/100*mScreenWidthHeight.width;
+            widgetHeight = (float)mRunningWidget.getInt("height")/100*mScreenWidthHeight.height;
         } catch (JSONException e){
             Log.e(TAG, "Couldn't get the running widget dimensions, widgets will probably be in the wrong place");
         }

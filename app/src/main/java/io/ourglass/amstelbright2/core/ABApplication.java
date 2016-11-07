@@ -42,6 +42,9 @@ public class ABApplication extends Application {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+
+
+
     }
 
     public static void dbToast(Context context, String message){

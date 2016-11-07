@@ -496,8 +496,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
         WebSettings settings = wv.getSettings();
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        settings.setUseWideViewPort(false);
 
     }
 
