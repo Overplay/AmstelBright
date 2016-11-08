@@ -70,6 +70,7 @@ public class STBService extends Service {
                     .build();
 
             final DirectvBoxInfo _this = this;
+
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -91,6 +92,7 @@ public class STBService extends Service {
                 Request req = new Request.Builder()
                         .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
                         .build();
+                Log.d(TAG, "checking channel info on "+ipAddr);
                 Response response = this.client.newCall(req).execute();
                 if(!response.isSuccessful()) {
                     return null;

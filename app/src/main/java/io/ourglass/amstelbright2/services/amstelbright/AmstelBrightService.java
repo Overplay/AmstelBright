@@ -15,15 +15,12 @@ import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
-import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
-import io.realm.Realm;
-import io.realm.RealmResults;
 
 //import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
@@ -105,7 +102,10 @@ public class AmstelBrightService extends Service  {
 
         // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
         startService( new Intent(this, UDPListenAndRespond.class));
-        startService( new Intent(this, UDPBeaconService.class));
+
+        if (OGConstants.SEND_UDP_BEACONS){
+            startService( new Intent(this, UDPBeaconService.class));
+        }
 
         Intent httpIntent = new Intent(this, HTTPDService.class);
         startService(httpIntent);
