@@ -1,8 +1,11 @@
 package io.ourglass.amstelbright2.services.amstelbright;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -18,7 +21,8 @@ import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
 import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
+import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
+import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
@@ -94,12 +98,6 @@ public class AmstelBrightService extends Service  {
                 OGConstants.BootState.UPGRADE_START.getValue());
 
 
-
-        /* Choose either new (UPNP) or old (shout in the dark) discovery method */
-//        Intent udpIntent = OGConstants.USE_UPNP_DISCOVERY ? new Intent(this, UDPListenAndRespond.class) :
-//                new Intent(this, UDPBeaconService.class);
-//        startService(udpIntent);
-
         // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
         startService( new Intent(this, UDPListenAndRespond.class));
 
@@ -113,8 +111,11 @@ public class AmstelBrightService extends Service  {
         Intent csIntent = new Intent(this, CloudScraperService.class);
         startService(csIntent);
 
-        Intent stbIntent = new Intent(this, STBService.class);
-        startService(stbIntent);
+//        Intent stbIntent = new Intent(this, STBService.class);
+//        startService(stbIntent);
+
+//        Intent upnpIntent = new Intent(this, SSDPService.class);
+//        startService(upnpIntent);
 
         Intent logReapIntent = new Intent(this, LogCleanAndPushService.class);
         startService(logReapIntent);
@@ -133,6 +134,8 @@ public class AmstelBrightService extends Service  {
         Intent advertisementIntent = new Intent(this, AdFetchService.class);
         startService(advertisementIntent);
 
+        testSSDP();
+
     }
 
     /** Called when The service is no longer used and is being destroyed */
@@ -149,4 +152,38 @@ public class AmstelBrightService extends Service  {
 
 
 
+    public void testSSDP(){
+
+        SSDPBroadcastReceiver ssdpBR = new SSDPBroadcastReceiver(new SSDPBroadcastReceiver.SSDPBroadcastReceiverListener() {
+            @Override
+            public void receivedSSDPUpdate(Intent intent) {
+                Log.d(TAG, "Got an SSDP update!");
+            }
+        });
+
+        IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver.ssdp");
+        registerReceiver(ssdpBR, filter);
+
+        Intent ssdpi = new Intent(this, SSDPService.class);
+        bindService(ssdpi, mConnection, Context.BIND_AUTO_CREATE);
+
+
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            SSDPService.LocalBinder binder = (SSDPService.LocalBinder) service;
+            binder.getService().discover();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            //mBound = false;
+        }
+    };
 }

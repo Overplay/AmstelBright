@@ -14,7 +14,7 @@ public class OGConstants {
 
     public static final boolean TEST_MODE = true;
     public static final boolean SHOW_DB_TOASTS = false;
-    public static final boolean LOGCAT_TO_FILE = true;
+    public static final boolean LOGCAT_TO_FILE = false;
 
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
@@ -28,11 +28,11 @@ public class OGConstants {
     // Turn off UPNP to work with the old iOS app
     public static final boolean USE_UPNP_DISCOVERY = true;
 
-    public static final int UDP_BEACON_PORT = 9091;
-    public static final boolean SEND_UDP_BEACONS = false;  // don't need any more, I hope :)
+    public static final int UDP_BEACON_PORT = 9092;
+    public static final boolean SEND_UDP_BEACONS = true;  // don't need any more, I hope :)
 
     // MAK: Created a new port so both discovery methods can be used at same time
-    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9092;
+    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
@@ -41,17 +41,17 @@ public class OGConstants {
 
     public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
 
-    public static final int UPNP_UDP_BROADCAST_PORT = 1900;
-    public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
-    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 5000; //every two seconds upon completion
+    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 60 * 1000; //every two seconds upon completion
 
     public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
-    public static final String[] discoverPacket = new String[]{
-            "M-SEARCH * HTTP/1.1\r\n",
-            "Host:239.255.255.250:1900\r\n",
-            "ST:ssdp:all\r\n","Man:\"ssdp:discover\"\r\n",
-            "MX:3\r\n\r\n"
-    };
+
+    /* UPNP Discovery Packet
+    M-SEARCH * HTTP/1.1
+    HOST: 239.255.255.250:1900
+    MAN: ssdp:discover
+    MX: 10
+    ST: ssdp:all
+     */
 
     public static final String ASAHI_ADDRESS = USE_DEMO_ASAHI ? "http://107.170.209.248" : "http://104.131.145.36";
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";

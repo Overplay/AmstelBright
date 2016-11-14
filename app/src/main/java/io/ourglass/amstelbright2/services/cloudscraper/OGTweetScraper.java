@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -27,7 +28,7 @@ public class OGTweetScraper {
     private static final String CONCAT_KEYS = CONSUMER_KEY+":"+CONSUMER_SECRET;
     private static final String B64_CONCAT = Base64.encodeToString(CONCAT_KEYS.getBytes(), Base64.NO_WRAP);
 
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = ABApplication.okclient;  // get the shared one!
 
     private String mToken;
 

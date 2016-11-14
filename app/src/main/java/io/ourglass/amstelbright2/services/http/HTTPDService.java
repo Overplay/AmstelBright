@@ -72,7 +72,7 @@ public class HTTPDService extends Service {
         return mStartMode;
     }
 
-    /** A client is binding to the service with bindService() */
+    /** A mClient is binding to the service with bindService() */
     @Override
     public IBinder onBind(Intent intent) {
         dbToastr( TAG+"binding" );

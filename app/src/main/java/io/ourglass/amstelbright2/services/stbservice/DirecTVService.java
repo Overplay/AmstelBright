@@ -31,7 +31,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 
-public class STBService extends Service {
+public class DirecTVService extends Service {
 
     public static final String TAG = "STB";
     public static final boolean VERBOSE = true;
@@ -120,7 +120,7 @@ public class STBService extends Service {
     private Handler mTVThreadHandler;
     private Handler mTVThreadHandler2;
 
-    public STBService() {
+    public DirecTVService() {
     }
 
     /**

@@ -22,6 +22,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
@@ -140,10 +141,10 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
         } else {
 
-            // Ethan, you did not create a client for non-HTTPS mode, ffs!
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            client = builder.build();
-
+            // Ethan, you did not create a mClient for non-HTTPS mode, ffs!
+            //OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            //mClient = builder.build();
+            client = ABApplication.okclient;
 
         }
 

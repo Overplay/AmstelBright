@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
@@ -26,6 +25,8 @@ public class LogCleanAndPushService extends Service {
     HandlerThread mWorkerThread = new HandlerThread("cleanAndPush");
     private Handler mWorkerThreadHandler;
 
+    final OkHttpClient client = ABApplication.okclient;  // share it
+
     public LogCleanAndPushService() {
     }
 
@@ -38,7 +39,7 @@ public class LogCleanAndPushService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        ABApplication.dbToast(this, "Starting Cloud Proxy");
+        ABApplication.dbToast(this, "Log Process Starting");
 
         mWorkerThread.start();
         mWorkerThreadHandler = new Handler(mWorkerThread.getLooper());
@@ -104,7 +105,8 @@ public class LogCleanAndPushService extends Service {
         int numUploaded = 0;
 
         final Realm realm = Realm.getDefaultInstance();
-        final OkHttpClient client = new OkHttpClient();
+        //        final OkHttpClient mClient = new OkHttpClient();
+
         final MediaType type = MediaType.parse("application/json");
         for(final OGLog log : logArr){
             String postBody = log.getLogAsJSON().toString();

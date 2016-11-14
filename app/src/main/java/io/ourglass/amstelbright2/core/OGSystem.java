@@ -151,16 +151,22 @@ public class OGSystem {
 
     }
 
-    public static void setPairedSTBIP(String location){
+    public static void setPairedSTBIP(String ipAddr){
+        putStringToPrefs("pairedSTBIP", ipAddr);
+    }
 
-        putStringToPrefs("pairedSTBIP", location);
+    // Only valid type right now is "DirecTV"
+    public static String getPairedSTBType(){
+        return getStringFromPrefs("pairedSTBType", null);
+    }
 
+    public static void setPairedSTBType(String stbType){
+        putStringToPrefs("pairedSTBIP", stbType);
     }
 
 
     public static String getPairedSTBIP(){
         return getStringFromPrefs("pairedSTBIP", null);
-
     }
 
     public static void setABVersionName(String vName){

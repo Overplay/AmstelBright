@@ -19,12 +19,11 @@ import java.util.ArrayList;
 import io.ourglass.amstelbright2.core.exceptions.OGServerException;
 import io.ourglass.amstelbright2.realm.OGAdvertisement;
 import io.ourglass.amstelbright2.realm.OGApp;
-import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.realm.OGAppRealmProxy;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
@@ -70,6 +69,7 @@ public class OGCore {
 
         Realm realm = Realm.getDefaultInstance();
 
+        // TODO doesn't seem like this should be here. CloudScraper should listen for this
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -111,15 +111,6 @@ public class OGCore {
         }
 
         return jobj;
-    }
-
-    public static OGDevice getDeviceAsObject(Realm realm) {
-        return OGDevice.getDevice(realm);
-    }
-
-    public static JSONObject getDeviceAsJSON(Realm realm) {
-
-        return OGDevice.getDeviceAsJSON(realm);
     }
 
 
@@ -362,6 +353,7 @@ public class OGCore {
     }
 
     private static void removeUninstalledAppsFromRealm(JSONArray installedApps){
+
         //populate an arraylist with the names of the apps which are installed in opp
         ArrayList<String> appIds = new ArrayList<String>();
         for (int i = 0 ; i < installedApps.length(); i++) {
@@ -377,29 +369,26 @@ public class OGCore {
 
         Realm realm = Realm.getDefaultInstance();
 
-        //now iterate over the apps currently in the realm database and if they are not present in appIds, then remove them
-        RealmResults<OGApp> appsInDatabase = OGApp.getAllApps(realm);
-        for(int j = 0; j < appsInDatabase.size(); j++){
-            final OGApp appInDatabase = appsInDatabase.get(j);
-            boolean goingToDie = true;
-            for(int i = 0; i < appIds.size(); i++){
-                String appId = ((OGAppRealmProxy) appInDatabase).realmGet$appId();
-                if(appId.equals(appIds.get(i))){
-                    goingToDie = false;
-                    break;
-                }
-            }
-            //if app in database is not present in installed apps, then delete it from realm
-            if(goingToDie){
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm bgRealm) {
-                        appInDatabase.deleteFromRealm();
-                    }
-                });
-            }
+        // initial query, all apps
+        RealmQuery<OGApp> query = realm.where(OGApp.class);
+
+        // Build a query of all appids NOT in the installed list pulled from SDCARD
+        for ( String appid: appIds){
+            query = query.not().equalTo("appId", appid);
         }
+
+        final RealmResults<OGApp> toDie = query.findAll();
+
+        realm.executeTransaction( new Realm.Transaction(){
+            @Override
+            public void execute(Realm realm){
+                toDie.deleteAllFromRealm();
+            }
+        });
+
         realm.close();
+
+
     }
 
     private static void setAppDataIfEmpty(JSONArray newApps){
@@ -424,6 +413,7 @@ public class OGCore {
     }
 
     private static ArrayList<String> getNamesOfAppsFromSd(){
+
         String sdcard = Environment.getExternalStorageDirectory().toString() + OGConstants.PATH_TO_ABWL+"/opp";
         File sdcard_dir = new File(sdcard);
 

@@ -72,6 +72,7 @@ public class UDPListenAndRespond extends Service {
         }
 
         DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+        Log.v( TAG, "UDP listener sitting on port: "+mPort);
         mSocket.receive(receivedPacket);
 
         Log.v(TAG, "received UDP packet from " + receivedPacket.getAddress() + " "

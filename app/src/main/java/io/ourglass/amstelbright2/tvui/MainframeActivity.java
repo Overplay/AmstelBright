@@ -55,7 +55,7 @@ import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
 
 public class MainframeActivity extends Activity implements Mainframe.MainframeListener {
 
-    private static final String TAG = "MFActivity";
+    private static final String TAG = "MainframeActivity";
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
 
@@ -105,7 +105,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -116,7 +115,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
         Log.d(TAG, "Is real OG H/W? " + (OGSystem.isRealOG()?"YES":"NO"));
         Log.d(TAG, "Is emulated H/W? " + (OGSystem.isEmulator()?"YES":"NO"));
-
 
         // Cross fingers and toes that this works the permissions magic for SDCARD on OG1
         verifyStoragePermissions(this);
@@ -755,7 +753,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             // This is called when the connection with the service has been
             // established, giving us the object we can use to
             // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
+            // service using a Messenger, so here we get a mClient-side
             // representation of that from the raw IBinder object.
             mService = new Messenger(service);
             mBound = true;

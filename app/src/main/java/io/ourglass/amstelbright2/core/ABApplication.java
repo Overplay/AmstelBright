@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by mkahn on 5/18/16.
@@ -20,6 +21,9 @@ import io.realm.RealmConfiguration;
 public class ABApplication extends Application {
 
     public static Context sharedContext;
+
+    // Shared by all!
+    public static final OkHttpClient okclient = new OkHttpClient();
 
     @Override
     public void onCreate() {
@@ -47,7 +51,8 @@ public class ABApplication extends Application {
             e.printStackTrace();
         }
 
-        if ( isExternalStorageWritable() ) {
+        // Logcat messages go to a file...
+        if ( isExternalStorageWritable() && OGConstants.LOGCAT_TO_FILE ) {
 
             File appDirectory = new File( Environment.getExternalStorageDirectory() + "/ABLogs" );
             File logDirectory = new File( appDirectory + "/log" );
@@ -71,10 +76,6 @@ public class ABApplication extends Application {
                 e.printStackTrace();
             }
 
-        } else if ( isExternalStorageReadable() ) {
-            // only readable
-        } else {
-            // not accessible
         }
 
 
@@ -95,14 +96,5 @@ public class ABApplication extends Application {
         return false;
     }
 
-    /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if ( Environment.MEDIA_MOUNTED.equals( state ) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals( state ) ) {
-            return true;
-        }
-        return false;
-    }
 
 }
