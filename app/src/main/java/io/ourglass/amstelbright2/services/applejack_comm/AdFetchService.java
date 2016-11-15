@@ -35,7 +35,7 @@ import okhttp3.Response;
 public class AdFetchService extends Service {
 
     public final String TAG = "AdFetchService";
-    private final OkHttpClient client = ABApplication.okclient;
+    private final OkHttpClient client = ABApplication.okclient;  // share it
     HandlerThread mScrapeThread = new HandlerThread("AdFetchLooper");
     private Handler mScrapeThreadHandler;
 

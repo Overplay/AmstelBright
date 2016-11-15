@@ -127,7 +127,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 //create an ssl socket facotry with our all-trusting manager
                 final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                OkHttpClient.Builder builder  = ABApplication.okclient.newBuilder();
                 builder.sslSocketFactory(sslSocketFactory);
                 builder.hostnameVerifier(new HostnameVerifier() {
                     @Override
@@ -142,9 +142,9 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         } else {
 
             // Ethan, you did not create a mClient for non-HTTPS mode, ffs!
-            //OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            //OkHttpClient.Builder builder = ABApplication.okclient.newBuilder();
             //mClient = builder.build();
-            client = ABApplication.okclient;
+            client = ABApplication.okclient;  // share it
 
         }
 

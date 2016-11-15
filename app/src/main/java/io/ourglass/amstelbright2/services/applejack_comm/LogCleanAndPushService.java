@@ -105,8 +105,6 @@ public class LogCleanAndPushService extends Service {
         int numUploaded = 0;
 
         final Realm realm = Realm.getDefaultInstance();
-        //        final OkHttpClient mClient = new OkHttpClient();
-
         final MediaType type = MediaType.parse("application/json");
         for(final OGLog log : logArr){
             String postBody = log.getLogAsJSON().toString();
