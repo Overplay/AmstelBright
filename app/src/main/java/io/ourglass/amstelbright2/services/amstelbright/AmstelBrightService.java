@@ -134,7 +134,9 @@ public class AmstelBrightService extends Service  {
         Intent advertisementIntent = new Intent(this, AdFetchService.class);
         startService(advertisementIntent);
 
-        testSSDP();
+        // These are here to try to the two different ways of talking to the SSDP discovery service
+        //testSSDPBind();
+        //testSSDPIntent();
 
     }
 
@@ -150,9 +152,7 @@ public class AmstelBrightService extends Service  {
         return null;
     }
 
-
-
-    public void testSSDP(){
+    public void registerSSDPResponse(){
 
         SSDPBroadcastReceiver ssdpBR = new SSDPBroadcastReceiver(new SSDPBroadcastReceiver.SSDPBroadcastReceiverListener() {
             @Override
@@ -161,8 +161,24 @@ public class AmstelBrightService extends Service  {
             }
         });
 
-        IntentFilter filter = new IntentFilter("com.ourglass.amstelbrightserver.ssdp");
+        IntentFilter filter = new IntentFilter("tv.ourglass.amstelbrightserver.ssdpresponse");
         registerReceiver(ssdpBR, filter);
+    }
+
+    public void testSSDPIntent(){
+
+        registerSSDPResponse();
+
+        Intent ssdpi = new Intent(this, SSDPService.class);
+        ssdpi.putExtra("deviceFilter", "DIRECTV");
+
+        startService(ssdpi);
+
+    }
+
+    public void testSSDPBind(){
+
+        registerSSDPResponse();
 
         Intent ssdpi = new Intent(this, SSDPService.class);
         bindService(ssdpi, mConnection, Context.BIND_AUTO_CREATE);
