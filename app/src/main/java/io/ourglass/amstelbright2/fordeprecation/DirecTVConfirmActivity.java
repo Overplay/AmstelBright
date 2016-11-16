@@ -1,20 +1,10 @@
-package io.ourglass.amstelbright2.tvui.stb;
+package io.ourglass.amstelbright2.fordeprecation;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;

@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.tvui.stb;
+package io.ourglass.amstelbright2.fordeprecation;
 
 import android.content.Context;
 import android.graphics.Typeface;

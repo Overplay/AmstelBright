@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.tvui.stb;
+package io.ourglass.amstelbright2.fordeprecation;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,6 +34,7 @@ import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
+import io.ourglass.amstelbright2.tvui.stb.SetTopBoxAdapter;
 import io.realm.Realm;
 
 public class DirecTVPairActivity extends AppCompatActivity {

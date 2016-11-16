@@ -28,6 +28,7 @@ import java.util.Map;
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGSystem;
+import io.ourglass.amstelbright2.fordeprecation.DirectvDevicesAdapter;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
