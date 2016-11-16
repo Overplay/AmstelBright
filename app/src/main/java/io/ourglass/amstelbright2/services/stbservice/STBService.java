@@ -52,11 +52,6 @@ public class STBService extends Service {
             this.channelCheckThread = new HandlerThread(ipAddr + "_channelCheckThread");
             this.channelCheckThread.start();
             this.mChannelChangeHandler = new Handler(channelCheckThread.getLooper());
-//            this.mClient = new OkHttpClient.Builder()
-//                    .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-//                    .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-//                    .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-//                    .build();
 
             // per cookbook
             this.client = ABApplication.okclient.newBuilder()
@@ -364,7 +359,7 @@ public class STBService extends Service {
         Realm realm = Realm.getDefaultInstance();
         String stbAddr = OGDevice.getPairedSTBOrNull(realm);
         if(stbAddr != null) {
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = ABApplication.okclient.newBuilder()
                     .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
