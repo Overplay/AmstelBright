@@ -11,17 +11,22 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import io.ourglass.amstelbright2.R;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
+import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 
 /**
- * Created by ethan on 9/8/16.
+ * Created by mkahn on 11/14/16. BAsed on Ethan's original.
  */
 
-public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInfo> {
+public class SetTopBoxAdapter extends ArrayAdapter<SetTopBox> {
+
     private Typeface font;
     private Typeface indexFont;
 
-    public DirectvDevicesAdapter(Context context, ArrayList<STBService.DirectvBoxInfo> boxes, Typeface font, Typeface indexFont){
+    public interface UpdateListener {
+        public void done();
+    }
+
+    public SetTopBoxAdapter(Context context, ArrayList<SetTopBox> boxes, Typeface font, Typeface indexFont){
         super(context, 0, boxes);
 
         this.font = font;
@@ -30,7 +35,8 @@ public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInf
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        STBService.DirectvBoxInfo box = getItem(position);
+
+        SetTopBox box = getItem(position);
 
         if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.dtv_list_elem_layout, parent, false);
@@ -53,11 +59,11 @@ public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInf
         //SpannableString friendlyNameUnderlined = new SpannableString(box.friendlyName);
         //friendlyNameUnderlined.setSpan(new UnderlineSpan(), 0, friendlyNameUnderlined.length(), 0);
 
-        friendlyName.setText(box.friendlyName);
-        curPlaying.setText("Current channel: " + (box.curPlaying == null ? "not available" : box.curPlaying));
+        friendlyName.setText(box.modelName);
+        curPlaying.setText("Showing: " + (box.nowPlaying == null ? "---" : box.nowPlaying.title+" on " + box.nowPlaying.networkName));
 
-        String ip = box.ipAddr;
-        ipAddr.setText(ip.replace("http://", "").replace("https://", ""));
+        String ip = box.ipAddress;
+        ipAddr.setText(ip.replace("http://", "").replace("https://", "")+" (ID: "+box.receiverId+")");
 
         //format to contain leading 0 for better aesthetics
         idx.setText(String.format("%02d", position + 1));
@@ -65,6 +71,25 @@ public class DirectvDevicesAdapter extends ArrayAdapter<STBService.DirectvBoxInf
         return convertView;
     }
 
+    public void refreshDevices(final UpdateListener listener){
 
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                int boxCount = getCount();
+                for (int i=0; i<boxCount; i++){
+                    SetTopBox box = getItem(i);
+                    box.updateAllSync();
+                }
+
+                listener.done();
+
+            }
+        });
+
+        t.start();
+
+    }
 
 }

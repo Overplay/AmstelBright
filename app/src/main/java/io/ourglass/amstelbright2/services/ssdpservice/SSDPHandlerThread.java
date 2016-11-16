@@ -77,7 +77,7 @@ public class SSDPHandlerThread extends HandlerThread {
                             "M-SEARCH * HTTP/1.1\r\n" +
                                     "HOST: 239.255.255.250:1900\r\n" +
                                     "MAN: \"ssdp:discover\"\r\n" +
-                                    "MX: 5\r\n" +   // do not respond after 5 seconds, plenty of time
+                                    "MX: 2\r\n" +   // do not respond after 2 seconds, plenty of time
                                     "ST: ssdp:all\r\n" +
                                     "\r\n";
 
@@ -91,7 +91,7 @@ public class SSDPHandlerThread extends HandlerThread {
                     socket.send(dgram);
 
                     // 6 seconds of inactivity and we're out
-                    socket.setSoTimeout(6000);
+                    socket.setSoTimeout(4000);
 
                     // Let's consider all the responses we can get in 1 second
                     while ( true ) {

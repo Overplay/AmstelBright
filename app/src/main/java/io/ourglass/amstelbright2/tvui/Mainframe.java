@@ -616,7 +616,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
 
             //log the movement as placement override
-            OGCore.log_placementOverride(OGCore.channel, OGCore.programId, app.getString("appId"), newSlot);
+            OGCore.log_placementOverride(OGSystem.getPairedSTB().nowPlaying.networkName, OGSystem.getPairedSTB().nowPlaying.programId, app.getString("appId"), newSlot);
         } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");

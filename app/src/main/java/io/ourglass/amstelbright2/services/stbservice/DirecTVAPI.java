@@ -31,22 +31,15 @@ public class DirecTVAPI {
 
     public static ArrayList<DirecTVSetTopBox> availableSystems = new ArrayList<>();
 
-    public interface DirecTVAPIInterface {
-        public void availableSystems(ArrayList<SetTopBox> systems);
-    }
-
-    public static void enumerate(){
-
-
-    }
 
     public static JSONObject whatsOn(String ipAddress){
 
         JSONObject rval = null;
 
         try {
+
             Request req = new Request.Builder()
-                    .url(ipAddress + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                    .url("http://"+ipAddress + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
                     .build();
             Log.d(TAG, "checking channel info on "+ipAddress);
             Response response = mClient.newCall(req).execute();
@@ -66,97 +59,146 @@ public class DirecTVAPI {
         return rval;
     }
 
+    public static JSONObject stbInfo(String ipAddress){
 
-    private void findSTBs(){
+        JSONObject rval = null;
 
-//        try {
-//
-//            final DatagramSocket mListenSocket = new DatagramSocket(null);
-//            mListenSocket.setReuseAddress(true);
-//            SocketAddress sa = new InetSocketAddress(UPNP_UDP_BROADCAST_PORT);
-//            mListenSocket.bind(sa);
-//            mListening = true;
-//
-//            mListenSocket.setSoTimeout(10000);
-//            final ArrayList<String> foundDeviceList = new ArrayList<String>();
-//            final ArrayList<String> verifiedDeviceIps = new ArrayList<String>();
-//
-//            new Thread(new Runnable(){
-//                @Override
-//                public void run() {
-//
-//                    try {
-//
-//                        byte[] buffer = new byte[2048];
-//                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-//                        while(mListening) {
-//                            mListenSocket.receive(packet);
-//                            String recInfo = new String(packet.getData(), 0, packet.getLength());
-//                            Matcher match = LOC_PATTERN.matcher(recInfo);
-//                            if(match.find()){
-//                                String loc = match.group();
-//                                loc = loc.substring(loc.indexOf("http"));//, loc.lastIndexOf(":"));
-//                                if(!foundDeviceList.contains(loc)) {
-//                                    foundDeviceList.add(loc);
-//                                }
-//                            }
-//                            buffer = new byte[2048];
-//                            packet = new DatagramPacket(buffer, buffer.length);
-//                        }
-//                    } catch (SocketTimeoutException e){
-//                        mListening = false;
-//                        mListenSocket.close();
-//                        new Thread(new Runnable(){
-//                            @Override
-//                            public void run(){
-//                                ArrayList<STBService.DirectvBoxInfo> newFoundBoxes = new ArrayList<STBService.DirectvBoxInfo>();
-//                                for(final String ip  : foundDeviceList){
-//                                    verifyBoxAndAdd(ip, newFoundBoxes);
-//                                }
-//
-//                                hasSearched = true;
-//                                while(foundBoxes.size() > 0){
-//                                    foundBoxes.remove(0);
-//                                }
-//                                for(STBService.DirectvBoxInfo info : newFoundBoxes){
-//                                    foundBoxes.add(info);
-//                                }
-//                            }
-//                        }).start();
-//
-//                    }catch (Exception e){
-//                        Log.e(TAG, e.getMessage());
-//                    }
-//
-//                }
-//            }).start();
-//
-//            //now send broadcast
-//            new Thread(new Runnable(){
-//
-//                @Override
-//                public void run() {
-//                    try {
-//                        StringBuffer packet = new StringBuffer();
-//
-//                        for(String packetLine : OGConstants.discoverPacket){
-//                            packet.append(packetLine);
-//                        }
-//
-//                        String toSend = packet.toString();
-//                        byte[] pk = toSend.getBytes();
-//
-//                        DatagramPacket out = new DatagramPacket(pk, pk.length, InetAddress.getByName(OGConstants.UPNP_UDP_BROADCAST_ADDR), OGConstants.UPNP_UDP_BROADCAST_PORT);
-//                        mListenSocket.send(out);
-//
-//                    } catch(Exception e){
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//            }).start();
-//        } catch (SocketException e) {
-//            e.printStackTrace();
-//        }
+        try {
+
+            Request req = new Request.Builder()
+                    .url("http://"+ipAddress + ":" + OGConstants.DIRECTV_PORT + "/info/getVersion")
+                    .build();
+            Log.d(TAG, "checking system info on "+ipAddress);
+            Response response = mClient.newCall(req).execute();
+
+            if(response.isSuccessful()) {
+                rval = new JSONObject(response.body().string());
+            }
+
+        } catch (IOException e){
+            Log.e(TAG, "IO Exception getting system info");
+        } catch (JSONException e){
+            Log.e(TAG, "JSON Exception getting system info");
+        } catch (Exception e){
+            Log.e(TAG, "Exception getting system info");
+        }
+
+        return rval;
     }
+
+    public static String modelInfo(String url){
+
+        String rval = null;
+
+        // First thing we need to do is grab the SSDP more info URL from response
+
+        try {
+
+            Request req = new Request.Builder()
+                    .url(url)
+                    .build();
+            Log.d(TAG, "checking model info on " + url);
+            Response response = mClient.newCall(req).execute();
+
+            if(response.isSuccessful()) {
+
+                // We got some crappy XML, need to parse
+                String xml = response.body().string();
+                String md= "<modelDescription>";
+                String mdSlash= "</modelDescription>";
+
+                int modelStartIdx = xml.indexOf(md)+ md.length();
+                int modelEndIdx = xml.indexOf(mdSlash);
+                rval = xml.substring(modelStartIdx, modelEndIdx);
+
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception getting model info");
+        } catch (Exception e){
+            Log.e(TAG, "Exception getting model info");
+        }
+
+        return rval;
+
+    }
+
+    public static String receiverId(String ipAddress){
+
+        String rval = null;
+
+        // First thing we need to do is grab the SSDP more info URL from response
+
+        try {
+
+            Request req = new Request.Builder()
+                    .url("http://"+ipAddress + ":8080/info/getVersion")
+                    .build();
+            Log.d(TAG, "checking version info on " + ipAddress);
+            Response response = mClient.newCall(req).execute();
+
+            if(response.isSuccessful()) {
+
+                JSONObject jobj = new JSONObject(response.body().string());
+                rval = jobj.optString("receiverId", "???");
+
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception getting system info");
+        } catch (Exception e){
+            Log.e(TAG, "Exception getting system info");
+        }
+
+        return rval;
+
+    }
+
 }
+
+
+/*  UPNP XML SALAD
+
+<?xml version="1.0" ?>
+<root
+    xmlns="urn:schemas-upnp-org:device-1-0">
+    <specVersion>
+        <major>1</major>
+        <minor>0</minor>
+    </specVersion>
+    <device>
+        <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+        <friendlyName>DIRECTV Mediashare Renderer</friendlyName>
+        <manufacturer>DIRECTV</manufacturer>
+        <manufacturerURL>http://www.directv.com</manufacturerURL>
+        <modelDescription>DIRECTV Plus HD DVR</modelDescription>
+        <modelName>MediaRenderer</modelName>
+        <modelNumber>1.0</modelNumber>
+        <UDN>uuid:29bbe0e1-1a6e-47f6-8f8d-0003784ebf0c</UDN>
+        <serviceList>
+            <service>
+                <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+                <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+                <controlURL>/upnp/control/2/RenderingControl1</controlURL>
+                <eventSubURL>/upnp/event/2/RenderingControl1</eventSubURL>
+                <SCPDURL>http://10.1.10.118:49152/2/RenderingControlSCPD.xml</SCPDURL>
+            </service>
+            <service>
+                <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+                <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+                <controlURL>/upnp/control/2/ConnectionManager1</controlURL>
+                <eventSubURL>/upnp/event/2/ConnectionManager1</eventSubURL>
+                <SCPDURL>http://10.1.10.118:49152/2/ConnectionManagerSCPD.xml</SCPDURL>
+            </service>
+        </serviceList>
+        <intel_nmpr:X_INTEL_NMPR
+            xmlns:intel_nmpr="udn:schemas-intel-com:device-1-0">2.1
+        </intel_nmpr:X_INTEL_NMPR>
+        <dlna:X_DLNADOC
+            xmlns:dlna="udn:schemas-dlna-org:device-1-0">DMP 1.00
+        </dlna:X_DLNADOC>
+        <directv-hmc></directv-hmc>
+    </device>
+</root>
+
+ */

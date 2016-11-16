@@ -48,8 +48,7 @@ import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.ourglass.amstelbright2.tvui.stb.DirecTVPairActivity;
-import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
+import io.ourglass.amstelbright2.tvui.stb.SetTopBoxPairActivity;
 
 @SuppressLint("SetJavaScriptEnabled")
 
@@ -251,14 +250,15 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
         if (keyCode == 8){
-            Intent intent = new Intent(this, DirecTVPairActivity.class);
+            Intent intent = new Intent(this, SetTopBoxPairActivity.class);
             startActivity(intent);
         }
 
-        if (keyCode == 9){
-            Intent intent = new Intent(this, WifiManageActivity.class);
-            startActivity(intent);
-        }
+        // Out until we can do more debug
+//        if (keyCode == 9){
+//            Intent intent = new Intent(this, WifiManageActivity.class);
+//            startActivity(intent);
+//        }
 
 
         //showAlert(new UIMessage("You pushed key " + keyCode));

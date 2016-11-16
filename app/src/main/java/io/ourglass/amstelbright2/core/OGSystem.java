@@ -17,6 +17,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
+import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 import io.ourglass.amstelbright2.tvui.WidthHeight;
 
 /**
@@ -35,6 +37,10 @@ public class OGSystem {
     private static SharedPreferences.Editor mEditor = mPrefs.edit();
 
     public static final String TAG = "OGSystem";
+
+    // TODO: this will need to be made generic in the future so the STB can be DTV, Xfinity, etc.
+    // Some of the groundwork for this is in (abstract inheritance), some not.
+    public static DirecTVSetTopBox pairedSTB;
 
     /**
      *
@@ -124,8 +130,6 @@ public class OGSystem {
 
     }
 
-
-
     public static void setSystemName(String name){
 
        putStringToPrefs("systemName", name);
@@ -151,25 +155,60 @@ public class OGSystem {
 
     }
 
-    public static void setPairedSTBIP(String ipAddr){
-        putStringToPrefs("pairedSTBIP", ipAddr);
+    // Set top pairing
+
+    public static void setPairedSTBIpAddress(String ipAddr){
+        putStringToPrefs("pairedSTBIpAddress", ipAddr);
     }
 
-    // Only valid type right now is "DirecTV"
+    public static String getPairedSTBIpAddress(){
+        return getStringFromPrefs("pairedSTBIpAddress", null);
+    }
+
+    public static boolean isPairedToSTB(){
+        return getPairedSTBIpAddress()!=null;
+    }
+
+    // Only valid type right now is "DIRECTV"
     public static String getPairedSTBType(){
         return getStringFromPrefs("pairedSTBType", null);
     }
 
     public static void setPairedSTBType(String stbType){
-        putStringToPrefs("pairedSTBIP", stbType);
+        putStringToPrefs("pairedSTBType", stbType);
     }
 
+    // TODO: This should use Serializable interface and save the object directly
+    public static void setPairedSTB(DirecTVSetTopBox stb){
 
-    public static String getPairedSTBIP(){
-        return getStringFromPrefs("pairedSTBIP", null);
+        setPairedSTBIpAddress(stb.ipAddress);
+        putStringToPrefs("ssdpResponse", stb.ssdpResponse);
+        setPairedSTBType("DIRECTV");
+
     }
 
-    public static void setABVersionName(String vName){
+    /**
+     * Returns the current STB or a blank SetTopBox that needs to have it's networking functions run to load current state
+     * @return
+     */
+    public static DirecTVSetTopBox getPairedSTB(){
+
+        if (!isPairedToSTB()){
+            return null;
+        }
+
+        if (pairedSTB!=null)
+            return pairedSTB;
+
+        // need to dearchive
+        String ipAddr = getPairedSTBIpAddress();
+        String ssdpResponse = getStringFromPrefs("ssdpResponse", "");
+        pairedSTB = new DirecTVSetTopBox(null, ipAddr, SetTopBox.STBConnectionType.IPGENERIC, ssdpResponse);
+        return pairedSTB;
+
+    }
+
+   public static void setABVersionName(String vName){
         putStringToPrefs("abVersionName", vName);
     }
 
@@ -213,17 +252,15 @@ public class OGSystem {
             //deviceJSON.put("apiToken", device.apiToken);
 
             //deviceJSON.put("uuid", device.uuid);
-            String pairIp = getPairedSTBIP();
-            boolean isPaired = false;
+            String pairIp = getPairedSTBIpAddress();
 
-            if (pairIp!=null && !pairIp.isEmpty()){
-                isPaired = true;
-            } else {
-                pairIp = "";
-            }
-
-            deviceJSON.put("isPairedToSTB", isPaired );
+            deviceJSON.put("isPairedToSTB", isPairedToSTB() );
             deviceJSON.put("pairedSTBIP", pairIp );
+
+            if (isPairedToSTB() && OGCore.currentlyOnTV!=null){
+                deviceJSON.put("channel", OGCore.currentlyOnTV.networkName);
+                deviceJSON.put("title", OGCore.currentlyOnTV.title);
+            }
             deviceJSON.put("outputRes", getCurrentResolution());
 
             deviceJSON.put("abVersionName", getABVersionName());

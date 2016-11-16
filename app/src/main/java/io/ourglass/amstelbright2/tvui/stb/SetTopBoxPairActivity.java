@@ -28,17 +28,15 @@ import java.util.Map;
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGSystem;
-import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
 import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
-import io.realm.Realm;
 
-public class DirecTVPairActivity extends AppCompatActivity {
+public class SetTopBoxPairActivity extends AppCompatActivity {
 
-    public static final String TAG = "DirecTVPairActivity";
+    public static final String TAG = "SetTopBoxPairActivity";
 
     static final int REQUEST_CODE = 43;
 
@@ -67,6 +65,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -169,56 +168,12 @@ public class DirecTVPairActivity extends AppCompatActivity {
     }
 
     public String lastIpAddressClicked;
+    public SetTopBox lastSTBClicked;
 
     public void setDirectvDevicesList(){
 //        devicesAdapter.notifyDataSetChanged();
 
         final Activity _this = this;
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                for(int i = 0; i < foundDevices.size(); i++){
-//                    final int fi = i;
-//                    STBService.DirectvBoxInfo info = foundDevices.get(i);
-//                    if(info.channelIsNew) {
-//                        try {
-//                            View child = directvDevicesList.getChildAt(fi);
-//                            TextView currentChannel = (TextView) child.findViewById(R.id.dtv_list_elem_curPlaying);
-//                            ColorDrawable cd = (ColorDrawable) currentChannel.getBackground();
-//
-//                            int colorFrom = ContextCompat.getColor(_this, R.color.DodgerBlue);
-//                            int colorTo = ContextCompat.getColor(_this, R.color.White);
-//
-//                            ValueAnimator colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-//                            colorAnim.setDuration(2000);
-//
-//                            colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                                @Override
-//                                public void onAnimationUpdate(ValueAnimator animation) {
-//                                    if (directvDevicesList == null) {
-//                                        Log.w("brrrrr", "directv devices list is null");
-//                                    } else {
-//                                        View child = directvDevicesList.getChildAt(fi);
-//                                        if (child != null) {
-//                                            TextView currentChannel = (TextView) child.findViewById(R.id.dtv_list_elem_curPlaying);
-//                                            if (currentChannel == null) {
-//                                                Log.w("brrrrr", "could not get current channel textview");
-//                                            } else {
-//                                                currentChannel.setTextColor((int) animation.getAnimatedValue());
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            });
-//                            colorAnim.start();
-//                            info.channelIsNew = false;
-//                        } catch (NullPointerException e){
-//                            Log.v("DirectvPair activity", "Something was null, fuck");
-//                        }
-//                    }
-//                }
-//            }
-//        });
 
         directvDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -227,6 +182,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         SetTopBox selectedBox = mFoundBoxes.get(position);
+                        lastSTBClicked = selectedBox;
                         final String ip = selectedBox.ipAddress;
                         final String name = selectedBox.modelName;
                         //final String currentChannel = selectedBox.refreshWhatsPlaying();
@@ -249,7 +205,7 @@ public class DirecTVPairActivity extends AppCompatActivity {
 
                         int width = contentWrapper.getWidth();
 
-                        Intent intent = new Intent(_this, DirecTVConfirmActivity.class);
+                        Intent intent = new Intent(_this, STBPairConfirmActivity.class);
                         intent.putExtra("width", width);
                         intent.putExtra("marginHor", contentMarginHor);
                         intent.putExtra("marginVer", contentMarginVer);
@@ -297,13 +253,9 @@ public class DirecTVPairActivity extends AppCompatActivity {
             }
 
             if(result == OGConstants.DIRECTV_PAIR_CONFIRMED_RESULT_CODE){
-                Realm realm = Realm.getDefaultInstance();
-                OGDevice device = realm.where(OGDevice.class).findFirst();
 
-                realm.beginTransaction();
-                device.pairedSTBAddr = lastIpAddressClicked;
-                device.isPairedToSTB = true;
-                realm.commitTransaction();
+                OGSystem.setPairedSTBIpAddress(lastIpAddressClicked);
+                OGSystem.setPairedSTB((DirecTVSetTopBox)lastSTBClicked);
                 setCurrentPair(lastIpAddressClicked);
                 lastIpAddressClicked = "";
                 finish();

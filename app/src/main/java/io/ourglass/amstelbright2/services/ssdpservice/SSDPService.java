@@ -39,7 +39,15 @@ import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
  *      registerReceiver(ssdpBR, filter);
  *
  *
- *  Once you have such a receiver set up, you can issue a startService
+ *  Once you have such a receiver set up, you can issue a startService command like so:
+ *
+ *      Intent ssdpi = new Intent(this, SSDPService.class);
+ *      ssdpi.putExtra("deviceFilter", "DIRECTV");
+ *      startService(ssdpi);
+ *
+ *  The "deviceFilter" is optional and, if ommitted, all devices will be returned.
+ *  You can call startService() even if it is already running. No problem.
+ *
  */
 
 public class SSDPService extends Service implements SSDPHandlerThread.SSDPListener {
@@ -47,6 +55,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
     public static final String TAG = "SSDPService";
     public static final long CONSIDERED_FRESH = 15000; // This is conservative
 
+    // Binder mode is not well tested!
     private final IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
@@ -134,6 +143,9 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
 
     public HashSet<String> getFilteredAddresses(String filterTerm){
 
+        if (filterTerm==null)
+            return mAllAddresses;
+
         HashSet<String> filteredAddresses = new HashSet<>();
 
         for(Map.Entry<String, String> device : mAllDevices.entrySet()){
@@ -147,6 +159,9 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
     }
 
     public HashMap<String, String> getFilteredDevices(String filterTerm){
+
+        if (filterTerm==null)
+            return mAllDevices;
 
         HashMap<String, String> filteredDevices = new HashMap<>();
 
@@ -163,7 +178,13 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
     public void onDestroy() {
 
         Log.d(TAG, "onDestroy");
-        mSSDPDicoveryThread.quit();
+
+        if (mSSDPDicoveryThread!=null)
+            mSSDPDicoveryThread.quit();
+
+        if (mBroadcastRcvr!=null)
+            unregisterReceiver(mBroadcastRcvr);
+
         super.onDestroy();
 
     }
@@ -172,15 +193,17 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
 
         Intent intent = new Intent();
         intent.setAction("tv.ourglass.amstelbrightserver.ssdpresponse");
+        intent.putExtra("devices", getFilteredDevices(mDeviceFilter));
+        intent.putExtra("addresses", getFilteredAddresses(mDeviceFilter));
+        AmstelBrightService.context.sendBroadcast(intent);
 
-        if (mDeviceFilter==null){
-            intent.putExtra("devices", mAllDevices);
-            intent.putExtra("addresses", mAllAddresses);
-        } else {
-            intent.putExtra("devices", getFilteredDevices(mDeviceFilter));
-            intent.putExtra("addresses", getFilteredAddresses(mDeviceFilter));
-        }
+    }
 
+    private void notifyError(String message){
+
+        Intent intent = new Intent();
+        intent.setAction("tv.ourglass.amstelbrightserver.ssdperror");
+        intent.putExtra("error", message);
         AmstelBrightService.context.sendBroadcast(intent);
 
     }
@@ -196,6 +219,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
     @Override
     public void encounteredError(String errString) {
         Log.e(TAG, "Error enumerating SSDP: "+errString);
+        notifyError(errString);
     }
 
 

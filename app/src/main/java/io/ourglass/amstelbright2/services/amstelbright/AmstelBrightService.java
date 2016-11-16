@@ -23,6 +23,7 @@ import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
+import io.ourglass.amstelbright2.services.stbservice.STBPollingService;
 import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
@@ -111,8 +112,7 @@ public class AmstelBrightService extends Service  {
         Intent csIntent = new Intent(this, CloudScraperService.class);
         startService(csIntent);
 
-//        Intent stbIntent = new Intent(this, STBService.class);
-//        startService(stbIntent);
+
 
 //        Intent upnpIntent = new Intent(this, SSDPService.class);
 //        startService(upnpIntent);
@@ -133,6 +133,9 @@ public class AmstelBrightService extends Service  {
 
         Intent advertisementIntent = new Intent(this, AdFetchService.class);
         startService(advertisementIntent);
+
+        Intent stbIntent = new Intent(this, STBPollingService.class);
+        startService(stbIntent);
 
         // These are here to try to the two different ways of talking to the SSDP discovery service
         //testSSDPBind();

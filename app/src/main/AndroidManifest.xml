@@ -39,7 +39,7 @@
             android:name=".services.udp.UDPListenAndRespond"
             android:enabled="true" />
         <service
-            android:name=".services.stbservice.STBService"
+            android:name=".services.stbservice.STBPollingService"
             android:enabled="true" />
         <service
             android:name=".services.ssdpservice.SSDPService"
@@ -86,15 +86,20 @@
             </intent-filter>
         </receiver>
 
+        <!--<activity-->
+            <!--android:name=".tvui.stb.DirecTVPairActivity"-->
+            <!--android:theme="@style/Theme.AppCompat.Translucent">-->
+        <!--</activity>-->
+
         <activity
-            android:name=".tvui.stb.DirecTVPairActivity"
+            android:name=".tvui.stb.SetTopBoxPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
         </activity>
 
-        <activity android:name=".tvui.stb.DirecTVConfirmActivity"
+        <activity android:name=".tvui.stb.STBPairConfirmActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-
         </activity>
+
         <activity
             android:name=".tvui.wifi.WifiManageActivity"
             android:theme="@style/Theme.AppCompat.Translucent">

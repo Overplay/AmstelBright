@@ -36,7 +36,7 @@ public class OGConstants {
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
-    public static final int TV_POLL_INTERVAL = 2500;
+    public static final int TV_POLL_INTERVAL = 5000;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
     public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour

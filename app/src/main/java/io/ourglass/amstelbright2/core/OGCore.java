@@ -22,6 +22,7 @@ import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.services.stbservice.TVShow;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
@@ -39,30 +40,29 @@ public class OGCore {
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
 
-    public static String channel = "";
-    public static String programId = "";
-    public static String programTitle = "";
+    // TODO why is this here and not in OGSystem? I don't remember, MAK.
+
+    public static TVShow currentlyOnTV;
 
     private static int adIndex = 0;
 
-    public static boolean setChannelInfo(String channel, String programId, String programTitle){
+    public static boolean setCurrentlyOnTV(TVShow show){
 
-        if ( OGCore.channel.equalsIgnoreCase(channel) &&
-                OGCore.programId.equalsIgnoreCase(programId) &&
-                    OGCore.programTitle.equalsIgnoreCase(programTitle) )
+        // TODO this if-then could be simplified
+        if (currentlyOnTV==null){
+            currentlyOnTV = show;
+        } else if ( OGCore.currentlyOnTV.equals(show) ) {
             return false;
-
-        //log the changed information
-        log_channelChange(OGCore.channel, OGCore.programId, OGCore.programTitle, channel, programId, programTitle);
-
-        OGCore.channel = channel;
-        OGCore.programId = programId;
-        OGCore.programTitle = programTitle;
+        } else {
+            //log the changed information
+            log_channelChange(currentlyOnTV, show);
+            currentlyOnTV = show;
+        }
 
         Intent intent = new Intent();
         intent.setAction("com.ourglass.amstelbrightserver");
         intent.putExtra("command", "NEW_CHANNEL");
-        intent.putExtra("channel", channel);
+        intent.putExtra("channel", currentlyOnTV.networkName);
         AmstelBrightService.context.sendBroadcast(intent);
 
         //  Add scrape for channel
@@ -88,7 +88,7 @@ public class OGCore {
                 }
 
                 channelScraper.appId = "io.ourglass.core.channeltweets";
-                channelScraper.setQuery(OGCore.programTitle+"&lang=en&result_type=popular&include_entities=false");
+                channelScraper.setQuery(currentlyOnTV.title+"&lang=en&result_type=popular&include_entities=false");
 
             }
         });
@@ -102,9 +102,9 @@ public class OGCore {
 
             JSONObject jobj = new JSONObject();
         try {
-            jobj.put("channel", OGCore.channel);
-            jobj.put("programId", OGCore.programId);
-            jobj.put("programTitle", OGCore.programTitle);
+            jobj.put("channel", currentlyOnTV.networkName);
+            jobj.put("programId", currentlyOnTV.programId);
+            jobj.put("programTitle", currentlyOnTV.title);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -478,24 +478,6 @@ public class OGCore {
         return toReturn;
     }
 
-    public void setChannel(String channel) {
-        if (this.channel.equalsIgnoreCase(channel))
-            return;
-
-        Log.d(TAG, "New channel is: " + channel);
-        this.channel = channel;
-        //TODO add auto-placement code here
-
-    }
-
-    public void setProgramTitle(String title) {
-        this.programTitle = title;
-    }
-
-    public void setProgramId(String id) {
-        this.programId = id;
-    }
-
 
     private JSONObject validOrEmptyJson(String jsonString) {
 
@@ -583,41 +565,30 @@ public class OGCore {
 
     /**
      * method to structure the passed in parameters into a CHANNEL_CHANGE type system log
-     * @param fromChannelId Id of the channel that was previously tuned
-     * @param fromProgramId Id of the program that was previously tuned
-     * @param fromProgramTitle Title of the program that was previously tuned to
-     * @param toChannelId Id of the channel that has been changed to
-     * @param toProgramId Id of the program that has been changed to
-     * @param toProgramTitle Title of the program that has been changed to
+     *
      */
-    public static void log_channelChange(
-            String fromChannelId,
-            String fromProgramId,
-            String fromProgramTitle,
-            String toChannelId,
-            String toProgramId,
-            String toProgramTitle
-    ) {
+    public static void log_channelChange(TVShow oldShow, TVShow newShow) {
+
         try {
             JSONObject logData = new JSONObject(),
                     changedFrom = new JSONObject(),
                     changedTo = new JSONObject();
 
-            changedFrom.put("channelId", fromChannelId);
-            changedFrom.put("programId", fromProgramId);
-            changedFrom.put("programTitle", fromProgramTitle);
+            changedFrom.put("channelId", oldShow.networkName);
+            changedFrom.put("programId", oldShow.programId);
+            changedFrom.put("programTitle", oldShow.title);
 
-            changedTo.put("channelId", toChannelId);
-            changedTo.put("programId", toProgramId);
-            changedTo.put("programTitle", toProgramTitle);
+            changedTo.put("channelId", newShow.networkName);
+            changedTo.put("programId", newShow.programId);
+            changedTo.put("programTitle", newShow.title);
 
             logData.put("changedFrom", changedFrom);
             logData.put("changedTo", changedTo);
 
             systemLog("CHANNEL", logData);
             Log.v(TAG, "channel change logged");
-        } catch (JSONException e){
-            Log.w(TAG, "Channel change could not be created\n" + e.getMessage());
+        } catch (Exception e){
+            Log.w(TAG, "Channel change log could not be created\n" + e.getMessage());
         }
     }
 

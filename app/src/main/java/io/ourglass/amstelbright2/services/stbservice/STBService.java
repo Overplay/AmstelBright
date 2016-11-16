@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.realm.Realm;
 import okhttp3.Call;
@@ -417,9 +416,9 @@ public class STBService extends Service {
                             //                    OGCore.channel = (direcTVJson.getString("callsign"));
                             //                    OGCore.programId = (direcTVJson.getString("programId"));
                             //                    OGCore.programTitle= (direcTVJson.getString("title"));
-                            OGCore.setChannelInfo(direcTVJson.getString("callsign"),
-                                    direcTVJson.getString("programId"),
-                                    direcTVJson.getString("title"));
+//                            OGCore.setChannelInfo(direcTVJson.getString("callsign"),
+//                                    direcTVJson.getString("programId"),
+//                                    direcTVJson.getString("title"));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
