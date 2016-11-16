@@ -184,6 +184,7 @@ public class OGSystem {
         setPairedSTBIpAddress(stb.ipAddress);
         putStringToPrefs("ssdpResponse", stb.ssdpResponse);
         setPairedSTBType("DIRECTV");
+        pairedSTB = stb;
 
     }
 
