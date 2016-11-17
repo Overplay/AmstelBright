@@ -78,7 +78,14 @@ public class DirecTVService extends Service {
             mChannelChangeHandler.post(runnable);
 
         }
+  //TODO BAM 11-15-2016 ---  Need to see when the m_channelChangeHandler and ChannelCheck Thread are cleaned up from the list of foundBoxes
+  /**      public void cleanUp() {
+            mChannelChangeHandler.removeCallbacksAndMessages(null);
+            channelCheckThread.quit();
 
+        }
+
+   */
         public String refreshWhatsPlaying(){
             try {
                 Request req = new Request.Builder()
@@ -169,8 +176,12 @@ public class DirecTVService extends Service {
      */
     @Override
     public void onDestroy() {
-        super.onDestroy();
         ABApplication.dbToast(this, "STB: onDestroy");
+        mTVThreadHandler.removeCallbacksAndMessages(null);
+        mTVThreadHandler2.removeCallbacksAndMessages(null);
+        mTVPollThread.quit();
+        mTVDiscoveryThread.quit();
+        super.onDestroy();
     }
 
     @Nullable

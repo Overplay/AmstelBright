@@ -150,6 +150,8 @@ public class LogCleanAndPushService extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         mWorkerThreadHandler.removeCallbacksAndMessages(null);
+        mWorkerThread.quit();
+        super.onDestroy();
     }
 
 }

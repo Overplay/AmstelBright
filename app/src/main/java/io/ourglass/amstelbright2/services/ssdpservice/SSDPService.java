@@ -161,8 +161,9 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
     }
 
     public void onDestroy() {
-
         Log.d(TAG, "onDestroy");
+        //TODO BAM 11-18-2016:  check to make sure we should be calling interrupted...
+        mSSDPDicoveryThread.interrupt();
         mSSDPDicoveryThread.quit();
         super.onDestroy();
 

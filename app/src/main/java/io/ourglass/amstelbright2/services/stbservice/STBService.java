@@ -169,8 +169,12 @@ public class STBService extends Service {
      */
     @Override
     public void onDestroy() {
-        super.onDestroy();
         ABApplication.dbToast(this, "STB: onDestroy");
+        mTVThreadHandler.removeCallbacksAndMessages(null);
+        mTVThreadHandler2.removeCallbacksAndMessages(null);
+        mTVPollThread.quit();
+        mTVDiscoveryThread.quit();
+        super.onDestroy();
     }
 
     @Nullable

@@ -223,6 +223,8 @@ public class AdFetchService extends Service {
         Log.d(TAG, "onDestroy");
 
         mScrapeThreadHandler.removeCallbacksAndMessages(null);
+        mScrapeThread.quit();
+        super.onDestroy();
     }
 
 

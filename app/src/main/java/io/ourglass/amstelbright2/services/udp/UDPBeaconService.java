@@ -90,12 +90,6 @@ public class UDPBeaconService extends Service {
 
     }
 
-
-    private void stopBeacon() {
-        Log.d(TAG, "stopBeacon");
-        mUdpThreadHandler.removeCallbacksAndMessages(null);
-    }
-
     private InetAddress getBroadcastAddress() throws IOException {
         WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         DhcpInfo dhcp = manager.getDhcpInfo();
@@ -138,10 +132,11 @@ public class UDPBeaconService extends Service {
         return Service.START_STICKY;
     }
 
-    @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        stopBeacon();
+        mUdpThreadHandler.removeCallbacksAndMessages(null);
+        udpLooperThread.quit();
+        super.onDestroy();
     }
 
     @Override

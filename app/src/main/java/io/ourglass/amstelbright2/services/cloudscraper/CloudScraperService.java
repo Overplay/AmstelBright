@@ -98,14 +98,6 @@ public class CloudScraperService extends Service {
 
     }
 
-
-    private void stop() {
-        Log.d(TAG, "stopBeacon");
-        mScrapeThreadHandler.removeCallbacksAndMessages(null);
-    }
-
-
-
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
@@ -144,7 +136,9 @@ public class CloudScraperService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        stop();
+        mScrapeThreadHandler.removeCallbacksAndMessages(null);
+        mScrapeThread.quit();
+        super.onDestroy();
     }
 
     @Override

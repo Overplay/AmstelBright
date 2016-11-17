@@ -11,6 +11,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import java.lang.InterruptedException;
+
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGSystem;
@@ -54,10 +56,12 @@ public class UDPListenAndRespond extends Service {
                     } catch(java.io.IOException e){
                         Log.e(TAG, "listen errored: " + e.getMessage());
                     }
+
                 }
                 Log.v(TAG, "Listen and Respond thread has been killed");
             }
         });
+
         udpListenThread.start();
 
         return Service.START_STICKY;
@@ -97,6 +101,12 @@ public class UDPListenAndRespond extends Service {
 
     public void onDestroy(){
         Log.d(TAG, "onDestroy");
+        udpListenThread.interrupt();
         threadAlive = false;
+        //TODO BAM 11-15-2016  need to check if we need to setBroadcast(false);
+        if(null != mSocket ||!mSocket.isClosed()) {
+            mSocket.disconnect();
+            mSocket.close();
+        }
     }
 }
