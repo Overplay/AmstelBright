@@ -41,7 +41,7 @@ import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
  *
  *  Once you have such a receiver set up, you can issue a startService command like so:
  *
- *      Intent ssdpi = new Intent(this, SSDPService.class);
+ *      Intent ssdpi = new Intent(this, OGDiscoService.class);
  *      ssdpi.putExtra("deviceFilter", "DIRECTV");
  *      startService(ssdpi);
  *
@@ -52,7 +52,7 @@ import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 public class SSDPService extends Service implements SSDPHandlerThread.SSDPListener {
 
-    public static final String TAG = "SSDPService";
+    public static final String TAG = "OGDiscoService";
     public static final long CONSIDERED_FRESH = 15000; // This is conservative
 
     // Binder mode is not well tested!
@@ -60,7 +60,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
 
     public class LocalBinder extends Binder {
         public SSDPService getService() {
-            // Return this instance of SSDPService so clients can call public methods
+            // Return this instance of OGDiscoService so clients can call public methods
             return SSDPService.this;
         }
     }

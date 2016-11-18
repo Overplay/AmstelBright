@@ -47,7 +47,7 @@ public abstract class SetTopBox {
     // These will be box specific (DirecTV, Xfinity, etc.)
     public abstract void updateWhatsOn();
     public abstract TVShow updateWhatsOnSync();
-    public abstract SetTopBox updateAllSync();
+    public abstract STBPollStatus updateAllSync();
     //public abstract void updateGuide();
 
     public void updateInBackground(){

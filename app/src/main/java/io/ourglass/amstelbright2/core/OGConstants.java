@@ -32,7 +32,8 @@ public class OGConstants {
     public static final boolean SEND_UDP_BEACONS = true;  // don't need any more, I hope :)
 
     // MAK: Created a new port so both discovery methods can be used at same time
-    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9091;
+    // These were moved back into the protocol service now that they've stabilized
+//    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;

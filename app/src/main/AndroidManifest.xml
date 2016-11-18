@@ -32,12 +32,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Ourglass Discovery Services...some are being deprecared -->
         <service
-            android:name=".services.udp.UDPBeaconService"
+            android:name=".services.ogdpservice.UDPBeaconService"
             android:enabled="true" />
         <service
-            android:name=".services.udp.UDPListenAndRespond"
+            android:name=".services.ogdpservice.UDPListenAndRespond"
             android:enabled="true" />
+        <service
+            android:name=".services.ogdpservice.OGDPService"
+            android:enabled="true" />
+
         <service
             android:name=".services.stbservice.STBPollingService"
             android:enabled="true" />

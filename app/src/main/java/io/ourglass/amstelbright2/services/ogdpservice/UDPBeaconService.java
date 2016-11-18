@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.services.udp;
+package io.ourglass.amstelbright2.services.ogdpservice;
 
 import android.app.Service;
 import android.content.Context;

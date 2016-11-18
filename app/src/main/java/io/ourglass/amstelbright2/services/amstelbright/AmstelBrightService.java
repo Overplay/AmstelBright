@@ -21,11 +21,11 @@ import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
 import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
 import io.ourglass.amstelbright2.services.http.HTTPDService;
+import io.ourglass.amstelbright2.services.ogdpservice.OGDPService;
+import io.ourglass.amstelbright2.services.ogdpservice.UDPBeaconService;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.stbservice.STBPollingService;
-import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
-import io.ourglass.amstelbright2.services.udp.UDPListenAndRespond;
 
 //import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
 
@@ -100,7 +100,8 @@ public class AmstelBrightService extends Service  {
 
 
         // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
-        startService( new Intent(this, UDPListenAndRespond.class));
+        //startService( new Intent(this, UDPListenAndRespond.class));
+        startService( new Intent(this, OGDPService.class));
 
         if (OGConstants.SEND_UDP_BEACONS){
             startService( new Intent(this, UDPBeaconService.class));
@@ -114,7 +115,7 @@ public class AmstelBrightService extends Service  {
 
 
 
-//        Intent upnpIntent = new Intent(this, SSDPService.class);
+//        Intent upnpIntent = new Intent(this, OGDiscoService.class);
 //        startService(upnpIntent);
 
         Intent logReapIntent = new Intent(this, LogCleanAndPushService.class);

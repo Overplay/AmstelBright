@@ -90,20 +90,35 @@ public class DirecTVSetTopBox extends SetTopBox {
         return show;
     }
 
-    private void getModelInfo(){
+    private boolean getModelInfo(){
 
         this.modelName = DirecTVAPI.modelInfo(upnpInfoUrl);
         this.receiverId = DirecTVAPI.receiverId(this.ipAddress);
         lastUpdated = System.currentTimeMillis();
+
+        return (this.modelName!=null) && (this.receiverId!=null);
     }
 
     @Override
-    public DirecTVSetTopBox updateAllSync(){
-        whatsOn();
-        getModelInfo();
+    public STBPollStatus updateAllSync(){
+
+        STBPollStatus status = new STBPollStatus();
+
+        if (whatsOn()==null){
+            status.cleanPoll = false;
+            status.lostConnection = true;
+        };
+
+        if (!getModelInfo()){
+            status.cleanPoll = false;
+            status.otherError = true;
+            status.message = "Could not poll model name and/or receiver id";
+        }
+
         lastUpdated = System.currentTimeMillis();
-        return this;
+        return status;
     }
+
 
 }
 

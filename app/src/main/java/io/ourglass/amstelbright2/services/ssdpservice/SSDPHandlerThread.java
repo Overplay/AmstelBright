@@ -23,7 +23,7 @@ import java.util.HashSet;
 
 public class SSDPHandlerThread extends HandlerThread {
 
-    public static final String TAG = "SSDPHandlerThread";
+    public static final String TAG = "OGDiscoHandlerThread";
     public String[] mDevices;
     public SSDPListener mListener;
     public Context mContext;

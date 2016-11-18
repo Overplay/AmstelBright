@@ -16,10 +16,25 @@ import io.ourglass.amstelbright2.core.OGSystem;
  * Created by atorres on 4/19/16.
  */
 
+// TODO This service shouldn't event run when not paired. It should be started only after a pair
+// event occurs, or upon bootup if an existing pair is saved.
+
+
 public class STBPollingService extends Service {
 
     static final String TAG = "STBPollingService";
     static final boolean VERBOSE = true;
+    static STBPollingService sInstance;
+
+    public static STBPollingService getInstance(){
+        return sInstance;
+    }
+
+    // TODO: Count failed polls and take a reconnect action if the number of failed polls exceeds a
+    // threshold. Several things could cause a disconnect: IP address changed for box, WiFi is down,
+    // etc.
+
+    public static STBPollStatus lastPollStatus;
 
     HandlerThread stbLooperThread = new HandlerThread("stbPollLooper");
     private Handler mPollThreadHandler;
@@ -42,7 +57,7 @@ public class STBPollingService extends Service {
                     Log.d(TAG, "Not paired to STB, skipping update");
                 } else {
                     Log.d(TAG, "Paired to: "+stb.ipAddress+", updating now.");
-                    stb.updateAllSync();
+                    lastPollStatus = stb.updateAllSync();
                     // Feels clunky like the STB should notify the system if its channel changed...
                     OGCore.setCurrentlyOnTV(stb.nowPlaying);
                 }
@@ -55,7 +70,6 @@ public class STBPollingService extends Service {
 
     }
 
-
     private void stopPoll() {
         Log.d(TAG, "Stopping TV polling.");
         mPollThreadHandler.removeCallbacksAndMessages(null);
@@ -64,7 +78,10 @@ public class STBPollingService extends Service {
 
     @Override
     public void onCreate() {
+
         Log.d(TAG, "onCreate");
+        sInstance = this;
+
     }
 
     @Override
