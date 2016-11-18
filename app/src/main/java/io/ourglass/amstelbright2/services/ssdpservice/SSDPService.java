@@ -109,6 +109,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
 
     private void processIntent(Intent intent){
 
+        // TODO: This does dick-all
         boolean noDisco = intent.getBooleanExtra("noDisco", false);
         mDeviceFilter = intent.getStringExtra("deviceFilter");
 

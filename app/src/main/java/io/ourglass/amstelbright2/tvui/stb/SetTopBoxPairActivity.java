@@ -132,7 +132,6 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
         //directvDevicesList.setAdapter(new DirectvDevicesAdapter(this, STBService.foundBoxes, poppins, boldFont));
 
         mSTBArrayAdapter = new SetTopBoxAdapter(this, mFoundBoxes, poppins, boldFont);
-
         directvDevicesList.setAdapter(mSTBArrayAdapter);
 
 
@@ -336,7 +335,7 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
         for(Map.Entry<String, String> device : devices.entrySet()){
 
             DirecTVSetTopBox newSTB = new DirecTVSetTopBox(null, device.getKey(), SetTopBox.STBConnectionType.IPGENERIC, device.getValue());
-            newSTB.ssdpResponse = device.getValue(); // Save it for getting the model name
+            //newSTB.ssdpResponse = device.getValue(); // Save it for getting the model name
             //newSTB.updateWhatsOn();
             mSTBArrayAdapter.add(newSTB);
 
