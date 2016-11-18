@@ -18,6 +18,7 @@ import io.ourglass.amstelbright2.core.OGSystem;
 
 // TODO This service shouldn't event run when not paired. It should be started only after a pair
 // event occurs, or upon bootup if an existing pair is saved.
+    // Edev2
 
 
 public class STBPollingService extends Service {
