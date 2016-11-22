@@ -41,8 +41,7 @@ public class AmstelBrightService extends Service  {
     //used to keep track of uptime
     public static final long bootTime = System.currentTimeMillis();
 
-    // This is here as a reliable ref to context for the Realm stuff.
-    public static Context context;
+    //public static Context context;
 
     public static final String TAG = "ABService";
 
@@ -75,8 +74,6 @@ public class AmstelBrightService extends Service  {
 
         ABApplication.dbToast(this, "Starting Background Services");
 
-        // Create global static ref for code that needs Context
-        context = getApplicationContext();
 
         // Let's start the UDP service
         OGCore.sendStatusIntent("STATUS", "Starting Services",

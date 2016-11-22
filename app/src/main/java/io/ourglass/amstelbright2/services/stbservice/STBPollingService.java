@@ -89,8 +89,11 @@ public class STBPollingService extends Service {
 
         ABApplication.dbToast(this, "Starting STB Polling");
 
-        stbLooperThread.start();
-        mPollThreadHandler = new Handler(stbLooperThread.getLooper());
+        if (!stbLooperThread.isAlive()){
+            stbLooperThread.start();
+            mPollThreadHandler = new Handler(stbLooperThread.getLooper());
+        }
+
 
         startPollLooper();
 

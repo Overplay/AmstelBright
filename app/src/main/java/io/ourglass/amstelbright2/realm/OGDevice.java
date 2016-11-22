@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
@@ -64,7 +64,7 @@ public class OGDevice extends RealmObject{
         newDevice.locationWithinVenue = "undefined";
 
         //retrieve the MAC address
-        WifiManager manager = (WifiManager) AmstelBrightService.context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager manager = (WifiManager) ABApplication.sharedContext.getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
         String MACaddress = info.getMacAddress();
 

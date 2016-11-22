@@ -238,7 +238,7 @@ public class OGSystem {
             deviceJSON.put("randomFactoid", "Bunnies are cute");
 
 
-            WifiManager manager = (WifiManager) AmstelBrightService.context.getSystemService(Context.WIFI_SERVICE);
+            WifiManager manager = (WifiManager) ABApplication.sharedContext.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = manager.getConnectionInfo();
             String macAddress = info.getMacAddress();
 

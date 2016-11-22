@@ -232,8 +232,10 @@ public class AdFetchService extends Service {
 
         Log.v(TAG, "In onStartCommand in AdFetchService");
 
-        mScrapeThread.start();
-        mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        if (!mScrapeThread.isAlive()){
+            mScrapeThread.start();
+            mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        }
 
         startAdScraping();
 

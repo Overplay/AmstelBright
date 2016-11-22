@@ -196,7 +196,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
         intent.setAction("tv.ourglass.amstelbrightserver.ssdpresponse");
         intent.putExtra("devices", getFilteredDevices(mDeviceFilter));
         intent.putExtra("addresses", getFilteredAddresses(mDeviceFilter));
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 
@@ -205,7 +205,7 @@ public class SSDPService extends Service implements SSDPHandlerThread.SSDPListen
         Intent intent = new Intent();
         intent.setAction("tv.ourglass.amstelbrightserver.ssdperror");
         intent.putExtra("error", message);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 

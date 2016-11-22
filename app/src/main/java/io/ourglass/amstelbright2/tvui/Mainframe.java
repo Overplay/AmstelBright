@@ -439,7 +439,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 raiseRedFlag("Unable to get stb info from server");
                 intent.putExtra("success", false);
                 intent.putExtra("errMsg", e.getMessage());
-                AmstelBrightService.context.startActivity(intent);
+                ABApplication.sharedContext.startActivity(intent);
             }
 
             @Override
@@ -463,7 +463,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     intent.putExtra("success", false);
                     //throw new IOException("Unexpected Json error " + e.toString());
                 } finally {
-                    AmstelBrightService.context.startActivity(intent);
+                    ABApplication.sharedContext.startActivity(intent);
                 }
             }
         });

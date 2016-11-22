@@ -41,8 +41,10 @@ public class LogCleanAndPushService extends Service {
 
         ABApplication.dbToast(this, "Log Process Starting");
 
-        mWorkerThread.start();
-        mWorkerThreadHandler = new Handler(mWorkerThread.getLooper());
+        if (!mWorkerThread.isAlive()){
+            mWorkerThread.start();
+            mWorkerThreadHandler = new Handler(mWorkerThread.getLooper());
+        }
 
         startLoop();
 

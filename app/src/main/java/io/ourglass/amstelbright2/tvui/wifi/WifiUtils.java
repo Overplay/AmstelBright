@@ -1,13 +1,11 @@
 package io.ourglass.amstelbright2.tvui.wifi;
 
-import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.util.List;
 
-import static io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService.context;
 
 /**
  * Created by ethan on 9/25/16.

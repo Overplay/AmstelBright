@@ -20,7 +20,7 @@ public class OGNotifications {
         intent.putExtra("command", cmd);
         intent.putExtra("appId", target.appId);
         intent.putExtra("app", target.getAppAsJson().toString());
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 
@@ -32,7 +32,7 @@ public class OGNotifications {
         intent.putExtra("command", cmd);
         intent.putExtra("message", msg);
         intent.putExtra("code", code);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 

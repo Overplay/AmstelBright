@@ -119,9 +119,11 @@ public class UDPBeaconService extends Service {
 
         ABApplication.dbToast(this, "Starting UDP Beacon");
 
-        udpLooperThread.start();
-        mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
-
+        // Without this check, when service is restarted by clicking home button, we explode.
+        if (!udpLooperThread.isAlive()){
+            udpLooperThread.start();
+            mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
+        }
 
         mMessage = OGSystem.getSystemInfo().toString();
 

@@ -48,6 +48,11 @@ public class OGCore {
 
     public static boolean setCurrentlyOnTV(TVShow show){
 
+        if (show==null){
+            Log.wtf(TAG, "Got a NULL show, what da fu?");
+            return false;
+        }
+
         // TODO this if-then could be simplified
         if (currentlyOnTV==null){
             currentlyOnTV = show;
@@ -62,8 +67,9 @@ public class OGCore {
         Intent intent = new Intent();
         intent.setAction("com.ourglass.amstelbrightserver");
         intent.putExtra("command", "NEW_CHANNEL");
-        intent.putExtra("channel", currentlyOnTV.networkName);
-        AmstelBrightService.context.sendBroadcast(intent);
+        // TODO this was blowing null pointer chunks on colde boot. Not sure why.
+        intent.putExtra("channel", ( currentlyOnTV.networkName==null) ? "NULLTV" : currentlyOnTV.networkName);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
         //  Add scrape for channel
 
@@ -261,7 +267,7 @@ public class OGCore {
         intent.putExtra("scale", scale);
         intent.putExtra("xAdjust", xAdjust);
         intent.putExtra("yAdjust", yAdjust);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
         realm.commitTransaction();
 
@@ -276,7 +282,7 @@ public class OGCore {
         intent.putExtra("command", cmd);
         intent.putExtra("appId", target.appId);
         intent.putExtra("app", target.getAppAsJson().toString());
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 
@@ -288,7 +294,7 @@ public class OGCore {
         intent.putExtra("command", cmd);
         intent.putExtra("message", msg);
         intent.putExtra("code", code);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 

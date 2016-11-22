@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -56,7 +58,11 @@ public class ABApplication extends Application {
 
             File appDirectory = new File( Environment.getExternalStorageDirectory() + "/ABLogs" );
             File logDirectory = new File( appDirectory + "/log" );
-            File logFile = new File( logDirectory, "logcat" + System.currentTimeMillis() + ".txt" );
+            Calendar now = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH-mm-ss-SSS");
+            String time = sdf.format(now.getTime());
+
+            File logFile = new File( logDirectory, "logcat" + time + ".txt" );
 
             // create app folder
             if ( !appDirectory.exists() ) {

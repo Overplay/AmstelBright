@@ -25,6 +25,7 @@
 
     <!-- Application is subclassed for a default Realm -->
     <application
+        android:launchMode="singleTask"
         android:name=".core.ABApplication"
         android:allowBackup="true"
         android:icon="@mipmap/og_launcher"
@@ -68,12 +69,15 @@
 
         <activity android:name=".tvui.MainframeActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <!-- Starting activity for this application -->
+                <action android:name="android.intent.action.MAIN"/>
+                <!-- Means that this app should appear on the launcher (app menu for OS)-->
+                <category android:name="android.intent.category.LAUNCHER" />
+
 
                 <category android:name="android.intent.category.DEFAULT" />
-                <!-- The following two intent-filters are the key to set homescreen -->
+                <!-- The following intent-filter says this is a candidate for home screen -->
                 <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -85,11 +89,15 @@
         <!-- </intent-filter> -->
         <!-- </receiver> -->
 
-        <receiver android:name=".tvui.wifi.WifiManageActivity$WifiReceiver" >
-            <intent-filter android:priority="100">
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>
-        </receiver>
+        <!-- The below was causing errors because it called an inner static class in the -->
+        <!-- WiFiManageActivity that in turn tried to call something on ABService which -->
+        <!-- had not started yet! -->
+
+        <!--<receiver android:name=".tvui.wifi.WifiManageActivity$WifiReceiver" >-->
+            <!--<intent-filter android:priority="100">-->
+                <!--<action android:name="android.net.wifi.STATE_CHANGE" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <!--<activity-->
             <!--android:name=".tvui.stb.DirecTVPairActivity"-->
@@ -105,11 +113,11 @@
             android:theme="@style/Theme.AppCompat.Translucent">
         </activity>
 
-        <activity
-            android:name=".tvui.wifi.WifiManageActivity"
-            android:theme="@style/Theme.AppCompat.Translucent">
+        <!--<activity-->
+            <!--android:name=".tvui.wifi.WifiManageActivity"-->
+            <!--android:theme="@style/Theme.AppCompat.Translucent">-->
 
-        </activity>
+        <!--</activity>-->
 
 
     </application>
