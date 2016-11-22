@@ -405,7 +405,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void animateIn(View v, float finalAlpha) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", 0f, finalAlpha);
-        anim.setDuration(1000);
+        anim.setDuration(500);
         anim.start();
 
     }
@@ -413,7 +413,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void animateOut(View v) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", v.getAlpha(), 0);
-        anim.setDuration(1000);
+        anim.setDuration(500);
         anim.start();
 
     }
@@ -585,12 +585,24 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void killCrawler() {
 
         animateOut(mCrawlerWebView);
+        mCrawlerWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCrawlerWebView.loadUrl("");
+            }
+        }, 1000);
     }
 
     @Override
     public void killWidget() {
 
         animateOut(mWidgetWebView);
+        mWidgetWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mWidgetWebView.loadUrl("");
+            }
+        }, 1000);
 
     }
 
