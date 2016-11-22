@@ -131,10 +131,17 @@ public class UDPBeaconService extends Service {
 
         return Service.START_STICKY;
     }
+    public  void onPause(){
+        mUdpThreadHandler.removeCallbacksAndMessages(null);
+        udpLooperThread.interrupt();
+        udpLooperThread.quit();
+
+    }
 
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         mUdpThreadHandler.removeCallbacksAndMessages(null);
+        udpLooperThread.interrupt();
         udpLooperThread.quit();
         super.onDestroy();
     }

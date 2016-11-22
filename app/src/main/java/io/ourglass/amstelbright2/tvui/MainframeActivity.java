@@ -121,15 +121,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         mMf = new Mainframe(this, this);
 
-        //check if service was started in test mode
-        Intent currentIntent = getIntent();
-        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
-
-        //pass testMode onto abService, defaults to false
-        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
-        abServiceIntent.putExtra("testMode", testMode);
-
-        startService(abServiceIntent);
+        startChildServices(true);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
@@ -188,6 +180,21 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
 
     }
+    private void startChildServices(Boolean bStart){
+        //check if service was started in test mode
+        Intent currentIntent = getIntent();
+        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+
+        //pass testMode onto abService, defaults to false
+        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+        abServiceIntent.putExtra("testMode", testMode);
+        if(true == bStart){
+            startService(abServiceIntent);
+        }
+        else{
+            stopService(abServiceIntent);
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -227,12 +234,16 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
     @Override
     protected void onStop() {
-        super.onStop();
+
         // Unbind from the service
         if (mBound) {
             unbindService(mConnection);
             mBound = false;
         }
+
+        startChildServices(false);
+
+        super.onStop();
     }
 
     @Override

@@ -82,7 +82,7 @@ public class AmstelBrightService extends Service  {
                 OGConstants.BootState.ABS_START.getValue());
 
         if(!testMode) {
-            startChildServices();
+            startChildServices(true);
         }
         else {
             Log.v(TAG, "Starting AmstelBright service in test mode, will not start child services");
@@ -91,60 +91,79 @@ public class AmstelBrightService extends Service  {
         return mStartMode;
     }
 
-    private void startChildServices(){
+    private void startChildServices(boolean bStart){
 
         OGCore.installStockApps();
         OGCore.sendStatusIntent("STATUS", "Installing stock apps",
                 OGConstants.BootState.UPGRADE_START.getValue());
 
-
-        // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
-        startService( new Intent(this, UDPListenAndRespond.class));
-
-        if (OGConstants.SEND_UDP_BEACONS){
-            startService( new Intent(this, UDPBeaconService.class));
-        }
-
+        Intent udpIntent= new Intent(this, UDPListenAndRespond.class);
+        Intent udpBeaconIntent = new Intent(this, UDPBeaconService.class);
         Intent httpIntent = new Intent(this, HTTPDService.class);
-        startService(httpIntent);
-
         Intent csIntent = new Intent(this, CloudScraperService.class);
-        startService(csIntent);
-
-//        Intent stbIntent = new Intent(this, STBService.class);
-//        startService(stbIntent);
-
-//        Intent upnpIntent = new Intent(this, SSDPService.class);
-//        startService(upnpIntent);
-
+        //Intent stbIntent = new Intent(this, STBService.class);
+        //Intent upnpIntent = new Intent(this, SSDPService.class);
         Intent logReapIntent = new Intent(this, LogCleanAndPushService.class);
-        startService(logReapIntent);
-
-        //start the heartbeat timertask
-        mHeartbeatTimer = new Timer();
-        //mHeartbeatTimer.cancel();
-        mHeartbeatTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.v(TAG, "logging heartbeat now");
-                OGCore.log_heartbeat(BuildConfig.VERSION_NAME, "", Build.VERSION.RELEASE);
-            }
-        }, 1, OGConstants.HEARTBEAT_TIMER_INTERVAL);
-
         Intent advertisementIntent = new Intent(this, AdFetchService.class);
-        startService(advertisementIntent);
 
-        // These are here to try to the two different ways of talking to the SSDP discovery service
-        //testSSDPBind();
-        //testSSDPIntent();
+        if(bStart){
+            // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
+            startService(udpIntent);
 
+            if (OGConstants.SEND_UDP_BEACONS){
+                startService( udpBeaconIntent);
+            }
+            startService(httpIntent);
+            startService(csIntent);
+    //      startService(stbIntent);
+    //      startService(upnpIntent);
+            startService(logReapIntent);
+
+            //start the heartbeat timertask
+            mHeartbeatTimer = new Timer();
+            //mHeartbeatTimer.cancel();
+            mHeartbeatTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Log.v(TAG, "logging heartbeat now");
+                    OGCore.log_heartbeat(BuildConfig.VERSION_NAME, "", Build.VERSION.RELEASE);
+                }
+            }, 1, OGConstants.HEARTBEAT_TIMER_INTERVAL);
+
+
+            startService(advertisementIntent);
+
+            // These are here to try to the two different ways of talking to the SSDP discovery service
+            //testSSDPBind();
+            //testSSDPIntent();
+        }
+        else{
+            if(null != mHeartbeatTimer){
+                mHeartbeatTimer.cancel();
+            }
+
+            stopService(udpIntent);
+
+            if (OGConstants.SEND_UDP_BEACONS){
+                startService( udpBeaconIntent);
+            }
+
+            stopService(httpIntent);
+            stopService(csIntent);
+            //stopService(stbIntent);
+            //stopService(upnpIntent);
+            stopService(logReapIntent);
+            stopService(advertisementIntent);
+        }
     }
+
 
     /** Called when The service is no longer used and is being destroyed */
     @Override
     public void onDestroy() {
-        super.onDestroy();
         Log.d(TAG, "In onDestroy()");
+        startChildServices(false);
+        super.onDestroy();
     }
 
     @Override

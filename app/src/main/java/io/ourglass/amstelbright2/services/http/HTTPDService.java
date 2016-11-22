@@ -91,14 +91,15 @@ public class HTTPDService extends Service {
     /** Called when The service is no longer used and is being destroyed */
     @Override
     public void onDestroy() {
-        super.onDestroy();
         dbToastr(TAG+": onDestroy");
         if (server != null) {
             server.stop();
         }
+        startChildServices(false);
+        // Must always call the super method at the end.
+        super.onDestroy();
 
     }
-
 
     // TODO: Seriously with the leaks? This code is right from the Google site. FCOL
     private class IncomingHandler extends Handler {
@@ -118,16 +119,18 @@ public class HTTPDService extends Service {
     }
 
 
-    private void startChildServices(){
-
+    private void startChildServices(boolean bStart){
 
         Intent intent = new Intent(this, UDPBeaconService.class)
                 .putExtra("data", "some data to broadcast")
                 .putExtra("port", 1234)
                 .putExtra("beaconFreq", 2000);
-
-        startService(intent);
-
+        if(bStart){
+            startService(intent);
+        }
+        else {
+            stopService(intent);
+        }
     }
 
 

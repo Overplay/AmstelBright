@@ -179,9 +179,13 @@ public class DirecTVService extends Service {
         ABApplication.dbToast(this, "STB: onDestroy");
         mTVThreadHandler.removeCallbacksAndMessages(null);
         mTVThreadHandler2.removeCallbacksAndMessages(null);
+        mTVDiscoveryThread.interrupt();
+        mTVPollThread.interrupt();
         mTVPollThread.quit();
         mTVDiscoveryThread.quit();
         super.onDestroy();
+
+
     }
 
     @Nullable

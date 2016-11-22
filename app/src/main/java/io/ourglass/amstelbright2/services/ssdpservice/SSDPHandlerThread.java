@@ -32,7 +32,7 @@ public class SSDPHandlerThread extends HandlerThread {
     HashMap<String, String> devices = new HashMap<>();
 
     public interface SSDPListener {
-        public void foundDevices(HashMap<String, String> devices, HashSet<String> addresses );
+        public void foundDevices(HashMap<String, String> devices, HashSet<String> addresses);
         public void encounteredError(String errString);
     }
 
@@ -40,7 +40,7 @@ public class SSDPHandlerThread extends HandlerThread {
         super(name);
     }
 
-    public void start(Context context, SSDPListener listener){
+    public void start(Context context, SSDPListener listener) {
 
         super.start();
         mListener = listener;
@@ -49,8 +49,12 @@ public class SSDPHandlerThread extends HandlerThread {
 
     }
 
-    public void discover(){
+    public void discover() {
         mWorkerHandler.post(discoveryRunnable);
+    }
+
+    public void onDestroy() {
+       mWorkerHandler.removeCallbacksAndMessages(null);
     }
 
     Runnable discoveryRunnable = new Runnable() {

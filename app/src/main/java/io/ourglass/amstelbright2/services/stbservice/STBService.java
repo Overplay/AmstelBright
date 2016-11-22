@@ -172,6 +172,8 @@ public class STBService extends Service {
         ABApplication.dbToast(this, "STB: onDestroy");
         mTVThreadHandler.removeCallbacksAndMessages(null);
         mTVThreadHandler2.removeCallbacksAndMessages(null);
+        mTVPollThread.interrupt();
+        mTVDiscoveryThread.interrupt();
         mTVPollThread.quit();
         mTVDiscoveryThread.quit();
         super.onDestroy();
