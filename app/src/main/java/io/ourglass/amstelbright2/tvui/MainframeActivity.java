@@ -24,7 +24,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -45,6 +44,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
@@ -58,7 +58,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
 
-    private SurfaceView surfaceView;
+//    private SurfaceView surfaceView;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -120,15 +120,15 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         mMf = new Mainframe(this, this);
 
-        //check if service was started in test mode
-        Intent currentIntent = getIntent();
-        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
-
-        //pass testMode onto abService, defaults to false
-        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
-        abServiceIntent.putExtra("testMode", testMode);
-
-        startService(abServiceIntent);
+//        //check if service was started in test mode
+//        Intent currentIntent = getIntent();
+//        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+//
+//        //pass testMode onto abService, defaults to false
+//        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+//        abServiceIntent.putExtra("testMode", testMode);
+//
+//        startService(abServiceIntent);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
@@ -158,17 +158,17 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             }
         });
 
-        if (!OGSystem.enableHDMI()) {
-            // The color change doesn't seem to do anything...:(.. not worth stressing.
-
-            surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
-            surfaceView.setVisibility(View.INVISIBLE);
-
-            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
-            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
-
-
-        }
+//        if (!OGSystem.enableHDMI()) {
+//            // The color change doesn't seem to do anything...:(.. not worth stressing.
+//
+//            surfaceView = (SurfaceView)findViewById(surfaceView);
+//            surfaceView.setVisibility(View.INVISIBLE);
+//
+//            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
+//            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+//
+//
+//        }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
 
@@ -186,14 +186,12 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
 
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
-
 
         mBootBugImageView.animate()
                 .scaleX(0f)
@@ -252,6 +250,10 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         if (keyCode == 8){
             Intent intent = new Intent(this, SetTopBoxPairActivity.class);
             startActivity(intent);
+        }
+
+        if ((keyCode == 12) && OGConstants.CRASH_TEST_DUMMY){
+            int zed = 1/0;
         }
 
         // Out until we can do more debug

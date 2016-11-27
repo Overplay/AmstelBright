@@ -53,7 +53,7 @@ public class CloudScraperService extends Service {
 
             @Override
             public void run() {
-                logd("sending UDP packet from looper");
+                logd("Fetching scrape targets from Realm");
 
                 final Realm realm = Realm.getDefaultInstance();
                 RealmResults<OGScraper> mScrapeTasks = realm.where(OGScraper.class).findAll();

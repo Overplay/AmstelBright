@@ -13,6 +13,7 @@ public class OGConstants {
     public static final boolean USE_DEMO_ASAHI = true;
 
     public static final boolean TEST_MODE = true;
+    public static final boolean CRASH_TEST_DUMMY = true; // enable force crash on '5' button
     public static final boolean SHOW_DB_TOASTS = false;
     public static final boolean LOGCAT_TO_FILE = true;
 
@@ -29,7 +30,7 @@ public class OGConstants {
     public static final boolean USE_UPNP_DISCOVERY = true;
 
     public static final int UDP_BEACON_PORT = 9092;
-    public static final boolean SEND_UDP_BEACONS = true;  // don't need any more, I hope :)
+    public static final boolean SEND_UDP_BEACONS = false;  // don't need any more, I hope :)
 
     // MAK: Created a new port so both discovery methods can be used at same time
     // These were moved back into the protocol service now that they've stabilized

@@ -16,7 +16,6 @@ import com.mstar.android.tvapi.common.vo.TvOsType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 import io.ourglass.amstelbright2.tvui.WidthHeight;
@@ -82,18 +81,13 @@ public class OGSystem {
     public static boolean enableHDMI(){
 
         if ( isRealOG() ){
-
             return false;
-
         } else if ( isTronsmart() ){
-
             enableTronsmartHDMI();
             return true;
-
         } else {
-
+            // Emulator
             return false;
-
         }
 
     }
@@ -131,28 +125,19 @@ public class OGSystem {
     }
 
     public static void setSystemName(String name){
-
        putStringToPrefs("systemName", name);
-
     }
 
     public static String getSystemName(){
-
-
         return getStringFromPrefs("systemName", "No Name");
-
     }
 
     public static void setSystemLocation(String location){
-
         putStringToPrefs("systemLocation", location);
-
     }
 
     public static String getSystemLocation(){
-
         return getStringFromPrefs("systemLocation", "No Location");
-
     }
 
     // Set top pairing
@@ -180,12 +165,10 @@ public class OGSystem {
 
     // TODO: This should use Serializable interface and save the object directly
     public static void setPairedSTB(DirecTVSetTopBox stb){
-
         setPairedSTBIpAddress(stb.ipAddress);
         putStringToPrefs("ssdpResponse", stb.ssdpResponse);
         setPairedSTBType("DIRECTV");
         pairedSTB = stb;
-
     }
 
     /**
@@ -215,7 +198,6 @@ public class OGSystem {
 
     public static String getABVersionName(){
         return getStringFromPrefs("abVersionName", null);
-
     }
 
     public static void setABVersionCode(int vCode){
@@ -228,15 +210,11 @@ public class OGSystem {
     }
 
     public static JSONObject getSystemInfo(){
-
         JSONObject deviceJSON = new JSONObject();
-
         try {
-
             deviceJSON.put("name", getSystemName());
             deviceJSON.put("locationWithinVenue", getSystemLocation());
             deviceJSON.put("randomFactoid", "Bunnies are cute");
-
 
             WifiManager manager = (WifiManager) ABApplication.sharedContext.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = manager.getConnectionInfo();
@@ -246,19 +224,14 @@ public class OGSystem {
                 macAddress = "undefined";
             }
 
-
             deviceJSON.put("wifiMacAddress", macAddress);
-
             //deviceJSON.put("settings", device.settings);
             //deviceJSON.put("apiToken", device.apiToken);
-
             //deviceJSON.put("uuid", device.uuid);
             String pairIp = getPairedSTBIpAddress();
-
             deviceJSON.put("isPairedToSTB", isPairedToSTB() );
             deviceJSON.put("pairedSTBIP", pairIp );
-
-            if (isPairedToSTB() && OGCore.currentlyOnTV!=null){
+            if (isPairedToSTB() && OGCore.currentlyOnTV!=null) {
                 deviceJSON.put("channel", OGCore.currentlyOnTV.networkName);
                 deviceJSON.put("title", OGCore.currentlyOnTV.title);
             }
@@ -270,6 +243,8 @@ public class OGSystem {
             deviceJSON.put("osVersion", osVersion());
             deviceJSON.put("osApiLevel", osLevel());
 
+            deviceJSON.put("venue", getVenueId());
+
         } catch (JSONException e){
             Log.e("OGDevice.model", e.toString());
             return null;
@@ -277,6 +252,15 @@ public class OGSystem {
 
         return deviceJSON;
     }
+
+    public static void setVenueId(String venueId){
+        putStringToPrefs("venueId", venueId);
+    }
+
+    public static String getVenueId(){
+        return getStringFromPrefs("venueId", "");
+    }
+
 
     /*******************************************************************************
      *

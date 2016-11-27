@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mainframeLayout">
+
+    <!--<SurfaceView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:id="@+id/surfaceView"-->
+        <!--android:layout_centerHorizontal="true" />-->
+
+    <!--<WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/subfloorWebView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible"/>-->
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="60dip"
+        android:id="@+id/crawlerWebView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:focusable="false"/>
+
+    <WebView
+        android:layout_width="300dip"
+        android:layout_height="300dip"
+        android:id="@+id/widgetWebView"
+        android:layout_alignParentTop="true"
+        android:focusable="false"
+    />
+
+    <TextView
+        android:layout_width="400dip"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="MESSAGES"
+        android:id="@+id/textViewMsg"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dip"
+        android:background="@drawable/popup_bkg"
+        android:focusable="false"
+        android:padding="15dip"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:layout_width="400dip"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="DEBUG"
+        android:id="@+id/textViewDebug"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="200dip"
+        android:background="@drawable/debug_bkg"
+        android:focusable="false"
+        android:padding="15dip" />
+
+    <ImageView
+        android:layout_width="300dip"
+        android:layout_height="wrap_content"
+        android:id="@+id/bootBugIV"
+        android:src="@drawable/bug600x500"
+        android:layout_above="@+id/textViewMsg"
+        android:layout_centerHorizontal="true"
+         />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/gapMaker"
+        android:src="@drawable/xparent5px"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/widgetWebView" />
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="200dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/BlackAlpha70"
+        android:padding="10dip"
+        android:id="@+id/appTray">
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>
