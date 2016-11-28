@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import io.ourglass.amstelbright2.core.ABApplication;
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -116,7 +117,7 @@ public class LogCleanAndPushService extends Service {
 
             //todo replace with OGConstants upon merge with ads branch
             Request request = new Request.Builder()
-                    .url("http://104.131.145.36/OGLog/upload")
+                    .url(OGConstants.ASAHI_ADDRESS + "/OGLog/upload")
                     .post(body)
                     .build();
             try {

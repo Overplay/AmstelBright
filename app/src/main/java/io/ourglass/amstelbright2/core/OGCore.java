@@ -26,6 +26,11 @@ import io.ourglass.amstelbright2.services.stbservice.TVShow;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by mkahn on 5/9/16.
@@ -39,6 +44,8 @@ public class OGCore {
 
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
+
+    private static final OkHttpClient client = ABApplication.okclient;  // share it
 
     // TODO why is this here and not in OGSystem? I don't remember, MAK.
 
@@ -641,6 +648,34 @@ public class OGCore {
         realm.commitTransaction();
 
         // This should have realm.close(), no?
+
+    }
+
+    public static JSONObject registerWithAsahi(String regCode){
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("regcode", regCode)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(OGConstants.ASAHI_ADDRESS + "/device/registerDevice")
+                .post(formBody)
+                .build();
+
+
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+            if(!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            Log.v(TAG, "successfully uploaded log to Asahi, will now mark the upload time");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not mark as uploaded");
+
+        }
+
+        return new JSONObject();
 
     }
 

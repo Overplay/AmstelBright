@@ -39,6 +39,7 @@ public class OGSystemExceptionHander implements java.lang.Thread.UncaughtExcepti
                 "Exception is: " + stackTrace.toString());
         intent.putExtra("stacktrace", s);
 
+        OGCore.log_alert("CRASH", s);
 
         int mPendingIntentId = 123456;
         PendingIntent mPendingIntent = PendingIntent.getActivity(myContext, mPendingIntentId,

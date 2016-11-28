@@ -123,7 +123,30 @@ public class JSONSystemHandler extends JSONHandler {
                             return makeErrorJson(e);
 
                         }
+                    //endpoint to register with Asaho
+                    case "regcode":
+
+                        String code = session.getParms().get("regcode");
+
+                        //check for JWT
+                        //todo add more checks to determine if the JWT contains the correct information
+                        if (!OGConstants.TEST_MODE && !JWTPresent(session)) {
+                            responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
+                            return "Unauthorized";
+                        }
+
+                        //if JWT not present then set responseStatus accordingly
+
+                        //parse the body of the request
+
+                            //TODO add mechanism to add paired Settop box info
+                            responseStatus = NanoHTTPD.Response.Status.OK;
+                        return code;
+                            //return OGSystem.getSystemInfo().toString();
+
+
                         //endpoint to discover installed apps, useful if there are new apps installed while running
+
                     case "refreshapps":
                         JSONArray installedApps = OGCore.installStockApps();
                         responseStatus = NanoHTTPD.Response.Status.OK;
