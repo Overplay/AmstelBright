@@ -590,7 +590,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             public void run() {
                 mCrawlerWebView.loadUrl("");
             }
-        }, 1000);
+        }, 600);
     }
 
     @Override
@@ -602,7 +602,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             public void run() {
                 mWidgetWebView.loadUrl("");
             }
-        }, 1000);
+        }, 600);
 
     }
 
@@ -663,7 +663,13 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     public void launchCrawler(final String urlPathToApp) {
 
-        loadWebView(mCrawlerWebView, urlPathToApp);
+        // Delayed 1sec to allow old app to be flushed from JS mem
+        mCrawlerWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadWebView(mCrawlerWebView, urlPathToApp);
+            }
+        }, 1000);
 
     }
 
@@ -673,25 +679,33 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
      * @param height percentages of the screen height (0-100)
      */
     @Override
-    public void launchWidget(final String urlPathToApp, int width, int height) {
-        int curWidth = mWidgetWebView.getLayoutParams().width;
-        int curHeight = mWidgetWebView.getLayoutParams().height;
+    public void launchWidget(final String urlPathToApp, final int width, final int height) {
 
-        width = (int) (mScreenWidth * (width / 100.0));
-        height = (int) (mScreenHeight* (height / 100.0));
+        mWidgetWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        if(curWidth != width || curHeight != height){
-            mWidgetWebView.getLayoutParams().height = height;
-            mWidgetWebView.getLayoutParams().width = width;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWidgetWebView.requestLayout();
+                int curWidth = mWidgetWebView.getLayoutParams().width;
+                int curHeight = mWidgetWebView.getLayoutParams().height;
+
+                int nwidth = (int) (mScreenWidth * (width / 100.0));
+                int nheight = (int) (mScreenHeight* (height / 100.0));
+
+                if(curWidth != nwidth || curHeight != nheight){
+                    mWidgetWebView.getLayoutParams().height = nheight;
+                    mWidgetWebView.getLayoutParams().width = nwidth;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mWidgetWebView.requestLayout();
+                        }
+                    });
                 }
-            });
-        }
 
-        loadWebView(mWidgetWebView, urlPathToApp);
+                loadWebView(mWidgetWebView, urlPathToApp);
+
+            }
+        }, 1000);
 
     }
 

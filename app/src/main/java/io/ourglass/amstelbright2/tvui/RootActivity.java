@@ -71,7 +71,7 @@ public class RootActivity extends Activity {
             surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
             surfaceView.setVisibility(View.INVISIBLE);
 
-            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
+            ((RelativeLayout)findViewById(R.id.mainframeLayout)).setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
 
 
