@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import okhttp3.Callback;
@@ -103,9 +105,23 @@ public class OGTweetScraper {
 
     public void getTweets(String query, final TwitterDataCallback cb){
 
+        String q = null;
+        String baseUrl = "https://api.twitter.com/1.1/search/tweets.json?q=";
+
+        // Fucking Java and it's never ending exception bullshit
+        try {
+            q = URLEncoder.encode(query, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            q = URLEncoder.encode(query);
+        }
+
+        String fUrl = baseUrl + q + "&lang=en";
+        fUrl += "&result_type=mixed";
+        fUrl += "&include_entities=false";
+
         Request request = new Request.Builder()
                 .header("Authorization" , "Bearer "+mToken)
-                .url("https://api.twitter.com/1.1/search/tweets.json?q="+query)
+                .url(fUrl)
                 .get()
                 .build();
 

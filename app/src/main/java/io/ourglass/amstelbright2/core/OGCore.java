@@ -114,14 +114,17 @@ public class OGCore {
     public static JSONObject getCurrentChannel(){
 
             JSONObject jobj = new JSONObject();
-        try {
-            jobj.put("channel", currentlyOnTV.networkName);
-            jobj.put("programId", currentlyOnTV.programId);
-            jobj.put("programTitle", currentlyOnTV.title);
+            if (currentlyOnTV!=null){
+                try {
+                    jobj.put("channel", currentlyOnTV.networkName);
+                    jobj.put("programId", currentlyOnTV.programId);
+                    jobj.put("programTitle", currentlyOnTV.title);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
 
         return jobj;
     }
