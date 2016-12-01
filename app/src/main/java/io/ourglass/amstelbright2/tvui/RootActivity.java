@@ -64,16 +64,15 @@ public class RootActivity extends Activity {
 
         startService(abServiceIntent);
 
+        surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
 
-        if (!OGSystem.enableHDMI()) {
+        if (!OGSystem.enableHDMI(this, surfaceView)) {
             // The color change doesn't seem to do anything...:(.. not worth stressing.
 
-            surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
             surfaceView.setVisibility(View.INVISIBLE);
 
             ((RelativeLayout)findViewById(R.id.mainframeLayout)).setBackgroundColor(getResources().getColor(R.color.Turquoise));
             Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
-
 
         }
 
