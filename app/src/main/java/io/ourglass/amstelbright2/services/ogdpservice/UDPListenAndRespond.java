@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.services.udp;
+package io.ourglass.amstelbright2.services.ogdpservice;
 
 import android.app.Service;
 import android.content.Intent;
@@ -12,7 +12,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import io.ourglass.amstelbright2.core.ABApplication;
-import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGSystem;
 
 /**
@@ -42,8 +41,8 @@ public class UDPListenAndRespond extends Service {
         ABApplication.dbToast(this, "starting udp listener");
 
         //get port
-        mPort = intent != null ? intent.getIntExtra("port", OGConstants.UDP_LISTEN_AND_RESPOND_PORT) :
-                OGConstants.UDP_LISTEN_AND_RESPOND_PORT;
+        mPort = intent != null ? intent.getIntExtra("port", 9091) :
+                9091;
 
         threadAlive = true;
         udpListenThread = new Thread(new Runnable(){
@@ -72,6 +71,7 @@ public class UDPListenAndRespond extends Service {
         }
 
         DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+        Log.v( TAG, "UDP listener sitting on port: "+mPort);
         mSocket.receive(receivedPacket);
 
         Log.v(TAG, "received UDP packet from " + receivedPacket.getAddress() + " "

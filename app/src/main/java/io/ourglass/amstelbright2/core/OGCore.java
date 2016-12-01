@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import io.ourglass.amstelbright2.core.exceptions.OGServerException;
 import io.ourglass.amstelbright2.realm.OGAdvertisement;
 import io.ourglass.amstelbright2.realm.OGApp;
-import io.ourglass.amstelbright2.realm.OGDevice;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.realm.OGScraper;
 import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.realm.OGAppRealmProxy;
+import io.ourglass.amstelbright2.services.stbservice.TVShow;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by mkahn on 5/9/16.
@@ -40,36 +45,44 @@ public class OGCore {
     private static final int NUM_WIDGET_SLOTS = 4;
     private static final int NUM_CRAWLER_SLOTS = 2;
 
-    public static String channel = "";
-    public static String programId = "";
-    public static String programTitle = "";
+    private static final OkHttpClient client = ABApplication.okclient;  // share it
+
+    // TODO why is this here and not in OGSystem? I don't remember, MAK.
+
+    public static TVShow currentlyOnTV;
 
     private static int adIndex = 0;
 
-    public static boolean setChannelInfo(String channel, String programId, String programTitle){
+    public static boolean setCurrentlyOnTV(TVShow show){
 
-        if ( OGCore.channel.equalsIgnoreCase(channel) &&
-                OGCore.programId.equalsIgnoreCase(programId) &&
-                    OGCore.programTitle.equalsIgnoreCase(programTitle) )
+        if (show==null){
+            Log.wtf(TAG, "Got a NULL show, what da fu?");
             return false;
+        }
 
-        //log the changed information
-        log_channelChange(OGCore.channel, OGCore.programId, OGCore.programTitle, channel, programId, programTitle);
-
-        OGCore.channel = channel;
-        OGCore.programId = programId;
-        OGCore.programTitle = programTitle;
+        // TODO this if-then could be simplified
+        if (currentlyOnTV==null){
+            currentlyOnTV = show;
+        } else if ( OGCore.currentlyOnTV.equals(show) ) {
+            return false;
+        } else {
+            //log the changed information
+            log_channelChange(currentlyOnTV, show);
+            currentlyOnTV = show;
+        }
 
         Intent intent = new Intent();
         intent.setAction("com.ourglass.amstelbrightserver");
         intent.putExtra("command", "NEW_CHANNEL");
-        intent.putExtra("channel", channel);
-        AmstelBrightService.context.sendBroadcast(intent);
+        // TODO this was blowing null pointer chunks on colde boot. Not sure why.
+        intent.putExtra("channel", ( currentlyOnTV.networkName==null) ? "NULLTV" : currentlyOnTV.networkName);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
         //  Add scrape for channel
 
         Realm realm = Realm.getDefaultInstance();
 
+        // TODO doesn't seem like this should be here. CloudScraper should listen for this
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -88,7 +101,7 @@ public class OGCore {
                 }
 
                 channelScraper.appId = "io.ourglass.core.channeltweets";
-                channelScraper.setQuery(OGCore.programTitle+"&lang=en&result_type=popular&include_entities=false");
+                channelScraper.setQuery(currentlyOnTV.title+"&lang=en&result_type=popular&include_entities=false");
 
             }
         });
@@ -102,24 +115,15 @@ public class OGCore {
 
             JSONObject jobj = new JSONObject();
         try {
-            jobj.put("channel", OGCore.channel);
-            jobj.put("programId", OGCore.programId);
-            jobj.put("programTitle", OGCore.programTitle);
+            jobj.put("channel", currentlyOnTV.networkName);
+            jobj.put("programId", currentlyOnTV.programId);
+            jobj.put("programTitle", currentlyOnTV.title);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return jobj;
-    }
-
-    public static OGDevice getDeviceAsObject(Realm realm) {
-        return OGDevice.getDevice(realm);
-    }
-
-    public static JSONObject getDeviceAsJSON(Realm realm) {
-
-        return OGDevice.getDeviceAsJSON(realm);
     }
 
 
@@ -270,7 +274,7 @@ public class OGCore {
         intent.putExtra("scale", scale);
         intent.putExtra("xAdjust", xAdjust);
         intent.putExtra("yAdjust", yAdjust);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
         realm.commitTransaction();
 
@@ -285,7 +289,7 @@ public class OGCore {
         intent.putExtra("command", cmd);
         intent.putExtra("appId", target.appId);
         intent.putExtra("app", target.getAppAsJson().toString());
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 
@@ -297,7 +301,7 @@ public class OGCore {
         intent.putExtra("command", cmd);
         intent.putExtra("message", msg);
         intent.putExtra("code", code);
-        AmstelBrightService.context.sendBroadcast(intent);
+        ABApplication.sharedContext.sendBroadcast(intent);
 
     }
 
@@ -331,7 +335,7 @@ public class OGCore {
         try{
             JSONObject scrapeTwitter = new JSONObject()
                     .put("source", "twitter")
-                    .put("query", "iOS10")
+                    .put("query", "sports")
                     .put("appId", "io.ourglass.ogcrawler");
 
             scrapeArr.put(scrapeTwitter);
@@ -362,6 +366,7 @@ public class OGCore {
     }
 
     private static void removeUninstalledAppsFromRealm(JSONArray installedApps){
+
         //populate an arraylist with the names of the apps which are installed in opp
         ArrayList<String> appIds = new ArrayList<String>();
         for (int i = 0 ; i < installedApps.length(); i++) {
@@ -377,29 +382,26 @@ public class OGCore {
 
         Realm realm = Realm.getDefaultInstance();
 
-        //now iterate over the apps currently in the realm database and if they are not present in appIds, then remove them
-        RealmResults<OGApp> appsInDatabase = OGApp.getAllApps(realm);
-        for(int j = 0; j < appsInDatabase.size(); j++){
-            final OGApp appInDatabase = appsInDatabase.get(j);
-            boolean goingToDie = true;
-            for(int i = 0; i < appIds.size(); i++){
-                String appId = ((OGAppRealmProxy) appInDatabase).realmGet$appId();
-                if(appId.equals(appIds.get(i))){
-                    goingToDie = false;
-                    break;
-                }
-            }
-            //if app in database is not present in installed apps, then delete it from realm
-            if(goingToDie){
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm bgRealm) {
-                        appInDatabase.deleteFromRealm();
-                    }
-                });
-            }
+        // initial query, all apps
+        RealmQuery<OGApp> query = realm.where(OGApp.class);
+
+        // Build a query of all appids NOT in the installed list pulled from SDCARD
+        for ( String appid: appIds){
+            query = query.not().equalTo("appId", appid);
         }
+
+        final RealmResults<OGApp> toDie = query.findAll();
+
+        realm.executeTransaction( new Realm.Transaction(){
+            @Override
+            public void execute(Realm realm){
+                toDie.deleteAllFromRealm();
+            }
+        });
+
         realm.close();
+
+
     }
 
     private static void setAppDataIfEmpty(JSONArray newApps){
@@ -424,6 +426,7 @@ public class OGCore {
     }
 
     private static ArrayList<String> getNamesOfAppsFromSd(){
+
         String sdcard = Environment.getExternalStorageDirectory().toString() + OGConstants.PATH_TO_ABWL+"/opp";
         File sdcard_dir = new File(sdcard);
 
@@ -486,24 +489,6 @@ public class OGCore {
         }
 
         return toReturn;
-    }
-
-    public void setChannel(String channel) {
-        if (this.channel.equalsIgnoreCase(channel))
-            return;
-
-        Log.d(TAG, "New channel is: " + channel);
-        this.channel = channel;
-        //TODO add auto-placement code here
-
-    }
-
-    public void setProgramTitle(String title) {
-        this.programTitle = title;
-    }
-
-    public void setProgramId(String id) {
-        this.programId = id;
     }
 
 
@@ -593,41 +578,30 @@ public class OGCore {
 
     /**
      * method to structure the passed in parameters into a CHANNEL_CHANGE type system log
-     * @param fromChannelId Id of the channel that was previously tuned
-     * @param fromProgramId Id of the program that was previously tuned
-     * @param fromProgramTitle Title of the program that was previously tuned to
-     * @param toChannelId Id of the channel that has been changed to
-     * @param toProgramId Id of the program that has been changed to
-     * @param toProgramTitle Title of the program that has been changed to
+     *
      */
-    public static void log_channelChange(
-            String fromChannelId,
-            String fromProgramId,
-            String fromProgramTitle,
-            String toChannelId,
-            String toProgramId,
-            String toProgramTitle
-    ) {
+    public static void log_channelChange(TVShow oldShow, TVShow newShow) {
+
         try {
             JSONObject logData = new JSONObject(),
                     changedFrom = new JSONObject(),
                     changedTo = new JSONObject();
 
-            changedFrom.put("channelId", fromChannelId);
-            changedFrom.put("programId", fromProgramId);
-            changedFrom.put("programTitle", fromProgramTitle);
+            changedFrom.put("channelId", oldShow.networkName);
+            changedFrom.put("programId", oldShow.programId);
+            changedFrom.put("programTitle", oldShow.title);
 
-            changedTo.put("channelId", toChannelId);
-            changedTo.put("programId", toProgramId);
-            changedTo.put("programTitle", toProgramTitle);
+            changedTo.put("channelId", newShow.networkName);
+            changedTo.put("programId", newShow.programId);
+            changedTo.put("programTitle", newShow.title);
 
             logData.put("changedFrom", changedFrom);
             logData.put("changedTo", changedTo);
 
             systemLog("CHANNEL", logData);
             Log.v(TAG, "channel change logged");
-        } catch (JSONException e){
-            Log.w(TAG, "Channel change could not be created\n" + e.getMessage());
+        } catch (Exception e){
+            Log.w(TAG, "Channel change log could not be created\n" + e.getMessage());
         }
     }
 
@@ -674,6 +648,34 @@ public class OGCore {
         realm.commitTransaction();
 
         // This should have realm.close(), no?
+
+    }
+
+    public static JSONObject registerWithAsahi(String regCode){
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("regcode", regCode)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(OGConstants.ASAHI_ADDRESS + "/device/registerDevice")
+                .post(formBody)
+                .build();
+
+
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+            if(!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            Log.v(TAG, "successfully uploaded log to Asahi, will now mark the upload time");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not mark as uploaded");
+
+        }
+
+        return new JSONObject();
 
     }
 

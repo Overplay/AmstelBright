@@ -1,4 +1,4 @@
-package io.ourglass.amstelbright2.services.udp;
+package io.ourglass.amstelbright2.services.ogdpservice;
 
 import android.app.Service;
 import android.content.Context;
@@ -20,8 +20,6 @@ import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
-import io.ourglass.amstelbright2.realm.OGDevice;
-import io.realm.Realm;
 
 /**
  * Created by atorres on 4/19/16.
@@ -49,16 +47,9 @@ public class UDPBeaconService extends Service {
 
     private void sendUDPPacket() {
 
-        Realm realm = Realm.getDefaultInstance();
-        OGDevice device = OGCore.getDeviceAsObject(realm);
 
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        String mac = manager.getConnectionInfo().getMacAddress();
+        mMessage = OGSystem.getSystemInfo().toString();
 
-        mMessage = String.format("{\"name\": \"%s\", \"location\": \"%s\", \"mac\": \"%s\"}",
-                device.name, device.locationWithinVenue, mac);
-
-        realm.close();
 
         if (mSocket == null || mSocket.isClosed()) {
             try {
@@ -128,9 +119,11 @@ public class UDPBeaconService extends Service {
 
         ABApplication.dbToast(this, "Starting UDP Beacon");
 
-        udpLooperThread.start();
-        mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
-
+        // Without this check, when service is restarted by clicking home button, we explode.
+        if (!udpLooperThread.isAlive()){
+            udpLooperThread.start();
+            mUdpThreadHandler = new Handler(udpLooperThread.getLooper());
+        }
 
         mMessage = OGSystem.getSystemInfo().toString();
 

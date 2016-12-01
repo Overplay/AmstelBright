@@ -162,7 +162,7 @@ public abstract class NanoHTTPD {
     }
 
     /**
-     * The runnable that will be used for every new client connection.
+     * The runnable that will be used for every new mClient connection.
      */
     public class ClientHandler implements Runnable {
 
@@ -191,7 +191,7 @@ public abstract class NanoHTTPD {
                     session.execute();
                 }
             } catch (Exception e) {
-                // When the socket is closed by the client,
+                // When the socket is closed by the mClient,
                 // we throw our own SocketException
                 // to break the "keep alive" loop above. If
                 // the exception was anything other
@@ -199,7 +199,7 @@ public abstract class NanoHTTPD {
                 // SocketTimeoutException, print the
                 // stacktrace
                 if (!(e instanceof SocketException && "NanoHttpd Shutdown".equals(e.getMessage())) && !(e instanceof SocketTimeoutException)) {
-                    NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the client broken, or an bug in the handler code", e);
+                    NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the mClient broken, or an bug in the handler code", e);
                 }
             } finally {
                 safeClose(outputStream);
@@ -272,7 +272,7 @@ public abstract class NanoHTTPD {
 
         /**
          * Set a cookie with an expiration date from a month ago, effectively
-         * deleting it on the client side.
+         * deleting it on the mClient side.
          * 
          * @param name
          *            The cookie name.
@@ -688,7 +688,7 @@ public abstract class NanoHTTPD {
                 // If there's another token, its protocol version,
                 // followed by HTTP headers.
                 // NOTE: this now forces header names lower case since they are
-                // case insensitive and vary by client.
+                // case insensitive and vary by mClient.
                 if (st.hasMoreTokens()) {
                     protocolVersion = st.nextToken();
                 } else {
@@ -901,7 +901,7 @@ public abstract class NanoHTTPD {
 
                 if (null != this.remoteIp) {
                     this.headers.put("remote-addr", this.remoteIp);
-                    this.headers.put("http-client-ip", this.remoteIp);
+                    this.headers.put("http-mClient-ip", this.remoteIp);
                 }
 
                 this.method = Method.lookup(pre.get("method"));
@@ -1461,7 +1461,7 @@ public abstract class NanoHTTPD {
          * 
          * @param close
          *            {@code true} to hint connection closing, {@code false} to
-         *            let connection be closed by client.
+         *            let connection be closed by mClient.
          */
         public void closeConnection(boolean close) {
             if (close)
@@ -1550,7 +1550,7 @@ public abstract class NanoHTTPD {
                 outputStream.flush();
                 safeClose(this.data);
             } catch (IOException ioe) {
-                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the mClient", ioe);
             }
         }
 
@@ -1698,7 +1698,7 @@ public abstract class NanoHTTPD {
                     final InputStream inputStream = finalAccept.getInputStream();
                     NanoHTTPD.this.asyncRunner.exec(createClientHandler(finalAccept, inputStream));
                 } catch (IOException e) {
-                    NanoHTTPD.LOG.log(Level.FINE, "Communication with the client broken", e);
+                    NanoHTTPD.LOG.log(Level.FINE, "Communication with the mClient broken", e);
                 }
             } while (!NanoHTTPD.this.myServerSocket.isClosed());
         }
@@ -1975,14 +1975,14 @@ public abstract class NanoHTTPD {
     }
 
     /**
-     * create a instance of the client handler, subclasses can return a subclass
+     * create a instance of the mClient handler, subclasses can return a subclass
      * of the ClientHandler.
      * 
      * @param finalAccept
      *            the socket the cleint is connected to
      * @param inputStream
      *            the input stream
-     * @return the client handler
+     * @return the mClient handler
      */
     protected ClientHandler createClientHandler(final Socket finalAccept, final InputStream inputStream) {
         return new ClientHandler(inputStream, finalAccept);
@@ -2067,7 +2067,7 @@ public abstract class NanoHTTPD {
     }
 
     /**
-     * @return true if the gzip compression should be used if the client
+     * @return true if the gzip compression should be used if the mClient
      *         accespts it. Default this option is on for text content and off
      *         for everything. Override this for custom semantics.
      */

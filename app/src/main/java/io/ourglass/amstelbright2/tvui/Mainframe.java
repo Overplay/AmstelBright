@@ -22,6 +22,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
@@ -80,18 +81,26 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     public interface MainframeListener {
 
         public void moveWidgetFromTo(Point fromTranslation, Point toTranslation);
+
         public void moveCrawlerFrom(float fromY, float toY);
-        public void adjustCrawler( float scale, int xAdjust, int yAdjust );
-        public void adjustWidget( float scale, int xAdjust, int yAdjust );
+
+        public void adjustCrawler(float scale, int xAdjust, int yAdjust);
+
+        public void adjustWidget(float scale, int xAdjust, int yAdjust);
+
         public void killCrawler();
+
         public void killWidget();
+
         public void launchCrawler(String urlPathToApp);
+
         public void launchWidget(String urlPathToApp, int width, int height);
+
         public void uiAlert(UIMessage message);
     }
 
     // Constructor
-    public Mainframe(Context c, MainframeListener listener){
+    public Mainframe(Context c, MainframeListener listener) {
 
         mListener = listener;
         mContext = c;
@@ -103,7 +112,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         mContext.registerReceiver(new OGBroadcastStatusReceiver(this), filter2);
 
         //if using https, then install custom certificate checker that trusts everything
-        if(OGConstants.USE_HTTPS) {
+        if (OGConstants.USE_HTTPS) {
             try {
                 final TrustManager[] trustAllCerts = new TrustManager[]{
                         new X509TrustManager() {
@@ -126,7 +135,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 //create an ssl socket facotry with our all-trusting manager
                 final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                OkHttpClient.Builder builder = ABApplication.okclient.newBuilder();
                 builder.sslSocketFactory(sslSocketFactory);
                 builder.hostnameVerifier(new HostnameVerifier() {
                     @Override
@@ -140,10 +149,10 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
         } else {
 
-            // Ethan, you did not create a client for non-HTTPS mode, ffs!
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            client = builder.build();
-
+            // Ethan, you did not create a mClient for non-HTTPS mode, ffs!
+            //OkHttpClient.Builder builder = ABApplication.okclient.newBuilder();
+            //mClient = builder.build();
+            client = ABApplication.okclient;  // share it
 
         }
 
@@ -151,25 +160,25 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     // Positioning Methods
 
-    private float crawlerTranslationY(int slotNumber){
+    private float crawlerTranslationY(int slotNumber) {
 
-        return ((float)slotNumber * 0.915f ) *  mScreenWidthHeight.height;
+        return ((float) slotNumber * 0.915f) * mScreenWidthHeight.height;
 
     }
 
-    private Point widgetTranslationXY(int slotNumber){
+    private Point widgetTranslationXY(int slotNumber) {
 
         float x;
         float y;
 
         //default values
-        int widgetWidth = 300;
-        int widgetHeight = 300;
+        float widgetWidth = 300;
+        float widgetHeight = 300;
 
-        try{
-            widgetWidth = mRunningWidget.getInt("width");
-            widgetHeight = mRunningWidget.getInt("height");
-        } catch (JSONException e){
+        try {
+            widgetWidth = (float) mRunningWidget.getInt("width") / 100 * mScreenWidthHeight.width;
+            widgetHeight = (float) mRunningWidget.getInt("height") / 100 * mScreenWidthHeight.height;
+        } catch (JSONException e) {
             Log.e(TAG, "Couldn't get the running widget dimensions, widgets will probably be in the wrong place");
         }
 
@@ -186,7 +195,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         float xleft = 0;
         float xright = mScreenWidthHeight.width - widgetWidth;
 
-        switch (slotNumber){
+        switch (slotNumber) {
 
             case 0:
 
@@ -216,46 +225,46 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         }
 
-        return new Point(x,y);
+        return new Point(x, y);
     }
 
 
-    private void raiseRedFlag(String message){
+    private void raiseRedFlag(String message) {
 
-        if (mListener!=null)
+        if (mListener != null)
             mListener.uiAlert(new UIMessage(message, UIMessage.UIMessageType.REDFLAG));
 
     }
 
 
-    public void setTVScreenSize( float width, float height){
+    public void setTVScreenSize(float width, float height) {
 
         mScreenWidthHeight = new WidthHeight(width, height);
         OGSystem.setCurrentResolution(mScreenWidthHeight);
-        Log.d(TAG, "TV size set to: "+ mScreenWidthHeight.toString());
+        Log.d(TAG, "TV size set to: " + mScreenWidthHeight.toString());
 
     }
 
-    public String urlForApp(String appId){
+    public String urlForApp(String appId) {
 
         return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/app/tv/index.html";
     }
 
-    public String urlForAppInfo(String appId){
+    public String urlForAppInfo(String appId) {
 
         return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/info/info.json";
     }
 
-    public String urlForAppIcon(String appId, String iconName){
+    public String urlForAppIcon(String appId, String iconName) {
 
-        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/"+iconName;
+        return BASE_URL + SERVER_PORT + "/www/opp/" + appId + "/assets/icons/" + iconName;
     }
 
     public void getApps() throws Exception {
 
         // TODO: Should we do this thru service calls now??
         Request request = new Request.Builder()
-                .url(BASE_URL + SERVER_PORT +"/api/system/apps")
+                .url(BASE_URL + SERVER_PORT + "/api/system/apps")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -288,7 +297,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     }
 
 
-    private void processInboundApps(){
+    private void processInboundApps() {
 
         mListener.uiAlert(new UIMessage("Processing Apps"));
         for (int i = 0; i < mAllApps.length(); i++) {
@@ -297,9 +306,9 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
                 // Set what's running
                 boolean running = app.getBoolean("running");
-                if (running){
+                if (running) {
                     String type = app.getString("appType");
-                    if (type.equalsIgnoreCase("crawler")){
+                    if (type.equalsIgnoreCase("crawler")) {
                         setRunningCrawler(app);
                     } else {
                         setRunningWidget(app);
@@ -314,12 +323,12 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
         }
 
-        mListener.uiAlert(new UIMessage(mAllApps.length()+" apps intalled. Nice!"));
+        mListener.uiAlert(new UIMessage(mAllApps.length() + " apps intalled. Nice!"));
 
     }
 
 
-    private void loadAppIconFor( final String appId){
+    private void loadAppIconFor(final String appId) {
 
 
         Request request = new Request.Builder()
@@ -349,17 +358,17 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     try {
                         //ai.primaryColor = aiObj.getInt("primaryColor"); //Color.parseColor(aiObj.getString("primaryColor"));
                         ai.primaryColor = Color.parseColor(aiObj.getString("primaryColorHex"));
-                    } catch(IllegalArgumentException e){
+                    } catch (IllegalArgumentException e) {
                         Log.e(TAG, "There was an error parsing color, verify that the correct information is associated with your applications or change your info.json to HEX values");
                     }
-                    try{
+                    try {
                         ai.secondaryColor = Color.parseColor(aiObj.getString("secondaryColorHex"));
-                    } catch(IllegalArgumentException e){
+                    } catch (IllegalArgumentException e) {
                         Log.e(TAG, "There was an error parsing secondaryColor, verify that the correct information is associated with your applications or change your info.json to HEX values");
                     }
                     try {
                         ai.label = aiObj.getString("iconLabel");
-                    } catch(JSONException e){
+                    } catch (JSONException e) {
                         Log.w(TAG, "iconLabel was missing from json, using appName as default");
                         ai.label = appId;
                     }
@@ -380,7 +389,6 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     // Feels like a hack to go two places to get similar info
     public void getAppInfo() throws Exception {
-
 
 
         Request request = new Request.Builder()
@@ -416,7 +424,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         });
     }
 
-    public void getDirectvBoxesAndLaunchActivity(final Intent intent){
+    public void getDirectvBoxesAndLaunchActivity(final Intent intent) {
         Request request = new Request.Builder()
                 .url(BASE_URL + SERVER_PORT + "/api/stb/available")
                 .build();
@@ -431,7 +439,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 raiseRedFlag("Unable to get stb info from server");
                 intent.putExtra("success", false);
                 intent.putExtra("errMsg", e.getMessage());
-                AmstelBrightService.context.startActivity(intent);
+                ABApplication.sharedContext.startActivity(intent);
             }
 
             @Override
@@ -446,7 +454,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     JSONArray devs = obj.getJSONArray("devices");
 
                     ArrayList<String> toAttach = new ArrayList<String>();
-                    for(int i = 0; i < devs.length(); i++){
+                    for (int i = 0; i < devs.length(); i++) {
                         toAttach.add(devs.getString(i));
                     }
                     intent.putExtra("success", true);
@@ -455,32 +463,32 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     intent.putExtra("success", false);
                     //throw new IOException("Unexpected Json error " + e.toString());
                 } finally {
-                    AmstelBrightService.context.startActivity(intent);
+                    ABApplication.sharedContext.startActivity(intent);
                 }
             }
         });
     }
 
-    private void moveCrawlerIfNeeded(int destSlot){
+    private void moveCrawlerIfNeeded(int destSlot) {
 
-        if (destSlot!=mRunningCrawlerSlot){
+        if (destSlot != mRunningCrawlerSlot) {
             // We're going to need to move it
-                mListener.moveCrawlerFrom(crawlerTranslationY(mRunningCrawlerSlot), crawlerTranslationY(destSlot));
-                mRunningCrawlerSlot = destSlot;
+            mListener.moveCrawlerFrom(crawlerTranslationY(mRunningCrawlerSlot), crawlerTranslationY(destSlot));
+            mRunningCrawlerSlot = destSlot;
 
         }
 
     }
 
-    private void setRunningCrawler(JSONObject appJson){
+    private void setRunningCrawler(JSONObject appJson) {
 
         try {
             String appId = appJson.getString("appId");
             int slotNumber = appJson.getInt("slotNumber");
 
             mRunningCrawler = appJson;
-            Log.d(TAG, "Crawler set to: "+ appId);
-            if (mListener!=null)
+            Log.d(TAG, "Crawler set to: " + appId);
+            if (mListener != null)
                 mListener.launchCrawler(urlForApp(appId));
 
             moveCrawlerIfNeeded(slotNumber);
@@ -492,35 +500,35 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    private void moveWidgetIfNeeded(int destSlot){
+    private void moveWidgetIfNeeded(int destSlot) {
 
         //if (destSlot!=mRunningWidgetSlot){
-            // We're going to need to move it
-            if (mListener!=null){
-                mListener.moveWidgetFromTo(widgetTranslationXY(mRunningWidgetSlot), widgetTranslationXY(destSlot));
-                mRunningWidgetSlot = destSlot;
-            }
+        // We're going to need to move it
+        if (mListener != null) {
+            mListener.moveWidgetFromTo(widgetTranslationXY(mRunningWidgetSlot), widgetTranslationXY(destSlot));
+            mRunningWidgetSlot = destSlot;
+        }
         //}
 
     }
 
-    public boolean isRunning(String appId){
+    public boolean isRunning(String appId) {
 
         // TODO another reason we need to dispense with JSONObjects quickly
         try {
-            if (mRunningCrawler != null){
+            if (mRunningCrawler != null) {
                 String rcaid = mRunningCrawler.getString("appId");
                 if (rcaid.equalsIgnoreCase(appId))
                     return true;
             }
 
-            if (mRunningWidget != null){
+            if (mRunningWidget != null) {
                 String rcaid = mRunningWidget.getString("appId");
                 if (rcaid.equalsIgnoreCase(appId))
                     return true;
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.wtf(TAG, "JSONObject sucks");
         }
 
@@ -528,7 +536,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    private void setRunningWidget(JSONObject appJson){
+    private void setRunningWidget(JSONObject appJson) {
 
         try {
             String appId = appJson.getString("appId");
@@ -538,8 +546,8 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             int width = appJson.getInt("width"), height = appJson.getInt("height");
 
             mRunningWidget = appJson;
-            Log.d(TAG, "Widget set to: "+ appId);
-            if (mListener!=null) {
+            Log.d(TAG, "Widget set to: " + appId);
+            if (mListener != null) {
                 mListener.launchWidget(urlForApp(appId), width, height);
             }
             moveWidgetIfNeeded(slotNumber);
@@ -551,7 +559,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    public void launchApp(JSONObject app){
+    public void launchApp(JSONObject app) {
 
         String appId = null;
         String appType = null;
@@ -562,13 +570,13 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             appType = app.getString("appType");
             appName = app.getString("appName");
 
-        } catch (Exception e){
+        } catch (Exception e) {
             raiseRedFlag("Could not launch app. Error parsing JSON");
         }
 
-        mListener.uiAlert(new UIMessage("Launching "+ appName));
+        mListener.uiAlert(new UIMessage("Launching " + appName));
         // OK, so at this point we need to concern ourselves with the type, URL, and slotNumber
-        switch (appType){
+        switch (appType) {
             case "crawler":
                 setRunningCrawler(app);
                 break;
@@ -580,14 +588,14 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    private void killApp(JSONObject app){
+    private void killApp(JSONObject app) {
 
         // TODO: Clearly we need to wrap apps in their own object that does all this try/catch busy work!
         // TODO: Or we need to make the UI part of the overall server app and share that code...
 
         try {
             String appType = app.getString("appType");
-            switch (appType){
+            switch (appType) {
                 case "crawler":
                     mListener.killCrawler();
                     mRunningCrawler = null;
@@ -598,7 +606,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                     break;
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.wtf(TAG, "Should not have a JSON failure here.");
         }
     }
@@ -615,24 +623,24 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
 
             //log the movement as placement override
-            OGCore.log_placementOverride(OGCore.channel, OGCore.programId, app.getString("appId"), newSlot);
+            OGCore.log_placementOverride(OGSystem.getPairedSTB().nowPlaying.networkName, OGSystem.getPairedSTB().nowPlaying.programId, app.getString("appId"), newSlot);
         } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");
         }
     }
 
-    private void adjustApp(JSONObject app, float scale, int xAdjust, int yAdjust){
+    private void adjustApp(JSONObject app, float scale, int xAdjust, int yAdjust) {
 
         try {
 
-            if (app.getString("appType").equalsIgnoreCase("crawler")){
+            if (app.getString("appType").equalsIgnoreCase("crawler")) {
                 mListener.adjustCrawler(scale, xAdjust, yAdjust);
             } else {
                 mListener.adjustWidget(scale, xAdjust, yAdjust);
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");
         }
@@ -644,18 +652,19 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
         String command = intent.getStringExtra("command");
 
-        if ( command.equalsIgnoreCase("NEW_CHANNEL")){
+        if (command.equalsIgnoreCase("NEW_CHANNEL")) {
 
             // Channel change stuff
             String channel = intent.getStringExtra("channel");
-            Log.d(TAG, "Got a channel change: "+channel);
-            UIMessage m = new UIMessage("Changed to: "+channel);
+            Log.d(TAG, "Got a channel change: " + channel);
+            UIMessage m = new UIMessage("Changed to: " + channel);
             mListener.uiAlert(m);
 
-            if (channel.startsWith("ES") || channel.startsWith("CNN") ){
-                moveCrawlerIfNeeded(0); // top
-            } else if ( channel.startsWith("beIN")){
+            // Pass some smoke and mirrors, please
+            if (channel.startsWith("beIN")) {
                 moveCrawlerIfNeeded(1); // bottom
+            } else {
+                moveCrawlerIfNeeded(0);
             }
 
 
@@ -672,7 +681,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
                 return;
             }
 
-            switch (command){
+            switch (command) {
 
                 case "launch":
 
@@ -700,14 +709,14 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    public void launchViaHttp(String appId){
+    public void launchViaHttp(String appId) {
 
         MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(JSON, "{}");
 
         Request request = new Request.Builder()
-                .url(BASE_URL + SERVER_PORT + "/api/app/"+appId+"/launch")
+                .url(BASE_URL + SERVER_PORT + "/api/app/" + appId + "/launch")
                 .post(body)
                 .build();
 
@@ -732,7 +741,7 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
     }
 
-    public ArrayList<AppDisplayInfo> getLauncherApps(){
+    public ArrayList<AppDisplayInfo> getLauncherApps() {
 
         ArrayList<AppDisplayInfo> rval = new ArrayList<>();
 
@@ -779,14 +788,13 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
     @Override
     public void receivedStatus(Intent intent) {
 
-        if(intent.hasExtra("newAppData") && intent.hasExtra("appType")){
+        if (intent.hasExtra("newAppData") && intent.hasExtra("appType")) {
             String newAppData = intent.getStringExtra("newAppData"), appType = intent.getStringExtra("appType");
-            if(newAppData != null){
-                if("widget".equals(appType)) {
-                    ((MainframeActivity)mContext).injectAppDataIntoWidget(newAppData);
-                }
-                else if("crawler".equals(appType)){
-                    ((MainframeActivity)mContext).injectAppDataIntoCrawler(newAppData);
+            if (newAppData != null) {
+                if ("widget".equals(appType)) {
+                    ((MainframeActivity) mContext).injectAppDataIntoWidget(newAppData);
+                } else if ("crawler".equals(appType)) {
+                    ((MainframeActivity) mContext).injectAppDataIntoCrawler(newAppData);
                 }
             }
             return;
@@ -795,11 +803,11 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
         String command = intent.getStringExtra("command");
 
         String msg = intent.getStringExtra("message");
-        ((MainframeActivity)mContext).uiAlert(new UIMessage(msg));
+        ((MainframeActivity) mContext).uiAlert(new UIMessage(msg));
 
         int code = intent.getIntExtra("code", 0);
 
-        if ( code == OGConstants.BootState.HTTP_START.getValue() ){
+        if (code == OGConstants.BootState.HTTP_START.getValue()) {
             Log.d(TAG, "HTTP server has started, going to get apps");
             try {
                 getApps();
@@ -810,7 +818,6 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
 
 
     }
-
 
 
 }

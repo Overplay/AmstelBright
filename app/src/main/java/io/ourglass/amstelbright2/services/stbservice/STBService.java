@@ -14,22 +14,13 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.realm.OGDevice;
 import io.realm.Realm;
 import okhttp3.Call;
@@ -37,8 +28,6 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static io.ourglass.amstelbright2.core.OGConstants.LOC_PATTERN;
 
 
 public class STBService extends Service {
@@ -63,13 +52,16 @@ public class STBService extends Service {
             this.channelCheckThread = new HandlerThread(ipAddr + "_channelCheckThread");
             this.channelCheckThread.start();
             this.mChannelChangeHandler = new Handler(channelCheckThread.getLooper());
-            this.client = new OkHttpClient.Builder()
+
+            // per cookbook
+            this.client = ABApplication.okclient.newBuilder()
                     .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .build();
 
             final DirectvBoxInfo _this = this;
+
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -87,10 +79,11 @@ public class STBService extends Service {
         }
 
         public String refreshWhatsPlaying(){
-            Request req = new Request.Builder()
-                    .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
-                    .build();
             try {
+                Request req = new Request.Builder()
+                        .url(ipAddr + ":" + OGConstants.DIRECTV_PORT + OGConstants.DIRECTV_CHANNEL_GET_ENDPOINT)
+                        .build();
+                Log.d(TAG, "checking channel info on "+ipAddr);
                 Response response = this.client.newCall(req).execute();
                 if(!response.isSuccessful()) {
                     return null;
@@ -103,13 +96,13 @@ public class STBService extends Service {
                 return null;
             } catch (JSONException e){
                 return null;
+            } catch (Exception e){
+                return null;
             }
-
-//            }
         }
     }
 
-    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<>();
+    public static ArrayList<DirectvBoxInfo> foundBoxes = new ArrayList<DirectvBoxInfo>();
 
     private boolean mListening = false;
 
@@ -229,91 +222,91 @@ public class STBService extends Service {
     }
 
     private void findSTBs(){
-        try {
-            final DatagramSocket mListenSocket = new DatagramSocket(null);
-            mListenSocket.setReuseAddress(true);
-            SocketAddress sa = new InetSocketAddress(OGConstants.UPNP_UDP_BROADCAST_PORT);
-            mListenSocket.bind(sa);
-            mListening = true;
-
-            mListenSocket.setSoTimeout(10000);
-            final ArrayList<String> foundDeviceList = new ArrayList<String>();
-            final ArrayList<String> verifiedDeviceIps = new ArrayList<String>();
-            new Thread(new Runnable(){
-                @Override
-                public void run() {
-                    try {
-                        byte[] buffer = new byte[2048];
-                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                        while(mListening) {
-                            mListenSocket.receive(packet);
-                            String recInfo = new String(packet.getData(), 0, packet.getLength());
-                            Matcher match = LOC_PATTERN.matcher(recInfo);
-                            if(match.find()){
-                                String loc = match.group();
-                                loc = loc.substring(loc.indexOf("http"));//, loc.lastIndexOf(":"));
-                                if(!foundDeviceList.contains(loc)) {
-                                    foundDeviceList.add(loc);
-                                }
-                            }
-                            buffer = new byte[2048];
-                            packet = new DatagramPacket(buffer, buffer.length);
-                        }
-                    } catch (SocketTimeoutException e){
-                        mListening = false;
-                        mListenSocket.close();
-                        new Thread(new Runnable(){
-                            @Override
-                            public void run(){
-                                ArrayList<DirectvBoxInfo> newFoundBoxes = new ArrayList<DirectvBoxInfo>();
-                                for(final String ip  : foundDeviceList){
-                                    verifyBoxAndAdd(ip, newFoundBoxes);
-                                }
-
-                                hasSearched = true;
-                                while(foundBoxes.size() > 0){
-                                    foundBoxes.remove(0);
-                                }
-                                for(DirectvBoxInfo info : newFoundBoxes){
-                                    foundBoxes.add(info);
-                                }
-                            }
-                        }).start();
-
-                    }catch (Exception e){
-                        Log.e(TAG, e.getMessage());
-                    }
-
-                }
-            }).start();
-
-            //now send broadcast
-            new Thread(new Runnable(){
-
-                @Override
-                public void run() {
-                    try {
-                        StringBuffer packet = new StringBuffer();
-
-                        for(String packetLine : OGConstants.discoverPacket){
-                            packet.append(packetLine);
-                        }
-
-                        String toSend = packet.toString();
-                        byte[] pk = toSend.getBytes();
-
-                        DatagramPacket out = new DatagramPacket(pk, pk.length, InetAddress.getByName(OGConstants.UPNP_UDP_BROADCAST_ADDR), OGConstants.UPNP_UDP_BROADCAST_PORT);
-                        mListenSocket.send(out);
-
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
-
-                }
-            }).start();
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            final DatagramSocket mListenSocket = new DatagramSocket(null);
+//            mListenSocket.setReuseAddress(true);
+//            SocketAddress sa = new InetSocketAddress(OGConstants.UPNP_UDP_BROADCAST_PORT);
+//            mListenSocket.bind(sa);
+//            mListening = true;
+//
+//            mListenSocket.setSoTimeout(10000);
+//            final ArrayList<String> foundDeviceList = new ArrayList<String>();
+//            final ArrayList<String> verifiedDeviceIps = new ArrayList<String>();
+//            new Thread(new Runnable(){
+//                @Override
+//                public void run() {
+//                    try {
+//                        byte[] buffer = new byte[2048];
+//                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+//                        while(mListening) {
+//                            mListenSocket.receive(packet);
+//                            String recInfo = new String(packet.getData(), 0, packet.getLength());
+//                            Matcher match = LOC_PATTERN.matcher(recInfo);
+//                            if(match.find()){
+//                                String loc = match.group();
+//                                loc = loc.substring(loc.indexOf("http"));//, loc.lastIndexOf(":"));
+//                                if(!foundDeviceList.contains(loc)) {
+//                                    foundDeviceList.add(loc);
+//                                }
+//                            }
+//                            buffer = new byte[2048];
+//                            packet = new DatagramPacket(buffer, buffer.length);
+//                        }
+//                    } catch (SocketTimeoutException e){
+//                        mListening = false;
+//                        mListenSocket.close();
+//                        new Thread(new Runnable(){
+//                            @Override
+//                            public void run(){
+//                                ArrayList<DirectvBoxInfo> newFoundBoxes = new ArrayList<DirectvBoxInfo>();
+//                                for(final String ip  : foundDeviceList){
+//                                    verifyBoxAndAdd(ip, newFoundBoxes);
+//                                }
+//
+//                                hasSearched = true;
+//                                while(foundBoxes.size() > 0){
+//                                    foundBoxes.remove(0);
+//                                }
+//                                for(DirectvBoxInfo info : newFoundBoxes){
+//                                    foundBoxes.add(info);
+//                                }
+//                            }
+//                        }).start();
+//
+//                    }catch (Exception e){
+//                        Log.e(TAG, e.getMessage());
+//                    }
+//
+//                }
+//            }).start();
+//
+//            //now send broadcast
+//            new Thread(new Runnable(){
+//
+//                @Override
+//                public void run() {
+//                    try {
+//                        StringBuffer packet = new StringBuffer();
+//
+//                        for(String packetLine : OGConstants.discoverPacket){
+//                            packet.append(packetLine);
+//                        }
+//
+//                        String toSend = packet.toString();
+//                        byte[] pk = toSend.getBytes();
+//
+//                        DatagramPacket out = new DatagramPacket(pk, pk.length, InetAddress.getByName(OGConstants.UPNP_UDP_BROADCAST_ADDR), OGConstants.UPNP_UDP_BROADCAST_PORT);
+//                        mListenSocket.send(out);
+//
+//                    } catch(Exception e){
+//                        e.printStackTrace();
+//                    }
+//
+//                }
+//            }).start();
+//        } catch (SocketException e) {
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -366,7 +359,7 @@ public class STBService extends Service {
         Realm realm = Realm.getDefaultInstance();
         String stbAddr = OGDevice.getPairedSTBOrNull(realm);
         if(stbAddr != null) {
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = ABApplication.okclient.newBuilder()
                     .connectTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .writeTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                     .readTimeout(OGConstants.DIRECTV_API_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
@@ -380,53 +373,57 @@ public class STBService extends Service {
 
             String url = pairedSTB + ":" + OGConstants.STB_PORT + OGConstants.STB_TUNED_ENDPOINT;
 
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
+            try {
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
 
-            client.newCall(request).enqueue(new Callback() {
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                    Log.wtf(TAG, "Couldn't GET from STB!");
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                    if (!response.isSuccessful()) {
-//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
-                        //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
-                        //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
-                        //OGDevice.unpair(Realm.getDefaultInstance());
-
-                        throw new IOException("Unexpected code " + response);
-                    }
-                    //                Headers responseHeaders = response.headers();
-                    //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-                    //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                    //                }
-                    //
-                    //                System.out.println(response.body().string());
-
-                    // TODO feels brittle, need more error checking
-                    String resJson = response.body().string();
-                    try {
-
-                        JSONObject direcTVJson = new JSONObject(resJson);
-                        //                    OGCore.channel = (direcTVJson.getString("callsign"));
-                        //                    OGCore.programId = (direcTVJson.getString("programId"));
-                        //                    OGCore.programTitle= (direcTVJson.getString("title"));
-                        OGCore.setChannelInfo(direcTVJson.getString("callsign"),
-                                direcTVJson.getString("programId"),
-                                direcTVJson.getString("title"));
-
-                    } catch (JSONException e) {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
+                        Log.wtf(TAG, "Couldn't GET from STB!");
                     }
-                }
-            });
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+
+                        if (!response.isSuccessful()) {
+//                        Log.w(TAG, "STB: " + pairedSTB + " appears to have gone down, disconnecting");
+                            //OGNotifications.sendStatusIntent("message", "Lost connection to STB", 0);
+                            //OGNotifications.sendStatusIntent("message", "Could not get information about that channel", 0);
+                            //OGDevice.unpair(Realm.getDefaultInstance());
+
+                            throw new IOException("Unexpected code " + response);
+                        }
+                        //                Headers responseHeaders = response.headers();
+                        //                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
+                        //                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                        //                }
+                        //
+                        //                System.out.println(response.body().string());
+
+                        // TODO feels brittle, need more error checking
+                        String resJson = response.body().string();
+                        try {
+
+                            JSONObject direcTVJson = new JSONObject(resJson);
+                            //                    OGCore.channel = (direcTVJson.getString("callsign"));
+                            //                    OGCore.programId = (direcTVJson.getString("programId"));
+                            //                    OGCore.programTitle= (direcTVJson.getString("title"));
+//                            OGCore.setChannelInfo(direcTVJson.getString("callsign"),
+//                                    direcTVJson.getString("programId"),
+//                                    direcTVJson.getString("title"));
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            } catch (Exception e){
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

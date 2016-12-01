@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
 
 import io.ourglass.amstelbright2.core.ABApplication;
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGLog;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -26,6 +26,8 @@ public class LogCleanAndPushService extends Service {
     HandlerThread mWorkerThread = new HandlerThread("cleanAndPush");
     private Handler mWorkerThreadHandler;
 
+    final OkHttpClient client = ABApplication.okclient;  // share it
+
     public LogCleanAndPushService() {
     }
 
@@ -38,10 +40,12 @@ public class LogCleanAndPushService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        ABApplication.dbToast(this, "Starting Cloud Proxy");
+        ABApplication.dbToast(this, "Log Process Starting");
 
-        mWorkerThread.start();
-        mWorkerThreadHandler = new Handler(mWorkerThread.getLooper());
+        if (!mWorkerThread.isAlive()){
+            mWorkerThread.start();
+            mWorkerThreadHandler = new Handler(mWorkerThread.getLooper());
+        }
 
         startLoop();
 
@@ -104,7 +108,6 @@ public class LogCleanAndPushService extends Service {
         int numUploaded = 0;
 
         final Realm realm = Realm.getDefaultInstance();
-        final OkHttpClient client = new OkHttpClient();
         final MediaType type = MediaType.parse("application/json");
         for(final OGLog log : logArr){
             String postBody = log.getLogAsJSON().toString();
@@ -114,7 +117,7 @@ public class LogCleanAndPushService extends Service {
 
             //todo replace with OGConstants upon merge with ads branch
             Request request = new Request.Builder()
-                    .url("http://104.131.145.36/OGLog/upload")
+                    .url(OGConstants.ASAHI_ADDRESS + "/OGLog/upload")
                     .post(body)
                     .build();
             try {

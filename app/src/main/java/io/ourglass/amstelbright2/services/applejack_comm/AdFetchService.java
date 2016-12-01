@@ -33,8 +33,9 @@ import okhttp3.Response;
  */
 
 public class AdFetchService extends Service {
+
     public final String TAG = "AdFetchService";
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = ABApplication.okclient;  // share it
     HandlerThread mScrapeThread = new HandlerThread("AdFetchLooper");
     private Handler mScrapeThreadHandler;
 
@@ -231,8 +232,10 @@ public class AdFetchService extends Service {
 
         Log.v(TAG, "In onStartCommand in AdFetchService");
 
-        mScrapeThread.start();
-        mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        if (!mScrapeThread.isAlive()){
+            mScrapeThread.start();
+            mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        }
 
         startAdScraping();
 

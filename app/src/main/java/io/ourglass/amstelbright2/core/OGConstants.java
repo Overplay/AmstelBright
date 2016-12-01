@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.core;
 
+import android.graphics.Color;
+
 import java.util.regex.Pattern;
 
 /**
@@ -11,7 +13,9 @@ public class OGConstants {
     public static final boolean USE_DEMO_ASAHI = true;
 
     public static final boolean TEST_MODE = true;
+    public static final boolean CRASH_TEST_DUMMY = true; // enable force crash on '5' button
     public static final boolean SHOW_DB_TOASTS = false;
+    public static final boolean LOGCAT_TO_FILE = true;
 
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
@@ -25,27 +29,31 @@ public class OGConstants {
     // Turn off UPNP to work with the old iOS app
     public static final boolean USE_UPNP_DISCOVERY = true;
 
-    public static final int UDP_BEACON_PORT = 9091;
+    public static final int UDP_BEACON_PORT = 9092;
+    public static final boolean SEND_UDP_BEACONS = false;  // don't need any more, I hope :)
+
     // MAK: Created a new port so both discovery methods can be used at same time
-    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9092;
+    // These were moved back into the protocol service now that they've stabilized
+//    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
-    public static final int TV_POLL_INTERVAL = 2500;
+    public static final int TV_POLL_INTERVAL = 5000;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
     public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
 
-    public static final int UPNP_UDP_BROADCAST_PORT = 1900;
-    public static final String UPNP_UDP_BROADCAST_ADDR = "239.255.255.250";
-    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 2000; //every two seconds upon completion
+    public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 60 * 1000; //every two seconds upon completion
+
     public static Pattern LOC_PATTERN = Pattern.compile("location[^\n]*", Pattern.CASE_INSENSITIVE);
-    public static final String[] discoverPacket = new String[]{
-            "M-SEARCH * HTTP/1.1\r\n",
-            "Host:239.255.255.250:1900\r\n",
-            "ST:ssdp:all\r\n","Man:\"ssdp:discover\"\r\n",
-            "MX:3\r\n\r\n"
-    };
+
+    /* UPNP Discovery Packet
+    M-SEARCH * HTTP/1.1
+    HOST: 239.255.255.250:1900
+    MAN: ssdp:discover
+    MX: 10
+    ST: ssdp:all
+     */
 
     public static final String ASAHI_ADDRESS = USE_DEMO_ASAHI ? "http://107.170.209.248" : "http://104.131.145.36";
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
@@ -90,8 +98,16 @@ public class OGConstants {
     public static final String DIRECTV_CHANNEL_GET_ENDPOINT = "/tv/getTuned";
     public static final int DIRECTV_PORT = 8080;
     public static final int DIRECTV_API_CONNECTION_TIMEOUT = 15000;
+    public static final int DIRECTV_PAIR_CANCELED_RESULT_CODE = 0;
+    public static final int DIRECTV_PAIR_CONFIRMED_RESULT_CODE = 1;
+
+    public static final int DIRECTV_PAIR_ACTIVITY_BACKGROUND_GREEN = Color.parseColor("#51B85E");
+
+    public static final int WIFI_MANAGE_ACTIVITY_BACKGROUND_ORANGE = Color.parseColor("#F6921E");
 
     public static final String[] WIFI_STRENGTH_LEVELS = new String[]{"None", "Poor", "Fair", "Good", "Excellent"};
+
+    public static final int BUTTON_CLICK_DEBOUNCE = 2000;
 
     // HARD CODED for DEMO
     public static final int STB_PORT = 8080;

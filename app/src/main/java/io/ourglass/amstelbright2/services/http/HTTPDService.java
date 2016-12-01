@@ -13,7 +13,7 @@ import java.io.IOException;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.services.http.ogutil.AssetExtractor;
-import io.ourglass.amstelbright2.services.udp.UDPBeaconService;
+import io.ourglass.amstelbright2.services.ogdpservice.UDPBeaconService;
 
 /**
  * This is the parent server class that kicks off everybody else: UDP, Bluetooth, HTTP
@@ -72,7 +72,7 @@ public class HTTPDService extends Service {
         return mStartMode;
     }
 
-    /** A client is binding to the service with bindService() */
+    /** A mClient is binding to the service with bindService() */
     @Override
     public IBinder onBind(Intent intent) {
         dbToastr( TAG+"binding" );

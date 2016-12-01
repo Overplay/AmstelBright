@@ -2,24 +2,35 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.ourglass.amstelbright2">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- permission required to use Alarm Manager -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <!--<uses-feature android:name="android.hardware.camera" android:required="false"/>-->
 
 
     <!-- Application is subclassed for a default Realm -->
     <application
+        android:launchMode="singleTask"
         android:name=".core.ABApplication"
         android:allowBackup="true"
         android:icon="@mipmap/og_launcher"
@@ -28,14 +39,24 @@
         android:theme="@style/AppTheme"
         android:largeHeap="true">
         <uses-library android:name="com.realtek" />
+        android:theme="@style/AppTheme">
+
+        <!-- Ourglass Discovery Services...some are being deprecared -->
         <service
-            android:name=".services.udp.UDPBeaconService"
+            android:name=".services.ogdpservice.UDPBeaconService"
             android:enabled="true" />
         <service
-            android:name=".services.udp.UDPListenAndRespond"
+            android:name=".services.ogdpservice.UDPListenAndRespond"
             android:enabled="true" />
         <service
-            android:name=".services.stbservice.STBService"
+            android:name=".services.ogdpservice.OGDPService"
+            android:enabled="true" />
+
+        <service
+            android:name=".services.stbservice.STBPollingService"
+            android:enabled="true" />
+        <service
+            android:name=".services.ssdpservice.SSDPService"
             android:enabled="true" />
         <service
             android:name=".services.http.HTTPDService"
@@ -50,22 +71,35 @@
             android:name=".services.applejack_comm.LogCleanAndPushService"
             android:enabled="true"
             android:exported="true" />
-        <!--service
-            android:name=".services.applejack_comm.AdFetchService"
-            android:enabled="true" /-->
-
         <service
             android:name=".services.applejack_comm.AdFetchService"
             android:enabled="true" />
 
         <activity android:name=".tvui.MainframeActivity">
+            <!--<intent-filter>-->
+                <!--&lt;!&ndash; Starting activity for this application &ndash;&gt;-->
+                <!--<action android:name="android.intent.action.MAIN"/>-->
+                <!--&lt;!&ndash; Means that this app should appear on the launcher (app menu for OS)&ndash;&gt;-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+
+
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--&lt;!&ndash; The following intent-filter says this is a candidate for home screen &ndash;&gt;-->
+                <!--<category android:name="android.intent.category.HOME" />-->
+            <!--</intent-filter>-->
+        </activity>
+
+        <activity android:name=".tvui.RootActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <!-- Starting activity for this application -->
+                <action android:name="android.intent.action.MAIN"/>
+                <!-- Means that this app should appear on the launcher (app menu for OS)-->
+                <category android:name="android.intent.category.LAUNCHER" />
+
 
                 <category android:name="android.intent.category.DEFAULT" />
-                <!-- The following two intent-filters are the key to set homescreen -->
+                <!-- The following intent-filter says this is a candidate for home screen -->
                 <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -77,23 +111,35 @@
         <!-- </intent-filter> -->
         <!-- </receiver> -->
 
-        <receiver android:name=".tvui.wifi.WifiManageActivity$WifiReceiver" >
-            <intent-filter android:priority="100">
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>
-        </receiver>
+        <!-- The below was causing errors because it called an inner static class in the -->
+        <!-- WiFiManageActivity that in turn tried to call something on ABService which -->
+        <!-- had not started yet! -->
+
+        <!--<receiver android:name=".tvui.wifi.WifiManageActivity$WifiReceiver" >-->
+            <!--<intent-filter android:priority="100">-->
+                <!--<action android:name="android.net.wifi.STATE_CHANGE" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
+        <!--<activity-->
+            <!--android:name=".tvui.stb.DirecTVPairActivity"-->
+            <!--android:theme="@style/Theme.AppCompat.Translucent">-->
+        <!--</activity>-->
 
         <activity
-            android:name=".tvui.stb.DirecTVPairActivity"
+            android:name=".tvui.stb.SetTopBoxPairActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-            >
         </activity>
 
-        <activity
-            android:name=".tvui.wifi.WifiManageActivity"
+        <activity android:name=".tvui.stb.STBPairConfirmActivity"
             android:theme="@style/Theme.AppCompat.Translucent">
-
         </activity>
+
+        <!--<activity-->
+            <!--android:name=".tvui.wifi.WifiManageActivity"-->
+            <!--android:theme="@style/Theme.AppCompat.Translucent">-->
+
+        <!--</activity>-->
 
 
     </application>

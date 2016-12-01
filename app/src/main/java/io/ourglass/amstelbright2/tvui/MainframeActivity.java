@@ -8,23 +8,15 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -45,21 +37,20 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import io.ourglass.amstelbright2.R;
+import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
-import io.ourglass.amstelbright2.tvui.stb.DirecTVPairActivity;
-import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
+import io.ourglass.amstelbright2.tvui.stb.SetTopBoxPairActivity;
 
 @SuppressLint("SetJavaScriptEnabled")
 
 public class MainframeActivity extends Activity implements Mainframe.MainframeListener {
 
-    private static final String TAG = "MFActivity";
+    private static final String TAG = "MainframeActivity";
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
 
-    private SurfaceView surfaceView;
+//    private SurfaceView surfaceView;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -85,12 +76,12 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     /**
      * Messenger for communicating with the service.
      */
-    Messenger mService = null;
+    //Messenger mService = null;
 
     /**
      * Flag indicating whether we have called bind on the service.
      */
-    boolean mBound;
+    //boolean mBound;
 
     //private SurfaceView mSurfaceView;
 
@@ -105,7 +96,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -117,21 +107,20 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         Log.d(TAG, "Is real OG H/W? " + (OGSystem.isRealOG()?"YES":"NO"));
         Log.d(TAG, "Is emulated H/W? " + (OGSystem.isEmulator()?"YES":"NO"));
 
-
         // Cross fingers and toes that this works the permissions magic for SDCARD on OG1
         verifyStoragePermissions(this);
 
         mMf = new Mainframe(this, this);
 
-        //check if service was started in test mode
-        Intent currentIntent = getIntent();
-        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
-
-        //pass testMode onto abService, defaults to false
-        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
-        abServiceIntent.putExtra("testMode", testMode);
-
-        startService(abServiceIntent);
+//        //check if service was started in test mode
+//        Intent currentIntent = getIntent();
+//        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+//
+//        //pass testMode onto abService, defaults to false
+//        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+//        abServiceIntent.putExtra("testMode", testMode);
+//
+//        startService(abServiceIntent);
 
         //mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
 
@@ -161,17 +150,17 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             }
         });
 
-        if (!OGSystem.enableHDMI(this, (SurfaceView)findViewById(R.id.surfaceView))) {
-            // The color change doesn't seem to do anything...:(.. not worth stressing.
-
-            surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
-            surfaceView.setVisibility(View.INVISIBLE);
-
-            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
-            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
-
-
-        }
+//        if (!OGSystem.enableHDMI()) {
+//            // The color change doesn't seem to do anything...:(.. not worth stressing.
+//
+//            surfaceView = (SurfaceView)findViewById(surfaceView);
+//            surfaceView.setVisibility(View.INVISIBLE);
+//
+//            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
+//            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+//
+//
+//        }
 
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
 
@@ -189,14 +178,12 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
         Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
 
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
-
 
         mBootBugImageView.animate()
                 .scaleX(0f)
@@ -214,6 +201,11 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             @Override
             public void run() {
                 //buildAppTray();
+                try {
+                    mMf.getApps();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }, 5000);
 
@@ -223,18 +215,19 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     protected void onStart() {
         super.onStart();
         // Bind to the service
-        bindService(new Intent(this, AmstelBrightService.class), mConnection,
-                Context.BIND_AUTO_CREATE);
+//        bindService(new Intent(this, AmstelBrightService.class), mConnection,
+//                Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         // Unbind from the service
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }
+//        if (mBound) {
+//            unbindService(mConnection);
+//            mBound = false;
+//        }
+
     }
 
     @Override
@@ -253,14 +246,19 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
 
         if (keyCode == 8){
-            Intent intent = new Intent(this, DirecTVPairActivity.class);
+            Intent intent = new Intent(this, SetTopBoxPairActivity.class);
             startActivity(intent);
         }
 
-        if (keyCode == 9){
-            Intent intent = new Intent(this, WifiManageActivity.class);
-            startActivity(intent);
+        if ((keyCode == 12) && OGConstants.CRASH_TEST_DUMMY){
+            int zed = 1/0;
         }
+
+        // Out until we can do more debug
+//        if (keyCode == 9){
+//            Intent intent = new Intent(this, WifiManageActivity.class);
+//            startActivity(intent);
+//        }
 
 
         //showAlert(new UIMessage("You pushed key " + keyCode));
@@ -407,7 +405,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void animateIn(View v, float finalAlpha) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", 0f, finalAlpha);
-        anim.setDuration(1000);
+        anim.setDuration(500);
         anim.start();
 
     }
@@ -415,7 +413,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void animateOut(View v) {
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, "alpha", v.getAlpha(), 0);
-        anim.setDuration(1000);
+        anim.setDuration(500);
         anim.start();
 
     }
@@ -496,8 +494,8 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
         WebSettings settings = wv.getSettings();
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        settings.setUseWideViewPort(false);
 
     }
 
@@ -587,12 +585,24 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     public void killCrawler() {
 
         animateOut(mCrawlerWebView);
+        mCrawlerWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCrawlerWebView.loadUrl("");
+            }
+        }, 600);
     }
 
     @Override
     public void killWidget() {
 
         animateOut(mWidgetWebView);
+        mWidgetWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mWidgetWebView.loadUrl("");
+            }
+        }, 600);
 
     }
 
@@ -653,7 +663,13 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     @Override
     public void launchCrawler(final String urlPathToApp) {
 
-        loadWebView(mCrawlerWebView, urlPathToApp);
+        // Delayed 1sec to allow old app to be flushed from JS mem
+        mCrawlerWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadWebView(mCrawlerWebView, urlPathToApp);
+            }
+        }, 1000);
 
     }
 
@@ -663,25 +679,33 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
      * @param height percentages of the screen height (0-100)
      */
     @Override
-    public void launchWidget(final String urlPathToApp, int width, int height) {
-        int curWidth = mWidgetWebView.getLayoutParams().width;
-        int curHeight = mWidgetWebView.getLayoutParams().height;
+    public void launchWidget(final String urlPathToApp, final int width, final int height) {
 
-        width = (int) (mScreenWidth * (width / 100.0));
-        height = (int) (mScreenHeight* (height / 100.0));
+        mWidgetWebView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        if(curWidth != width || curHeight != height){
-            mWidgetWebView.getLayoutParams().height = height;
-            mWidgetWebView.getLayoutParams().width = width;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWidgetWebView.requestLayout();
+                int curWidth = mWidgetWebView.getLayoutParams().width;
+                int curHeight = mWidgetWebView.getLayoutParams().height;
+
+                int nwidth = (int) (mScreenWidth * (width / 100.0));
+                int nheight = (int) (mScreenHeight* (height / 100.0));
+
+                if(curWidth != nwidth || curHeight != nheight){
+                    mWidgetWebView.getLayoutParams().height = nheight;
+                    mWidgetWebView.getLayoutParams().width = nwidth;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mWidgetWebView.requestLayout();
+                        }
+                    });
                 }
-            });
-        }
 
-        loadWebView(mWidgetWebView, urlPathToApp);
+                loadWebView(mWidgetWebView, urlPathToApp);
+
+            }
+        }, 1000);
 
     }
 
@@ -744,30 +768,30 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
 
 
 
-    /*************************************
-     * PLACEHOLDER CODE
-     * Not currently used.
-     ************************************/
-
-    // MAK this is not currently used since we ar enot binding the service
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // This is called when the connection with the service has been
-            // established, giving us the object we can use to
-            // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
-            // representation of that from the raw IBinder object.
-            mService = new Messenger(service);
-            mBound = true;
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            mService = null;
-            mBound = false;
-        }
-    };
+//    /*************************************
+//     * PLACEHOLDER CODE
+//     * Not currently used.
+//     ************************************/
+//
+//    // MAK this is not currently used since we ar enot binding the service
+//    private ServiceConnection mConnection = new ServiceConnection() {
+//        public void onServiceConnected(ComponentName className, IBinder service) {
+//            // This is called when the connection with the service has been
+//            // established, giving us the object we can use to
+//            // interact with the service.  We are communicating with the
+//            // service using a Messenger, so here we get a mClient-side
+//            // representation of that from the raw IBinder object.
+//            mService = new Messenger(service);
+//            mBound = true;
+//        }
+//
+//        public void onServiceDisconnected(ComponentName className) {
+//            // This is called when the connection with the service has been
+//            // unexpectedly disconnected -- that is, its process crashed.
+//            mService = null;
+//            mBound = false;
+//        }
+//    };
 
     public void injectAppDataIntoWidget(String appdata){
         mWidgetWebView.loadUrl("javascript:GLOBAL_UPDATE_TARGET(" + appdata + ")");
@@ -777,17 +801,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         mCrawlerWebView.loadUrl("javascript:GLOBAL_UPDATE_TARGET(" + appdata + ")");
     }
 
-    // From old example code, needs to go...eventually
-    public void sayHello(int msgnum) {
-        if (!mBound) return;
-        // Create and send a message to the service, using a supported 'what' value
-        Message msg = Message.obtain(null, msgnum, 0, 0);
-        try {
-            mService.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     public int getStatusBarHeight() {
@@ -798,10 +811,5 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         }
         return result;
     }
-
-    /* From Bob M's Work */
-
-
-
 
 }

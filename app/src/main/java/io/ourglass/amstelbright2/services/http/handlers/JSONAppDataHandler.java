@@ -1,16 +1,17 @@
 package io.ourglass.amstelbright2.services.http.handlers;
 
+import android.content.Intent;
+
 import org.json.JSONObject;
 
 import java.util.Map;
 
+import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.realm.OGApp;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
 import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
-import android.content.Intent;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 /**
  * Created by mkahn on 5/9/16.
@@ -64,7 +65,8 @@ public class JSONAppDataHandler extends JSONHandler {
                             intent.setAction("com.ourglass.amstelbrightserver.status");
                             intent.putExtra("newAppData", dataJson.toString());
                             intent.putExtra("appType", appType);
-                            AmstelBrightService.context.sendBroadcast(intent);
+                            //AmstelBrightService.context.sendBroadcast(intent);
+                            ABApplication.sharedContext.sendBroadcast(intent);
 
                         }
                     }, null, null );

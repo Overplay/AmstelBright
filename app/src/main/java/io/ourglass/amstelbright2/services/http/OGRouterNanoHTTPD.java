@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD.Response.IStatus;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD.Response.Status;
+import io.ourglass.amstelbright2.services.http.handlers.MainInfoPageHandler;
 
 /*
  *
@@ -535,8 +536,9 @@ public class OGRouterNanoHTTPD extends NanoHTTPD {
     public void addMappings() {
         router.setNotImplemented(NotImplementedHandler.class);
         router.setNotFoundHandler(Error404UriHandler.class);
-        router.addRoute("/", Integer.MAX_VALUE / 2, IndexHandler.class);
-        router.addRoute("/index.html", Integer.MAX_VALUE / 2, IndexHandler.class);
+        //router.addRoute("/", Integer.MAX_VALUE / 2, IndexHandler.class);
+        router.addRoute("/", Integer.MAX_VALUE / 2, MainInfoPageHandler.class);
+        router.addRoute("/index.html", Integer.MAX_VALUE / 2, MainInfoPageHandler.class);
     }
 
     public void addRoute(String url, Class<?> handler, Object... initParameter) {

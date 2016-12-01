@@ -5,107 +5,134 @@
     android:id="@+id/activity_direc_tvpair"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.ourglass.amstelbright2.tvui.stb.DirecTVPairActivity"
+    tools:context="io.ourglass.amstelbright2.fordeprecation.DirecTVPairActivity"
     android:background="#00FFFFFF">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/content_wrapper"
-        android:background="@drawable/popup_bkg">
+        android:background="#51B85E">
 
-        <!--Title/Header-->
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="DirecTV Pairing"
-            android:textAllCaps="true"
-            android:textColor="@color/DodgerBlue"
-            android:textSize="30dip"
-            android:textAlignment="center"
-            android:id="@+id/directv_pair_title"
-            android:background="@drawable/directv_header_bkg"
-            android:paddingBottom="10dip"
-            android:paddingTop="10dip"/>
+            android:id="@+id/header_wrapper"
+            android:background="#333333">
 
-        <!--Error message-->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:id="@+id/error_msg"
-            android:layout_below="@+id/directv_pair_title"
-            android:textColor="@color/Red"
-            android:textSize="24dip"/>
-
-        <!-- Status Message -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/error_msg"
-            android:id="@+id/directv_status_line"
-            android:orientation="horizontal"
-            android:layout_marginLeft="10dip"
-            android:layout_marginTop="10dip">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Status: "
-                android:textColor="@color/DodgerBlue"
-                android:textSize="24dip"
-                android:id="@+id/directv_status_head"
-                android:layout_weight="0"
-                />
-
+            <!--Title/Header-->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/current_pair"
-                android:textSize="24dip"
-                android:layout_weight="1"
-                />
+                android:text="TV Box Pairing"
+                android:textAllCaps="true"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:textSize="50dip"
+                android:layout_marginLeft="70dip"
+                android:id="@+id/directv_pair_title"
+                android:paddingTop="20dip"/>
 
-        </LinearLayout>
+            <!--Error message-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:id="@+id/error_msg"
+                android:layout_below="@+id/directv_pair_title"
+                android:textColor="@color/Red"
+                android:textSize="24dip"/>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_below="@+id/directv_status_line"
-            android:id="@+id/directv_hr"
-            android:layout_height="4dp"
-            android:background="#ffffff"
-            android:layout_marginTop="10dip"/>
+            <!-- Status Message -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/error_msg"
+                android:id="@+id/directv_status_line"
+                android:orientation="horizontal"
+                android:layout_marginLeft="70dip"
+                android:layout_marginBottom="20dip">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Currently Paired to: "
+                    android:textColor="@color/White"
+                    android:textSize="24dip"
+                    android:id="@+id/directv_status_head"
+                    android:layout_weight="0"
+                    />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/device_list_header"
-            android:text="Available devices:"
-            android:textColor="@color/DodgerBlue"
-            android:textSize="24dip"
-            android:layout_below="@+id/directv_hr"
-            android:layout_marginTop="20dip"
-            android:layout_marginLeft="10dip"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/current_pair"
+                    android:textColor="@color/White"
+                    android:textSize="24dip"
+                    android:layout_weight="1"
+                    />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
 
         <ListView
             android:id="@+id/directv_devices_list"
             android:layout_width="match_parent"
+            android:layout_marginLeft="100dip"
+            android:layout_marginRight="100dip"
+            android:layout_marginTop="30dip"
+            android:layout_marginBottom="30dip"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/device_list_header">
+            android:listSelector="#00000000"
+            android:layout_below="@+id/header_wrapper">
         </ListView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/empty_list_message"
-            android:text="There seem to be no devices on the network..."
             android:visibility="gone"
             android:layout_below="@+id/directv_devices_list"
-            android:textColor="@color/Red"
+            android:textColor="@color/White"
             android:textSize="30dip"
             android:textAlignment="center"/>
+
+
     </RelativeLayout>
-    
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scanning_message"
+        android:layout_centerInParent="true">
+
+        <com.github.rahatarmanahmed.cpv.CircularProgressView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/progress_view"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginLeft="30dip"
+            app:cpv_animAutostart="true"
+            app:cpv_indeterminate="true"
+            app:cpv_color="@color/White" />
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="50dp"
+            android:src="@drawable/white_wifi_256"
+            android:contentDescription="Wifi Icon"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanning for devices"
+            android:textSize="20dip"
+            android:layout_marginTop="10dip"
+            android:layout_below="@+id/progress_view"/>
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -53,7 +53,7 @@ public class CloudScraperService extends Service {
 
             @Override
             public void run() {
-                logd("sending UDP packet from looper");
+                logd("Fetching scrape targets from Realm");
 
                 final Realm realm = Realm.getDefaultInstance();
                 RealmResults<OGScraper> mScrapeTasks = realm.where(OGScraper.class).findAll();
@@ -116,8 +116,12 @@ public class CloudScraperService extends Service {
 
         ABApplication.dbToast(this, "Starting Cloud Proxy");
 
-        mScrapeThread.start();
-        mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        // Can't restart if it is just the Activity restarting
+        if (!mScrapeThread.isAlive()){
+            mScrapeThread.start();
+            mScrapeThreadHandler = new Handler(mScrapeThread.getLooper());
+        }
+
 
         mTweetScraper = new OGTweetScraper();
         mTweetScraper.authorize(new OGTweetScraper.TwitterAuthCallback() {

@@ -1,31 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/lightweight_listview_selector"
+    android:orientation="horizontal">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wifi_list_elem_ssid"
-            android:text="SampleSSID"
-            android:textSize="20dip"
-            android:textStyle="bold"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wifi_list_elem_security_desc"
-            android:text="Sample security protocols"
-            android:textSize="15dip"
-            android:layout_below="@id/wifi_list_elem_ssid"
-            android:layout_marginTop="5dip"/>
-    </RelativeLayout>
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/image_wifi_level_unlocked"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/wifi_level_unlocked"/>
-</RelativeLayout>
+        android:src="@drawable/wifi_level_unlocked"
+        android:layout_marginRight="15dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wifi_list_elem_ssid"
+        android:textSize="30dp"
+        android:textStyle="bold"
+        android:textColor="@color/White" />
+</LinearLayout>
