@@ -654,10 +654,13 @@ public class OGCore {
 
     }
 
-    public static JSONObject registerWithAsahi(String regCode){
+    // TODO, this is a shitty implementation. Returning true/false is almost useless
+    public static JSONHTTPResponse registerWithAsahi(String regCode) {
+
 
         RequestBody formBody = new FormBody.Builder()
-                .add("regcode", regCode)
+                .add("regCode", regCode)
+                .add("udid", OGSystem.uniqueDeviceId())
                 .build();
 
         Request request = new Request.Builder()
@@ -667,18 +670,37 @@ public class OGCore {
 
 
         Response response = null;
+        JSONHTTPResponse jsonResponse;
+
         try {
             response = client.newCall(request).execute();
-            if(!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            Log.v(TAG, "successfully uploaded log to Asahi, will now mark the upload time");
+            jsonResponse = new JSONHTTPResponse(response.body().string(), response.code());
+
+            if(!response.isSuccessful()) {
+                Log.d(TAG, "Bad server response registering code.");
+                return jsonResponse;
+            }
+
+            Log.d(TAG, "Successfully registered with server with code!");
+
+            if (!jsonResponse.isGoodJSON){
+                Log.d(TAG, "Got bad JSON on registration!");
+                return jsonResponse;
+            }
+
+            OGSystem.setVenueId(jsonResponse.jsonResponseObject.optString("venue", ""));
+            OGSystem.setDeviceId(jsonResponse.jsonResponseObject.optString("id",""));
+            OGSystem.setDeviceAPIToken(jsonResponse.jsonResponseObject.optString("apiToken", ""));
+
+            return jsonResponse;
 
         } catch (IOException e) {
             e.printStackTrace();
-            Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not mark as uploaded");
+            Log.w(TAG, "There was an error registering (" + e.getMessage() + ")");
+            return null;
 
         }
 
-        return new JSONObject();
 
     }
 

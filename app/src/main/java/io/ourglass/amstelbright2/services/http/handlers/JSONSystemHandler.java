@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.ourglass.amstelbright2.core.JSONHTTPResponse;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
@@ -137,12 +138,23 @@ public class JSONSystemHandler extends JSONHandler {
 
                         //if JWT not present then set responseStatus accordingly
 
-                        //parse the body of the request
+                        if (code==null){
+                            responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
+                            return makeErrorJson("No code, homie");
+                        }
 
-                            //TODO add mechanism to add paired Settop box info
+                        //TODO add mechanism to add paired Settop box info
+
+                        JSONHTTPResponse result = OGCore.registerWithAsahi(code);
+
+                        if (result.isGoodResponse){
                             responseStatus = NanoHTTPD.Response.Status.OK;
-                        return code;
-                            //return OGSystem.getSystemInfo().toString();
+                            return result.stringResponse;
+
+                        } else {
+                            responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
+                            return result.stringResponse;
+                        }
 
 
                         //endpoint to discover installed apps, useful if there are new apps installed while running

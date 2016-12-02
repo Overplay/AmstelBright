@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.mstar.android.tv.TvCommonManager;
@@ -40,6 +41,14 @@ public class OGSystem {
     // TODO: this will need to be made generic in the future so the STB can be DTV, Xfinity, etc.
     // Some of the groundwork for this is in (abstract inheritance), some not.
     public static DirecTVSetTopBox pairedSTB;
+
+
+    public static String uniqueDeviceId(){
+
+        return Settings.Secure.getString(ABApplication.sharedContext.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+    }
 
     /**
      *
@@ -244,6 +253,7 @@ public class OGSystem {
             deviceJSON.put("osApiLevel", osLevel());
 
             deviceJSON.put("venue", getVenueId());
+            deviceJSON.put("udid", uniqueDeviceId());
 
         } catch (JSONException e){
             Log.e("OGDevice.model", e.toString());
@@ -259,6 +269,22 @@ public class OGSystem {
 
     public static String getVenueId(){
         return getStringFromPrefs("venueId", "");
+    }
+
+    public static void setDeviceId(String deviceId){
+        putStringToPrefs("deviceId", deviceId);
+    }
+
+    public static String getDeviceId(){
+        return getStringFromPrefs("deviceId", "");
+    }
+
+    public static void setDeviceAPIToken(String venueId){
+        putStringToPrefs("deviceToken", venueId);
+    }
+
+    public static String getDeviceAPIToken(){
+        return getStringFromPrefs("deviceToken", "");
     }
 
 

@@ -56,6 +56,8 @@ public class OGConstants {
      */
 
     public static final String ASAHI_ADDRESS = USE_DEMO_ASAHI ? "http://107.170.209.248" : "http://104.131.145.36";
+//    public static final String ASAHI_ADDRESS = "http://192.168.1.220:1337";
+
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
     public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
     public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
