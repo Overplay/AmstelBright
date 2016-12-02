@@ -90,6 +90,20 @@
         </activity>
 
         <activity android:name=".tvui.RootActivity">
+            <!--<intent-filter>-->
+                <!--&lt;!&ndash; Starting activity for this application &ndash;&gt;-->
+                <!--<action android:name="android.intent.action.MAIN"/>-->
+                <!--&lt;!&ndash; Means that this app should appear on the launcher (app menu for OS)&ndash;&gt;-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+
+
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--&lt;!&ndash; The following intent-filter says this is a candidate for home screen &ndash;&gt;-->
+                <!--<category android:name="android.intent.category.HOME" />-->
+            <!--</intent-filter>-->
+        </activity>
+
+        <activity android:name=".tvui.ComboMainframeActivity">
             <intent-filter>
                 <!-- Starting activity for this application -->
                 <action android:name="android.intent.action.MAIN"/>

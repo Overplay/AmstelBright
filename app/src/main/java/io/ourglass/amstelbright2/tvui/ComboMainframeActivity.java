@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -40,15 +41,19 @@ import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
+import io.ourglass.amstelbright2.core.OGSystemExceptionHander;
+import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import io.ourglass.amstelbright2.tvui.stb.SetTopBoxPairActivity;
 
 @SuppressLint("SetJavaScriptEnabled")
 
-public class MainframeActivity extends Activity implements Mainframe.MainframeListener {
+public class ComboMainframeActivity extends Activity implements Mainframe.MainframeListener {
 
     private static final String TAG = "MainframeActivity";
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
+
+    private SurfaceView surfaceView;
 
 //    private SurfaceView surfaceView;
 
@@ -100,7 +105,34 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.mainframe_layout_with_root);
+        setContentView(R.layout.mainframe_layout);
+
+        Thread.setDefaultUncaughtExceptionHandler(new OGSystemExceptionHander(this,
+                RootActivity.class));
+
+
+        //check started in test mode
+        Intent currentIntent = getIntent();
+        boolean testMode = currentIntent.getBooleanExtra("testMode", false);
+
+        //pass testMode onto abService, defaults to false
+        Intent abServiceIntent = new Intent(getBaseContext(), AmstelBrightService.class);
+        abServiceIntent.putExtra("testMode", testMode);
+
+        startService(abServiceIntent);
+
+        surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+
+        if (!OGSystem.enableHDMI(this, surfaceView)) {
+            // The color change doesn't seem to do anything...:(.. not worth stressing.
+
+            surfaceView.setVisibility(View.INVISIBLE);
+
+            ((RelativeLayout)findViewById(R.id.mainframeLayout)).setBackgroundColor(getResources().getColor(R.color.Turquoise));
+            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+
+        }
+
 
         Log.d(TAG, "OS Level: "+ OGSystem.osLevel());
         Log.d(TAG, "Is demo H/W? " + (OGSystem.isTronsmart()?"YES":"NO"));
