@@ -9,10 +9,12 @@ import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceView;
 
+/*
 import com.mstar.android.tv.TvCommonManager;
 import com.mstar.android.tvapi.common.TvManager;
 import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
+*/
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,15 +85,20 @@ public class OGSystem {
 
     public static boolean enableHDMI(Context c, SurfaceView rootView  ){
 
+
         if ( isRealOG() ){
 
             m_HDMIRxPlayer = new HDMIRxPlayer(c, rootView, 1920, 1080);
-
-            return false;
-        } else if ( isTronsmart() ){
+            m_HDMIRxPlayer.play();
+            return true;
+        }
+        /*
+        else if ( isTronsmart() ){
             enableTronsmartHDMI();
             return true;
-        } else {
+        }
+        */
+        else {
             // Emulator
             return false;
         }
@@ -277,6 +284,7 @@ public class OGSystem {
     /***************************************
      * TRONSMART CODE
      ***************************************/
+/*
 
     private static boolean enableOGHDMI() {
 
@@ -286,15 +294,19 @@ public class OGSystem {
     }
 
 
-    /*******************************************************************************
+    */
+/*******************************************************************************
      *
      * TRONSMART SPECIFIC CODE
      *
-     *******************************************************************************/
+     *******************************************************************************//*
 
-    /***************************************
+
+    */
+/***************************************
      * TRONSMART CODE
-     ***************************************/
+     ***************************************//*
+
 
     private static boolean enableTronsmartHDMI() {
         boolean bRet = false;
@@ -324,6 +336,5 @@ public class OGSystem {
         }
     }
 
-
-
+*/
 }
