@@ -70,7 +70,7 @@ public class LogCleanAndPushTest extends ActivityUnitTestCase<MainframeActivity>
 
     private void createTestLogs(){
         //create 1 of each log type
-        OGCore.log_channelChange(null, null, null, null, null, null);
+        OGCore.log_channelChange(null, null);//, null, null, null, null);
         OGCore.log_alert(null, null);
         OGCore.log_placementOverride(null, null, null, 0);
         //OGCore.log_adImpression(null);

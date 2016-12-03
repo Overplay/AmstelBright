@@ -8,11 +8,14 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.SurfaceView;
 
+/*
 import com.mstar.android.tv.TvCommonManager;
 import com.mstar.android.tvapi.common.TvManager;
 import com.mstar.android.tvapi.common.exception.TvCommonException;
 import com.mstar.android.tvapi.common.vo.TvOsType;
+*/
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +40,8 @@ public class OGSystem {
     private static SharedPreferences.Editor mEditor = mPrefs.edit();
 
     public static final String TAG = "OGSystem";
+
+    private static HDMIRxPlayer m_HDMIRxPlayer;
 
     // TODO: this will need to be made generic in the future so the STB can be DTV, Xfinity, etc.
     // Some of the groundwork for this is in (abstract inheritance), some not.
@@ -87,14 +92,22 @@ public class OGSystem {
     }
 
 
-    public static boolean enableHDMI(){
+    public static boolean enableHDMI(Context c, SurfaceView rootView  ){
+
 
         if ( isRealOG() ){
-            return false;
-        } else if ( isTronsmart() ){
+
+            m_HDMIRxPlayer = new HDMIRxPlayer(c, rootView, 1920, 1080);
+            m_HDMIRxPlayer.play();
+            return true;
+        }
+        /*
+        else if ( isTronsmart() ){
             enableTronsmartHDMI();
             return true;
-        } else {
+        }
+        */
+        else {
             // Emulator
             return false;
         }
@@ -297,6 +310,7 @@ public class OGSystem {
     /***************************************
      * TRONSMART CODE
      ***************************************/
+/*
 
     private static boolean enableOGHDMI() {
 
@@ -306,15 +320,19 @@ public class OGSystem {
     }
 
 
-    /*******************************************************************************
+    */
+/*******************************************************************************
      *
      * TRONSMART SPECIFIC CODE
      *
-     *******************************************************************************/
+     *******************************************************************************//*
 
-    /***************************************
+
+    */
+/***************************************
      * TRONSMART CODE
-     ***************************************/
+     ***************************************//*
+
 
     private static boolean enableTronsmartHDMI() {
         boolean bRet = false;
@@ -344,6 +362,5 @@ public class OGSystem {
         }
     }
 
-
-
+*/
 }

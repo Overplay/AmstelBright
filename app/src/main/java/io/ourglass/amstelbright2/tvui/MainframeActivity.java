@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -50,7 +51,7 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
     private static final boolean FLASHY = true;
     private static final long SCALE_ANIM_DURATION = 1000;
 
-//    private SurfaceView surfaceView;
+   private SurfaceView surfaceView;
 
     private WebView mCrawlerWebView;
     private WebView mWidgetWebView;
@@ -150,18 +151,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
             }
         });
 
-//        if (!OGSystem.enableHDMI()) {
-//            // The color change doesn't seem to do anything...:(.. not worth stressing.
-//
-//            surfaceView = (SurfaceView)findViewById(surfaceView);
-//            surfaceView.setVisibility(View.INVISIBLE);
-//
-//            mMainLayout.setBackgroundColor(getResources().getColor(R.color.Turquoise));
-//            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
-//
-//
-//        }
-
         mBootBugImageView = (ImageView) findViewById(R.id.bootBugIV);
 
         appTray = (LinearLayout) findViewById(R.id.appTray);
@@ -177,7 +166,6 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
         Log.d(TAG, "onCreate done");
 
         Log.d(TAG, "Status bar height is: "+getStatusBarHeight());
-
 
     }
 
@@ -208,6 +196,18 @@ public class MainframeActivity extends Activity implements Mainframe.MainframeLi
                 }
             }
         }, 5000);
+
+        surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+
+        if (!OGSystem.enableHDMI(this, surfaceView)) {
+            // The color change doesn't seem to do anything...:(.. not worth stressing.
+
+            surfaceView.setVisibility(View.INVISIBLE);
+
+            ((RelativeLayout)findViewById(R.id.mainframeLayout)).setBackgroundColor(getResources().getColor(R.color.Turquoise));
+            Log.d(TAG, "Running in emulator or on OG H/W without libs, skipping HDMI passthru.");
+
+        }
 
     }
 
