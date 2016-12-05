@@ -113,9 +113,23 @@ public class JSONSystemHandler extends JSONHandler {
                                 OGSystem.setSystemLocation(inboundParams.getString("locationWithinVenue"));
                             }
 
+                            JSONHTTPResponse result = OGCore.updateNameLocOnAsahi();
+
+                            //TODO this should be 3 cases: null (500?), NOT_ACC, OK
+                            //TODO HATE HATE this implementation. There should be a sweep service
+                            //that updates Asahi periodically. No reason this should fault out
+                            //if Asahi is down.
+                            //implement an operations queue of synchronous requests plus a retry count
+                            //in a seperate service
+                            if (result==null || !result.isGoodResponse) {
+                                responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
+                                return result.stringResponse;
+                            } else {
+                                responseStatus = NanoHTTPD.Response.Status.OK;
+                                return OGSystem.getSystemInfo().toString();
+                            }
+
                             //TODO add mechanism to add paired Settop box info
-                            responseStatus = NanoHTTPD.Response.Status.OK;
-                            return OGSystem.getSystemInfo().toString();
 
                         } catch (Exception e) {
 
@@ -147,14 +161,15 @@ public class JSONSystemHandler extends JSONHandler {
 
                         JSONHTTPResponse result = OGCore.registerWithAsahi(code);
 
-                        if (result.isGoodResponse){
-                            responseStatus = NanoHTTPD.Response.Status.OK;
-                            return result.stringResponse;
-
-                        } else {
+                        //TODO this should be 3 cases: null (500?), NOT_ACC, OK
+                        if (result==null || !result.isGoodResponse) {
                             responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
                             return result.stringResponse;
+                        } else {
+                            responseStatus = NanoHTTPD.Response.Status.OK;
+                            return result.stringResponse;
                         }
+
 
 
                         //endpoint to discover installed apps, useful if there are new apps installed while running

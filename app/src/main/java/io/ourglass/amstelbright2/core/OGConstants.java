@@ -28,7 +28,6 @@ public class OGConstants {
     public static final String AJPGS_BASE = "http://http://107.170.209.248:1338";
     public static final int AJPGS_DIRECTV_PROVIDER_ID = 195;
 
-
     /**
      * Networking constants
      */

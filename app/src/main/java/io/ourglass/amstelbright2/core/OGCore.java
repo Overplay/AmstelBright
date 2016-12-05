@@ -692,6 +692,9 @@ public class OGCore {
             OGSystem.setDeviceId(jsonResponse.jsonResponseObject.optString("id",""));
             OGSystem.setDeviceAPIToken(jsonResponse.jsonResponseObject.optString("apiToken", ""));
 
+            OGSystem.setSystemLocation(jsonResponse.jsonResponseObject.optString("locationWithinVenue", "Not Set"));
+            OGSystem.setSystemName(jsonResponse.jsonResponseObject.optString("name", "No Name"));
+
             return jsonResponse;
 
         } catch (IOException e) {
@@ -699,6 +702,51 @@ public class OGCore {
             Log.w(TAG, "There was an error registering (" + e.getMessage() + ")");
             return null;
 
+        }
+
+
+    }
+
+    // TODO, this is a shitty implementation. Returning true/false is almost useless
+    public static JSONHTTPResponse updateNameLocOnAsahi() {
+
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("name", OGSystem.getSystemName())
+                .add("locationWithinVenue", OGSystem.getSystemLocation())
+                .build();
+
+        Request request = new Request.Builder()
+                .url(OGConstants.ASAHI_ADDRESS + "/device/updateNameLocation/"+OGSystem.getDeviceId())
+                .post(formBody)
+                .build();
+
+
+        Response response = null;
+        JSONHTTPResponse jsonResponse;
+
+        try {
+            response = client.newCall(request).execute();
+            jsonResponse = new JSONHTTPResponse(response.body().string(), response.code());
+
+            if(!response.isSuccessful()) {
+                Log.d(TAG, "Bad server response changing name or loc.");
+                return jsonResponse;
+            }
+
+            Log.d(TAG, "Successfully updated name and location on Asahi!");
+
+            if (!jsonResponse.isGoodJSON){
+                Log.d(TAG, "Got bad JSON on name change!");
+                return jsonResponse;
+            }
+
+            return jsonResponse;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.w(TAG, "There was an error changing name (" + e.getMessage() + ")");
+            return null;
         }
 
 
