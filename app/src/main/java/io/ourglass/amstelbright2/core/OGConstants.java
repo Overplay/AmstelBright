@@ -20,6 +20,15 @@ public class OGConstants {
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
     public static final String SSL_KEYSTORE = "src/main/resources/keystore2.jks";
+
+    /**
+     * PROGRAM GUIDE CONSTANTS FOR ALPHA
+     */
+
+    public static final String AJPGS_BASE = "http://http://107.170.209.248:1338";
+    public static final int AJPGS_DIRECTV_PROVIDER_ID = 195;
+
+
     /**
      * Networking constants
      */
