@@ -20,21 +20,18 @@ import io.realm.Realm;
 
 /**
  * Created by mkahn on 5/9/16.
- *
+ * <p>
  * Handles the following:
- *
+ * <p>
  * /api/app/:appid/:command
- *
+ * <p>
  * /api/app/:appid/launch
  * /api/app/:appid/kill
  * /api/app/:appid/move
- *
+ * <p>
  * Idea?
- *
+ * <p>
  * /api/app/:appid/data
- *
- *
- *
  */
 
 public class JSONAppCommandsHandler extends JSONHandler {
@@ -44,7 +41,7 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
         //these operations require owner level permissions
         String tok = session.getHeaders().get("Authorization");
-        if(!OGConstants.USE_JWT && (tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
+        if (!OGConstants.USE_JWT && (tok == null || JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
             return "";
         }
@@ -58,84 +55,39 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
                 switch (cmd) {
 
-
                     case "move":
-                    {
-
-                        OGApp movedApp;
-                        Realm realm = Realm.getDefaultInstance();
 
                         try {
-
-                            movedApp = OGCore.moveApp(realm, appId);
-                            String appJsonString = movedApp.getAppAsJson().toString();
+                            JSONObject movedJson = OGCore.moveApp(appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
-                            return appJsonString;
-
+                            return movedJson.toString();
                         } catch (OGServerException e) {
-
                             return processOGException(e);
-
-                        } finally {
-                            realm.close();
                         }
-
-                    }
-
-
-
 
                     case "launch":
 
-                    {
-
-                        OGApp launchedApp;
-                        Realm realm = Realm.getDefaultInstance();
-
-
                         try {
-
-                            launchedApp = OGCore.launchApp(realm, appId);
+                            JSONObject launchedApp = OGCore.launchApp(appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
-                            return launchedApp.getAppAsJson().toString();
-
+                            return launchedApp.toString();
                         } catch (OGServerException e) {
-
                             return processOGException(e);
-
-                        } finally {
-                            realm.close();
                         }
-
-
-                    }
-
 
                     case "kill":
 
-                    {
-
-                        Realm realm = Realm.getDefaultInstance();
-
-
                         try {
-
-                            OGApp killedApp = OGCore.killApp(realm, appId);
+                            JSONObject killedApp = OGCore.killApp(appId);
                             responseStatus = NanoHTTPD.Response.Status.OK;
-                            return killedApp.getAppAsJson().toString();
+                            return killedApp.toString();
 
                         } catch (OGServerException e) {
-
                             return processOGException(e);
-
-                        } finally {
-                            realm.close();
                         }
 
-                    }
-
                     case "adjust":
-                    {
+
                         float scale;
                         int xAdjust, yAdjust;
 
@@ -144,39 +96,28 @@ public class JSONAppCommandsHandler extends JSONHandler {
                             scale = Float.valueOf(body.get("scale").toString());
                             try {
                                 xAdjust = body.getInt("xAdjust");
-                            } catch(JSONException e){
+                            } catch (JSONException e) {
                                 Log.v("JSONAppCommandsHandler", "xAdjust not supplied, setting to 0");
                                 xAdjust = 0;
                             }
                             try {
                                 yAdjust = body.getInt("yAdjust");
-                            } catch(JSONException e) {
+                            } catch (JSONException e) {
                                 Log.v("JSONAppCommandsHandler", "yAdjust not supplied, setting to 0");
                                 yAdjust = 0;
                             }
-                        } catch(Exception e){
+                        } catch (Exception e) {
                             responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
                             return e.toString();
                         }
 
-                        OGApp scaledApp;
-                        Realm realm = Realm.getDefaultInstance();
-
                         try {
-                            OGCore.adjustApp(realm, appId, scale, xAdjust, yAdjust);
-
+                            JSONObject adjustedApp = OGCore.adjustApp(appId, scale, xAdjust, yAdjust);
                             responseStatus = NanoHTTPD.Response.Status.OK;
-
-                            return "success";
+                            return adjustedApp.toString();
                         } catch (OGServerException e) {
-
                             return processOGException(e);
-
-                        } finally {
-                            realm.close();
                         }
-
-                    }
 
                     default:
 
@@ -184,7 +125,6 @@ public class JSONAppCommandsHandler extends JSONHandler {
                         return "no such command, genius";
 
                 }
-
 
 
             case GET:
@@ -197,7 +137,6 @@ public class JSONAppCommandsHandler extends JSONHandler {
 
 
     }
-
 
 
 }

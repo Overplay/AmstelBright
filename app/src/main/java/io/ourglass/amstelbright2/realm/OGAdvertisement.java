@@ -1,7 +1,5 @@
 package io.ourglass.amstelbright2.realm;
 
-import android.graphics.Bitmap;
-import android.media.ImageReader;
 import android.util.Base64;
 import android.util.Log;
 
@@ -13,9 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.realm.Realm;
 import io.realm.RealmObject;
-import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -53,7 +49,8 @@ public class OGAdvertisement extends RealmObject{
         return id;
     }
 
-    public JSONObject adAsJSON() throws JSONException{
+    //TODO this is shite. Gson?
+    public JSONObject adAsJSON() {
         JSONObject toReturn = new JSONObject();
 
         JSONArray arr = new JSONArray();
@@ -61,16 +58,20 @@ public class OGAdvertisement extends RealmObject{
         if(text2 != null) arr.put(text2);
         if(text3 != null) arr.put(text3);
 
-        toReturn.put("textAds", arr);
+        try {
+            toReturn.put("textAds", arr);
+            if(crawlerImg != null) {
+                toReturn.put("crawlerUrl", crawlerURL);
+                //toReturn.put("crawlerImg_location", crawlerImgFileLoc);
+            }
+            if(widgetImg != null) {
+                toReturn.put("widgetUrl", widgetURL);
+                //toReturn.put("widgetImg_location", widgetImgFileLoc);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        if(crawlerImg != null) {
-            toReturn.put("crawlerUrl", crawlerURL);
-            //toReturn.put("crawlerImg_location", crawlerImgFileLoc);
-        }
-        if(widgetImg != null) {
-            toReturn.put("widgetUrl", widgetURL);
-            //toReturn.put("widgetImg_location", widgetImgFileLoc);
-        }
         return toReturn;
     }
 

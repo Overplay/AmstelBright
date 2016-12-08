@@ -24,9 +24,7 @@ import javax.net.ssl.X509TrustManager;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -623,7 +621,8 @@ public class Mainframe implements OGBroadcastReceiver.OGBroadcastReceiverListene
             }
 
             //log the movement as placement override
-            OGCore.log_placementOverride(OGSystem.getPairedSTB().nowPlaying.networkName, OGSystem.getPairedSTB().nowPlaying.programId, app.getString("appId"), newSlot);
+            //TODO THIS IS THE WRONG WAY TO DO THIS. It will crash if not paired!
+            //OGCore.log_placementOverride(OGSystem.getPairedSTB().nowPlaying.networkName, OGSystem.getPairedSTB().nowPlaying.programId, app.getString("appId"), newSlot);
         } catch (Exception e) {
             Log.wtf(TAG, "WTF with the bad JSON again!");
             raiseRedFlag("WTF with the bad JSON again!");

@@ -15,7 +15,7 @@ public class OGConstants {
     public static final boolean TEST_MODE = true;
     public static final boolean CRASH_TEST_DUMMY = true; // enable force crash on '5' button
     public static final boolean SHOW_DB_TOASTS = false;
-    public static final boolean LOGCAT_TO_FILE = true;
+    public static final boolean LOGCAT_TO_FILE = false;
 
     public static final boolean USE_HTTPS = false;
     public static final String SSL_KEY_PASSWORD = "password";
@@ -25,7 +25,7 @@ public class OGConstants {
      * PROGRAM GUIDE CONSTANTS FOR ALPHA
      */
 
-    public static final String AJPGS_BASE = "http://http://107.170.209.248:1338";
+    public static final String AJPGS_BASE = "http://107.170.209.248:1338";
     public static final int AJPGS_DIRECTV_PROVIDER_ID = 195;
 
     /**

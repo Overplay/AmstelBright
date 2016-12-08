@@ -3,7 +3,6 @@ package io.ourglass.amstelbright2.core;
 import android.content.Intent;
 
 import io.ourglass.amstelbright2.realm.OGApp;
-import io.ourglass.amstelbright2.services.amstelbright.AmstelBrightService;
 
 /**
  * Created by mkahn on 7/25/16.
@@ -19,7 +18,7 @@ public class OGNotifications {
         intent.setAction("com.ourglass.amstelbrightserver");
         intent.putExtra("command", cmd);
         intent.putExtra("appId", target.appId);
-        intent.putExtra("app", target.getAppAsJson().toString());
+        intent.putExtra("app", target.toJson().toString());
         ABApplication.sharedContext.sendBroadcast(intent);
 
     }

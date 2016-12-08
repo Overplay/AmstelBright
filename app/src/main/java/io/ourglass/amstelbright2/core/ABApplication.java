@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -84,6 +86,7 @@ public class ABApplication extends Application {
 
         }
 
+        JodaTimeAndroid.init(this);
 
     }
 

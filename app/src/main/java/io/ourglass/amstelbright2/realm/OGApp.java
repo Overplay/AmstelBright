@@ -86,7 +86,7 @@ public class OGApp extends RealmObject {
 
     }
 
-    public JSONObject getAppAsJson(){
+    public JSONObject toJson(){
 
         JSONObject rval = new JSONObject();
 
@@ -135,7 +135,7 @@ public class OGApp extends RealmObject {
 
         while (litr.hasNext()){
             OGApp app = litr.next();
-            rval.put(app.getAppAsJson());
+            rval.put(app.toJson());
         }
 
         return rval;

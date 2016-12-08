@@ -17,6 +17,7 @@ import io.ourglass.amstelbright2.BuildConfig;
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
+import io.ourglass.amstelbright2.services.ajpgsservice.AJPGSPollingService;
 import io.ourglass.amstelbright2.services.applejack_comm.AdFetchService;
 import io.ourglass.amstelbright2.services.applejack_comm.LogCleanAndPushService;
 import io.ourglass.amstelbright2.services.cloudscraper.CloudScraperService;
@@ -97,7 +98,7 @@ public class AmstelBrightService extends Service  {
 
 
         // Start both UDP discovery methods (won't harm anything now they are on different ports...MAK
-        //startService( new Intent(this, UDPListenAndRespond.class));
+
         startService( new Intent(this, OGDPService.class));
 
         if (OGConstants.SEND_UDP_BEACONS){
@@ -109,7 +110,6 @@ public class AmstelBrightService extends Service  {
 
         Intent csIntent = new Intent(this, CloudScraperService.class);
         startService(csIntent);
-
 
 
 //        Intent upnpIntent = new Intent(this, OGDiscoService.class);
@@ -134,6 +134,9 @@ public class AmstelBrightService extends Service  {
 
         Intent stbIntent = new Intent(this, STBPollingService.class);
         startService(stbIntent);
+
+        Intent pgsIntent = new Intent(this, AJPGSPollingService.class);
+        startService(pgsIntent);
 
         // These are here to try to the two different ways of talking to the SSDP discovery service
         //testSSDPBind();

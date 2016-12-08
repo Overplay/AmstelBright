@@ -3,8 +3,6 @@ package io.ourglass.amstelbright2.tvui.wifi;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import io.ourglass.amstelbright2.R;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
-import io.ourglass.amstelbright2.tvui.wifi.WifiManageActivity;
 
 /**
  * Created by ethan on 9/8/16.

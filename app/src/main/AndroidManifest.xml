@@ -50,6 +50,9 @@
             android:name=".services.stbservice.STBPollingService"
             android:enabled="true" />
         <service
+            android:name=".services.ajpgsservice.AJPGSPollingService"
+            android:enabled="true" />
+        <service
             android:name=".services.ssdpservice.SSDPService"
             android:enabled="true" />
         <service

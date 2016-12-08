@@ -48,4 +48,5 @@ dependencies {
     compile 'com.daimajia.easing:library:1.0.1@aar'
     compile 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
     compile 'io.jsonwebtoken:jjwt:0.7.0'
+    compile 'net.danlew:android.joda:2.9.5.1'
 }

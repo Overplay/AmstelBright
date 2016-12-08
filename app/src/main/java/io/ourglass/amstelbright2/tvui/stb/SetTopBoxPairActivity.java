@@ -28,11 +28,9 @@ import java.util.Map;
 import io.ourglass.amstelbright2.R;
 import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGSystem;
-import io.ourglass.amstelbright2.fordeprecation.DirectvDevicesAdapter;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPBroadcastReceiver;
 import io.ourglass.amstelbright2.services.ssdpservice.SSDPService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
-import io.ourglass.amstelbright2.services.stbservice.STBService;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 
 public class SetTopBoxPairActivity extends AppCompatActivity {
@@ -49,7 +47,6 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
 
     ListView directvDevicesList;
     TextView emptyListMessage;
-    DirectvDevicesAdapter devicesAdapter;
     View scanningMessage;
 
     Typeface font;
@@ -283,21 +280,22 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
             @Override
             public void run()
             {
-                if(STBService.hasSearched){
-                    emptyListMessage.setText("");
-                    emptyListMessage.setVisibility(View.GONE);
+//                if(STBService.hasSearched){
+//                    emptyListMessage.setText("");
+//                    emptyListMessage.setVisibility(View.GONE);
+//
+//                    setDirectvDevicesList();
+//
+//                    //((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
+//
+//                    //hide the scanning message
+//                    scanningMessage.setVisibility(View.GONE);
+//                    h.postDelayed(this, 1000);
+//                }
+//                else {
+//                    h.postDelayed(this, 500);
+//                }
 
-                    setDirectvDevicesList();
-
-                    ((DirectvDevicesAdapter)directvDevicesList.getAdapter()).notifyDataSetChanged();
-
-                    //hide the scanning message
-                    scanningMessage.setVisibility(View.GONE);
-                    h.postDelayed(this, 1000);
-                }
-                else {
-                    h.postDelayed(this, 500);
-                }
             }
         }, 500);
     }
