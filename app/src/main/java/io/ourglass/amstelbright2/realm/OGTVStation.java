@@ -77,6 +77,11 @@ public class OGTVStation extends RealmObject {
 
         for (OGTVStation channel : all) {
             JSONObject robj = channel.toJson();
+            try {
+                robj.put("nowshowing", OGTVListing.getCurrentShowForStationID(realm, channel.stationID));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             if (robj!=null)
                 rval.put(robj);
         }

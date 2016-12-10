@@ -1,5 +1,7 @@
 package io.ourglass.amstelbright2.realm;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -155,11 +157,11 @@ public class OGTVListing extends RealmObject {
 
         Calendar c = Calendar.getInstance();
         c.add(Calendar.HOUR, 1);
-        Date plus4 = c.getTime();
+        Date plus1 = c.getTime();
 
-        query.between("listDateTime", now, plus4);
+        query.between("listDateTime", now, plus1);
 
-        RealmResults<OGTVListing> next4 = query.findAll().sort("listDateTime");
+        RealmResults<OGTVListing> next4 = query.findAll();
 
         JSONArray rval = new JSONArray();
 
@@ -170,6 +172,37 @@ public class OGTVListing extends RealmObject {
         }
 
         return rval;
+
+    }
+
+    public static JSONObject getCurrentShowForStationID(Realm realm, int stationID) {
+
+        RealmQuery<OGTVListing> query = realm.where(OGTVListing.class);
+        Date now = new Date();
+
+//        Calendar c = Calendar.getInstance();
+//        c.add(Calendar.HOUR, 1);
+//        Date plus1 = c.getTime();
+
+        query.greaterThanOrEqualTo("listDateTime", now)
+                .equalTo("stationID", stationID);
+
+        //query.between("listDateTime", now);
+
+        OGTVListing onNow = query.findFirst();
+
+        if (onNow==null){
+            Log.d(TAG,"No program guide info for stationID: "+stationID);
+            JSONObject shite = new JSONObject();
+            try {
+                shite.put("error", "No match for station ID: "+stationID);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return shite;
+        }
+
+        return onNow.toJSON();
 
     }
 
