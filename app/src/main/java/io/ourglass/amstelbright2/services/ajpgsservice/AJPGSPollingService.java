@@ -89,8 +89,8 @@ public class AJPGSPollingService extends Service {
         }
 
 
-//        mPGSThreadHandler.postDelayed(mUpdateStationsRunnable, 5000);
-//        mPGSThreadHandler.postDelayed(mUpdateListingsRunnable, 15000);
+        mPGSThreadHandler.postDelayed(mUpdateStationsRunnable, 5000);
+        mPGSThreadHandler.postDelayed(mUpdateListingsRunnable, 15000);
 
         //startPollLooper();
 
