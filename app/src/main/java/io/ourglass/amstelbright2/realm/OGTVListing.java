@@ -79,6 +79,7 @@ public class OGTVListing extends RealmObject {
     // as the stationID is a part of the query itself.
     public int stationID;
     public Date listDateTime;
+    public Date endDateTime;
     public int duration;
     public int showID;
     public int seriesID;
@@ -109,6 +110,7 @@ public class OGTVListing extends RealmObject {
             robj.put("listingID", this.listingID);
             robj.put("stationID", this.stationID);
             robj.put("listDateTime", this.listDateTime);
+            robj.put("endDateTime", this.endDateTime);
             robj.put("showID", this.showID);
             robj.put("description", this.description);
             robj.put("showName", this.showName);

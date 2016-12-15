@@ -154,6 +154,35 @@ public class DirecTVAPI {
 
     }
 
+    public static JSONObject changeChannel(String ipAddress, int channelNumber){
+
+
+        JSONObject jobj = null;
+
+        try {
+
+            Request req = new Request.Builder()
+                    .url("http://"+ipAddress + ":8080/tv/tune?major="+channelNumber)
+                    .build();
+            Log.d(TAG, "changing channel on " + ipAddress);
+            Response response = mClient.newCall(req).execute();
+
+            if(response.isSuccessful()) {
+
+                jobj = new JSONObject(response.body().string());
+
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception changing channel");
+        } catch (Exception e){
+            Log.e(TAG, "Exception changing channel");
+        }
+
+        return jobj;
+
+    }
+
 }
 
 

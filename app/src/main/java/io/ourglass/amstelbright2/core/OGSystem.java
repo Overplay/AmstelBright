@@ -17,6 +17,7 @@ import com.mstar.android.tvapi.common.vo.TvOsType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.ourglass.amstelbright2.services.ajpgsservice.AJPGSPollingService;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 import io.ourglass.amstelbright2.tvui.WidthHeight;
@@ -254,6 +255,8 @@ public class OGSystem {
 
             deviceJSON.put("venue", getVenueId());
             deviceJSON.put("udid", uniqueDeviceId());
+
+            deviceJSON.put("lastGuideSync", AppSettings.getString(AJPGSPollingService.LAST_SYNC_SETTINGS_KEY, "none"));
 
         } catch (JSONException e){
             Log.e("OGDevice.model", e.toString());

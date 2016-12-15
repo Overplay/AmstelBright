@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 import io.ourglass.amstelbright2.core.ABApplication;
+import io.ourglass.amstelbright2.core.TimeHelpers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -196,6 +197,41 @@ public class TVMediaAPI {
 
             Request req = new Request.Builder()
                     .url(TVMEDIA_BASE_URL + "stations/" + stationID + "/listings?" + TVMEDIA_API_KEY)
+                    .build();
+            Response response = mClient.newCall(req).execute();
+
+            String respString = response.body().string();
+
+            if (response.isSuccessful()) {
+                rval = new JSONArray(respString);
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception getting" + TASK);
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON Exception getting" + TASK);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception getting" + TASK);
+        }
+
+        return rval;
+    }
+
+    //http://api.tvmedia.ca/tv/v4/lineups/5266D/listings/grid?api_key=761cbd1955e14ff1b1af8d677a488904&timezone=-08:00
+    public static JSONArray gridForLineupID(String lineupId) {
+
+        String TASK = " grid array for next 4 hours on for lineupID "+lineupId;
+        Log.d(TAG, "GETting " + TASK);
+
+        JSONArray rval = null;
+
+        String startTime = TimeHelpers.utcISOTimeStringWithOffset(-30);
+
+        try {
+
+            Request req = new Request.Builder()
+                    .url(TVMEDIA_BASE_URL + "lineups/" + lineupId + "/listings/grid?" +
+                            "start="+startTime+"&"+TVMEDIA_API_KEY)
                     .build();
             Response response = mClient.newCall(req).execute();
 

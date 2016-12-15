@@ -26,8 +26,8 @@ public class DirecTVSetTopBox extends SetTopBox {
 
         //TODO: This extraction should be done with REGEX
         try {
-            int locIdx = ssdpResponse.indexOf("Location:");
-            String s1 = ssdpResponse.substring(locIdx+"Location:".length());
+            int locIdx = ssdpResponse.toLowerCase().indexOf("location:");
+            String s1 = ssdpResponse.substring(locIdx+"location:".length());
             int eol = s1.indexOf("\n");
             String url1 = s1.substring(0, eol);
             String url = url1.trim();

@@ -41,6 +41,11 @@ public class OGTVStation extends RealmObject {
         return "http://cdn.tvpassport.com/image/station/100x100/"+this.logoFilename;
     }
 
+    //Compensate for realm compilation error
+    public int getStationID(){
+        return this.stationID;
+    }
+
     public JSONObject toJson(){
 
         JSONObject rval = new JSONObject();

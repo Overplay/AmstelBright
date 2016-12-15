@@ -96,7 +96,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <!-- The following intent-filter says this is a candidate for home screen -->
-                <category android:name="android.intent.category.HOME" />
+                <!--<category android:name="android.intent.category.HOME" />-->
             </intent-filter>
         </activity>
 
