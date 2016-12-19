@@ -14,6 +14,7 @@ import io.ourglass.amstelbright2.core.OGConstants;
 import io.ourglass.amstelbright2.core.OGCore;
 import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.realm.OGApp;
+import io.ourglass.amstelbright2.realm.OGLog;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
 import io.ourglass.amstelbright2.services.http.ogutil.JWTHelper;
 import io.realm.Realm;
@@ -25,12 +26,11 @@ import io.realm.Realm;
 public class JSONSystemHandler extends JSONHandler {
 
 
-
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
 
         //these operations require owner level permissions
         String tok = session.getHeaders().get("authorization");
-        if(!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
+        if (!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
             return "";
         }
@@ -43,14 +43,13 @@ public class JSONSystemHandler extends JSONHandler {
 
                 switch (cmd) {
 
-                    case "apps":
-
+                    case "apps": {
                         Realm realm = Realm.getDefaultInstance();
                         JSONArray arr = OGApp.getAllAppsAsJSON(realm);
                         realm.close();
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return arr.toString();
-
+                    }
                     case "device":
 
                         responseStatus = NanoHTTPD.Response.Status.OK;
@@ -59,6 +58,15 @@ public class JSONSystemHandler extends JSONHandler {
                     case "channel":
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return OGCore.getCurrentChannel().toString();
+
+                    case "logs":{
+                        Realm realm = Realm.getDefaultInstance();
+                        JSONArray logs = OGLog.getAllAsJson(realm);
+                        realm.close();
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return logs.toString();
+                    }
+
 
 
                     default:
@@ -121,7 +129,7 @@ public class JSONSystemHandler extends JSONHandler {
                             //if Asahi is down.
                             //implement an operations queue of synchronous requests plus a retry count
                             //in a seperate service
-                            if (result==null || !result.isGoodResponse) {
+                            if (result == null || !result.isGoodResponse) {
                                 responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
                                 return result.stringResponse;
                             } else {
@@ -138,7 +146,7 @@ public class JSONSystemHandler extends JSONHandler {
                             return makeErrorJson(e);
 
                         }
-                    //endpoint to register with Asaho
+                        //endpoint to register with Asaho
                     case "regcode":
 
                         String code = session.getParms().get("regcode");
@@ -152,7 +160,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                         //if JWT not present then set responseStatus accordingly
 
-                        if (code==null){
+                        if (code == null) {
                             responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
                             return makeErrorJson("No code, homie");
                         }
@@ -162,17 +170,16 @@ public class JSONSystemHandler extends JSONHandler {
                         JSONHTTPResponse result = OGCore.registerWithAsahi(code);
 
                         //TODO this should be 3 cases: null (500?), NOT_ACC, OK
-                        if (result==null || !result.isGoodResponse) {
+                        if (result == null || !result.isGoodResponse) {
                             responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
-                            return result.stringResponse;
-                        } else {
-                            responseStatus = NanoHTTPD.Response.Status.OK;
-                            return result.stringResponse;
+                            return makeErrorJson(result.stringResponse);
                         }
 
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+                        return result.stringResponse;
 
 
-                        //endpoint to discover installed apps, useful if there are new apps installed while running
+                    //endpoint to discover installed apps, useful if there are new apps installed while running
 
                     case "refreshapps":
                         JSONArray installedApps = OGCore.installStockApps();

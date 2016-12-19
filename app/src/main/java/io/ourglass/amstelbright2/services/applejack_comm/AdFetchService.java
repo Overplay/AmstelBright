@@ -180,6 +180,7 @@ public class AdFetchService extends Service {
             realm.beginTransaction();
             realm.copyToRealmOrUpdate(receivedAds);
             realm.commitTransaction();
+            realm.close();
         } catch (JSONException e) {
             Log.e(TAG, "Response of ads from Applejack/asahi seems to have been malformatted. " + e.getMessage());
         }

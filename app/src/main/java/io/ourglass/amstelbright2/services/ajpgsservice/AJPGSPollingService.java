@@ -16,6 +16,7 @@ import java.util.Date;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.AppSettings;
+import io.ourglass.amstelbright2.core.ProgramGuide;
 import io.ourglass.amstelbright2.core.TimeHelpers;
 import io.ourglass.amstelbright2.realm.OGTVListing;
 import io.ourglass.amstelbright2.realm.OGTVStation;
@@ -32,7 +33,8 @@ public class AJPGSPollingService extends Service {
     static final Boolean DONT_FETCH = false;
     static final String TAG = "AJPGSPollingService";
     static final boolean VERBOSE = true;
-    static AJPGSPollingService sInstance;
+
+     static AJPGSPollingService sInstance;
     public static final String LAST_SYNC_SETTINGS_KEY = "lastPGSSync";
 
     public static AJPGSPollingService getInstance() {
@@ -81,6 +83,8 @@ public class AJPGSPollingService extends Service {
         if (!DONT_FETCH)
             mPGSThreadHandler.postDelayed(mUpdateGridRunnable, 5000);
 
+        mPGSThreadHandler.postDelayed(mUpdateGridCache, 12000);
+
         return Service.START_STICKY;
     }
 
@@ -100,6 +104,17 @@ public class AJPGSPollingService extends Service {
         AppSettings.putString(LAST_SYNC_SETTINGS_KEY, TimeHelpers.utcISOTimeStringWithOffset(0));
     }
 
+    Runnable mUpdateGridCache = new Runnable() {
+        @Override
+        public void run() {
+            //All this does is cache a fairly recent grid.
+            Log.d(TAG, "Reloading grid cache");
+            Realm realm = Realm.getDefaultInstance();
+            ProgramGuide.currentGridForAllStations(realm);
+            realm.close();
+            mPGSThreadHandler.postDelayed(this, TimeHelpers.TEN_MINUTES_AS_MS);
+        }
+    };
 
     Runnable mUpdateGridRunnable = new Runnable() {
 
@@ -176,6 +191,7 @@ public class AJPGSPollingService extends Service {
                     }
                 }
 
+                ProgramGuide.currentGridForAllStations(realm); //tickle the cache
                 realm.close();
 
             } else {
@@ -183,7 +199,8 @@ public class AJPGSPollingService extends Service {
             }
 
             setLastSyncNow();
-            mPGSThreadHandler.postDelayed(this, TimeHelpers.FOUR_HOURS_AS_MS);
+
+            mPGSThreadHandler.postDelayed(this, TimeHelpers.ONE_HOUR_AS_MS);
 
         }
     };

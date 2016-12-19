@@ -2,16 +2,15 @@ package io.ourglass.amstelbright2.realm;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.UUID;
-
+import io.ourglass.amstelbright2.core.OGSystem;
+import io.realm.Realm;
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
+import io.realm.RealmResults;
 import io.realm.annotations.Required;
-
-import static android.R.attr.required;
 
 /**
  * Created by ethan on 8/23/16.
@@ -23,14 +22,10 @@ public class OGLog extends RealmObject {
     private String type;
 
     @Required
-    private String data = "{}";
+    private String data;
 
-    @PrimaryKey
-    private String uuid = UUID.randomUUID().toString();
-
-    private Long createdAt = System.currentTimeMillis();
-
-    private Long uploaded = -1L;
+    private Long createdAt;
+    private Long uploadedAt;
 
     public JSONObject getLogAsJSON(){
         try {
@@ -39,12 +34,20 @@ public class OGLog extends RealmObject {
             toReturn.put("logType", this.type.toLowerCase());
             toReturn.put("message", new JSONObject(data));
             toReturn.put("loggedAt", createdAt);
-            toReturn.put("deviceUniqueId", uuid);
+            toReturn.put("uploadedAt", uploadedAt);
+            toReturn.put("deviceUniqueId", OGSystem.uniqueDeviceId());
+            toReturn.put("deviceId",OGSystem.getDeviceId() );
 
             return toReturn;
+
         } catch (JSONException e){
             return null;
         }
+    }
+
+    // For consistency
+    public JSONObject toJson(){
+        return getLogAsJSON();
     }
 
     public void setType(String type){
@@ -64,27 +67,43 @@ public class OGLog extends RealmObject {
         }
     }
 
-    /**
-     * note make sure you are in a transaction or else will explode
-     * @param timeUploadedAt time the upload was completed
-     */
-    public void setUploaded(Long timeUploadedAt){
-        if(timeUploadedAt < 0){
-            Log.e("OGLog", "invalid uploaded time entered, ignoring");
-            return;
-        }
-        //check if uploaded has already been set, should only be set once by log clean and push service
-        if(this.uploaded != -1L){
-            Log.e("OGLog", "uploaded has already been set, " +
-                    "if this error is coming from LogCleanAndPushService, " +
-                    "then there is probably something bad going on");
-            return;
+    public void setUploaded(){
+        if(this.uploadedAt != 0){
+            Log.e("OGLog", "Try to reset uploaded time, error");
+            throw new Error("Log already marked uploaded");
         }
 
-        this.uploaded = timeUploadedAt;
+        this.uploadedAt = System.currentTimeMillis();
     }
 
     public boolean isUploaded(){
-        return this.uploaded != -1L;
+
+        return this.uploadedAt != 0;
+    }
+
+    // Using default values for fields (like createdAt=System.time...) does not work right with realm.
+    // So we use a factory method.
+
+    /**
+     * Factory method for new OGLog
+     * @param realm
+     * @return
+     */
+    public static OGLog getNewLogInstance(Realm realm){
+        OGLog newLog = realm.createObject(OGLog.class);
+        newLog.createdAt = System.currentTimeMillis();
+        newLog.uploadedAt = 0L;
+        newLog.type = "UNSPECIFIED";
+        newLog.data = "{}";
+        return newLog;
+    }
+
+    public static JSONArray getAllAsJson(Realm realm){
+        RealmResults<OGLog> logs = realm.where(OGLog.class).findAll();
+        JSONArray rval = new JSONArray();
+        for (OGLog log: logs){
+            rval.put(log.toJson());
+        }
+        return rval;
     }
 }

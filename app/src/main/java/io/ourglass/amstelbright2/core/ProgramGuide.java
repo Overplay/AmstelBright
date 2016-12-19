@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
+import io.ourglass.amstelbright2.realm.OGHTTPCachedResponse;
 import io.ourglass.amstelbright2.realm.OGTVListing;
 import io.ourglass.amstelbright2.realm.OGTVStation;
 import io.realm.Realm;
@@ -16,6 +17,9 @@ import io.realm.RealmResults;
  */
 
 public class ProgramGuide {
+
+    public static final String TAG = "ProgramGuide";
+    public static final String GRID_CACHE_URI = "$$cachedGrid";
 
     /**
      * Return an object array nearly identical to TVMedia grid call, but sourced from
@@ -35,6 +39,7 @@ public class ProgramGuide {
                 .equalTo("channelNumber", channelNumber)
                 .findFirst();
 
+        //FIXME is station=null this shouldn't blowup
         int stationID = station.getStationID();
 
         RealmResults<OGTVListing> allListings = realm.where(OGTVListing.class)
@@ -60,7 +65,7 @@ public class ProgramGuide {
 
     }
 
-    public static JSONArray currentGridForAllStations(Realm realm){
+    public static String currentGridForAllStations(Realm realm){
 
         RealmResults<OGTVStation> stations = realm.where(OGTVStation.class)
                 .findAll();
@@ -70,7 +75,25 @@ public class ProgramGuide {
             grid.put(currentGridForStation(realm, station.channelNumber));
         }
 
-        return grid;
+        String rval = grid.toString();
+        //Cache it
+        OGHTTPCachedResponse.createOrUpdate(realm, GRID_CACHE_URI, rval);
+
+        return rval;
     }
+
+    public static String currentGridForAllStationsCached(Realm realm){
+
+        //First, check the cache! This is an expensive operation!!
+        String cachedGrid = OGHTTPCachedResponse.getURIResponseAsString(realm, GRID_CACHE_URI);
+
+        if (cachedGrid!=null){
+            return cachedGrid;
+        }
+
+        return currentGridForAllStations(realm);
+
+    }
+
 
 }

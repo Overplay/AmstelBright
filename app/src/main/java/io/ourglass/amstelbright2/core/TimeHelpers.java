@@ -10,7 +10,10 @@ import java.util.Date;
 
 public class TimeHelpers {
 
+    public static final long ONE_HOUR_AS_MS = 1000*60*60*1;
+    public static final long TWO_HOURS_AS_MS = 1000*60*60*2;
     public static final long FOUR_HOURS_AS_MS = 1000*60*60*4;
+    public static final long TEN_MINUTES_AS_MS = 1000*60*10;
 
     /**
      * Leverages Joda-Time to provide a UTC string suitable for API calls

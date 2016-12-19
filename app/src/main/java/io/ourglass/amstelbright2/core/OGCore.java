@@ -663,18 +663,20 @@ public class OGCore {
      * @param type    Type of log message
      * @param logData Payload of the log
      */
-    private static void systemLog(String type, JSONObject logData) {
-        OGLog log = new OGLog();
-        log.setType(type);
-        log.setData(logData);
+    private static void systemLog(final String type, final JSONObject logData) {
 
         Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.copyToRealm(log);
-//        realm.copyToRealmOrUpdate(log);
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                //Factory method sets all relevant time fields
+                OGLog log = OGLog.getNewLogInstance(realm);
+                log.setType(type);
+                log.setData(logData);
+            }
+        });
 
-        // This should have realm.close(), no?
+        realm.close();
 
     }
 

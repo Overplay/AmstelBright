@@ -122,7 +122,11 @@ public class OGDPService extends Service {
             e.printStackTrace();
         }
 
+        //MAK sending 2 more additional responses to help with shitty networks...
         respondToUDP(receivedPacket.getAddress(), responseDelay);
+        respondToUDP(receivedPacket.getAddress(), responseDelay*2);
+        respondToUDP(receivedPacket.getAddress(), responseDelay*3);
+
     }
 
     private void respondToUDP(InetAddress receivedFrom, int responseDelay){

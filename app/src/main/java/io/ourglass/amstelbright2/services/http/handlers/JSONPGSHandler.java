@@ -55,10 +55,14 @@ public class JSONPGSHandler extends JSONHandler {
                     }
 
                     case "grid": {
+
                         Realm realm = Realm.getDefaultInstance();
-                        JSONArray arr = ProgramGuide.currentGridForAllStations(realm);
+                        String resp = ProgramGuide.currentGridForAllStationsCached(realm);
+                        realm.close();
+
                         responseStatus = NanoHTTPD.Response.Status.OK;
-                        return arr.toString();
+                        return resp;
+
                     }
 
                     case "channels": {

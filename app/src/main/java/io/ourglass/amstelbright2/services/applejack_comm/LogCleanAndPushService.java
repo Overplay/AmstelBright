@@ -7,6 +7,8 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import io.ourglass.amstelbright2.core.ABApplication;
@@ -63,23 +65,26 @@ public class LogCleanAndPushService extends Service {
                 Realm realm = Realm.getDefaultInstance();
 
                 //find all logs that haven't been uploaded
-                RealmResults<OGLog> logs = realm.where(OGLog.class).equalTo("uploaded", -1L).findAll();
+                RealmResults<OGLog> logs = realm.where(OGLog.class)
+                        .equalTo("uploadedAt", 0).findAll();
+
                 if(logs.size() != 0){
-                    uploadLogs(logs);
+                    uploadLogs(realm, logs);
                 }
                 else {
                     Log.v(TAG, "There are no logs to upload");
                 }
 
-                logs = getOldLogs();
 
-                if(logs.size() != 0) {
-                    realm.beginTransaction();
-                    reapLogs(logs);
-                    realm.commitTransaction();
-                }
-                else
-                    Log.v(TAG, "There are no logs ready to be reaped");
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        long weekAgo = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7);
+                        RealmResults<OGLog> oldLogs = realm.where(OGLog.class)
+                                .lessThan("uploadedAt", weekAgo).findAll();
+                        oldLogs.deleteAllFromRealm();
+                    }
+                });
 
                 realm.close();
 
@@ -92,25 +97,18 @@ public class LogCleanAndPushService extends Service {
         mWorkerThreadHandler.post(run);
     }
 
-    public RealmResults<OGLog> getOldLogs(){
-        //todo in the future, change week calculation to configurable setting
 
-        Realm realm = Realm.getDefaultInstance();
+    public void uploadLogs(Realm realm, RealmResults<OGLog> logs){
 
-        long weekAgo = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7);
-        RealmResults<OGLog> oldLogs = realm.where(OGLog.class).lessThan("uploaded", weekAgo).findAll();
-
-        return oldLogs;
-    }
-
-    public void uploadLogs(RealmResults<OGLog> logs){
-        OGLog[] logArr = logs.toArray(new OGLog[logs.size()]);
         int numUploaded = 0;
 
-        final Realm realm = Realm.getDefaultInstance();
         final MediaType type = MediaType.parse("application/json");
-        for(final OGLog log : logArr){
-            String postBody = log.getLogAsJSON().toString();
+
+        for(final OGLog log : logs){
+
+            JSONObject logJSON = log.toJson();
+
+            String postBody = logJSON.toString();
 
             RequestBody body = RequestBody.create(type, postBody);
             Log.v(TAG, postBody);
@@ -120,34 +118,29 @@ public class LogCleanAndPushService extends Service {
                     .url(OGConstants.ASAHI_ADDRESS + "/OGLog/upload")
                     .post(body)
                     .build();
+
             try {
                 Response response = client.newCall(request).execute();
                 if(!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 Log.v(TAG, "successfully uploaded log to Asahi, will now mark the upload time");
-                realm.beginTransaction();
-                log.setUploaded(System.currentTimeMillis());
-                realm.commitTransaction();
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        log.setUploaded();
+                    }
+                });
 
                 numUploaded++;
             } catch (Exception e){
                 Log.w(TAG, "there was an error uploading log (" + e.getMessage() + "), will not mark as uploaded");
             }
         }
-        realm.close();
+
         Log.v(TAG, "Uploaded a total of " + numUploaded + " logs");
+
     }
 
-    /**
-     * NOTE: make sure that you are inside a transaction
-     * @param logs OGLogs to delete
-     */
-    public void reapLogs(RealmResults<OGLog> logs){
-        int numToReap = logs.size();
-        logs.deleteAllFromRealm();
-
-        Log.v(TAG, "Successfully reaped " + numToReap + " old logs from the database");
-    }
 
     @Override
     public void onDestroy() {
