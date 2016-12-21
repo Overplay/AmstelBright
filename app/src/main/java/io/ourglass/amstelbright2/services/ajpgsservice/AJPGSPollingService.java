@@ -159,6 +159,7 @@ public class AJPGSPollingService extends Service {
                     @Override
                     public void execute(Realm realm) {
                         //TODO the channel update should really look for channels dropped from a lineup
+                        //It also has to mindful of those marked as FAVORITES
                         //and only nuke those. For now, no cleanup on stations.
                         //Log.d(TAG, "Deleting all stations, then replacing");
                         //realm.where(OGTVStation.class).findAll().deleteAllFromRealm();

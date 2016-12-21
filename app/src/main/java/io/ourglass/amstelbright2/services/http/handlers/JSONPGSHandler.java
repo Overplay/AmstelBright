@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import java.util.Map;
 
 import io.ourglass.amstelbright2.core.OGConstants;
-import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.core.ProgramGuide;
 import io.ourglass.amstelbright2.realm.OGTVStation;
 import io.ourglass.amstelbright2.services.http.NanoHTTPBase.NanoHTTPD;
@@ -19,6 +18,16 @@ import io.realm.Realm;
  */
 public class JSONPGSHandler extends JSONHandler {
 
+    private void markChannelFavorite(Realm realm, final OGTVStation station, final boolean isFav){
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                station.favorite = isFav;
+            }
+        });
+
+    }
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
 
@@ -85,8 +94,8 @@ public class JSONPGSHandler extends JSONHandler {
 
 
                 switch (cmd) {
-                    case "change":
-
+                    case "unfavorite":
+                    case "favorite": {
                         String channel = urlParams.get("channel");
 
                         //check for JWT
@@ -96,9 +105,20 @@ public class JSONPGSHandler extends JSONHandler {
                             return "Unauthorized";
                         }
 
+                        Realm realm = Realm.getDefaultInstance();
+                        final OGTVStation station = OGTVStation.getByChannelNumber(realm, Integer.parseInt(channel));
+
+                        if (station == null ){
+                            responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
+                            realm.close();
+                            return makeErrorJson("No such channel");
+                        }
+
+                        markChannelFavorite(realm, station, cmd.equalsIgnoreCase("favorite"));
 
                         responseStatus = NanoHTTPD.Response.Status.OK;
-                        return OGSystem.getSystemInfo().toString();
+                        return station.toJson().toString();
+                    }
 
 
                 }

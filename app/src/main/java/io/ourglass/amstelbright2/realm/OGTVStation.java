@@ -94,6 +94,10 @@ public class OGTVStation extends RealmObject {
         return rval;
     }
 
+    public static OGTVStation getByChannelNumber(Realm realm, int channelNumber){
+        return realm.where(OGTVStation.class).equalTo("channelNumber", channelNumber).findFirst();
+    }
+
 
 }
 
