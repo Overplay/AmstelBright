@@ -76,6 +76,15 @@ public class OGLog extends RealmObject {
         this.uploadedAt = System.currentTimeMillis();
     }
 
+    public void setUploadedAt(Long uploadedAt){
+        if(this.uploadedAt != 0){
+            Log.e("OGLog", "Try to reset uploaded time, error");
+            throw new Error("Log already marked uploaded");
+        }
+
+        this.uploadedAt = uploadedAt;
+    }
+
     public boolean isUploaded(){
 
         return this.uploadedAt != 0;
