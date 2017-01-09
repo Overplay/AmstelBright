@@ -53,6 +53,20 @@ public class JSONAppScrapeHandler extends JSONHandler {
                     return results;
 
 
+                }  else if (appId.equalsIgnoreCase("queries")){
+
+//                    Realm realm = Realm.getDefaultInstance();
+//                    String results = OGScraper.getAllQueries(realm).toString();
+//                    realm.close();
+//
+//                    if (results==null){
+//                        results = "[]";
+//                        responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+//                    } else {
+//                        responseStatus = NanoHTTPD.Response.Status.OK;
+//                    }
+//                    return results;
+
                 } else {
 
                     Realm realm = Realm.getDefaultInstance();

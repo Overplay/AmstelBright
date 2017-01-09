@@ -163,6 +163,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/tv/change/:newchannel", JSONTVControlHandler.class);
         addRoute("/api/tv/currentgrid", JSONTVControlHandler.class);
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
+
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
         addRoute("/user/jwt", JSONJWTHandler.class);

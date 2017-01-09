@@ -18,6 +18,8 @@ import io.realm.annotations.PrimaryKey;
 
 public class OGScraper extends RealmObject {
 
+    public static final String TAG  = "OGScraper";
+
     @PrimaryKey
     public String appId;
 
@@ -74,7 +76,7 @@ public class OGScraper extends RealmObject {
 
         } catch (Exception e){
 
-            Log.e("OGScrape.model", "Failure converting to JSON");
+            Log.e(TAG, "Failure converting to JSON");
 
         }
 
@@ -85,31 +87,47 @@ public class OGScraper extends RealmObject {
 
     public static String getScrape(Realm realm, String appId) {
 
-        RealmResults<OGScraper> result = realm.where(OGScraper.class)
+        OGScraper result = realm.where(OGScraper.class)
                 .equalTo("appId", appId)
-                .findAll();
+                .findFirst();
 
-        if (result.size() > 0) {
-            return result.first().data;
+        if (result !=null ) {
+            return result.data;
         }
 
         return null;
     }
 
-    public static String setQueryFor(Realm realm, String appId, String query) {
+    public static String setQueryFor(Realm realm, final String appId, final String query) {
 
-        RealmResults<OGScraper> result = realm.where(OGScraper.class)
+        final OGScraper scraper = realm.where(OGScraper.class)
                 .equalTo("appId", appId)
-                .findAll();
+                .findFirst();
 
-        if (result.size() > 0) {
-            OGScraper ogs = result.first();
-            realm.beginTransaction();
-            ogs.setQuery(query);
-            realm.commitTransaction();
+        if (scraper==null){
+
+            Log.d(TAG, "Adding new scraper for "+appId);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    OGScraper newScraper = realm.createObject(OGScraper.class);
+                    newScraper.appId = appId;
+                    newScraper.setQuery(query);
+                }
+            });
+
+        } else {
+
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    scraper.setQuery(query);
+                }
+            });
         }
 
-        return null;
+        return query;
     }
+
 
 }

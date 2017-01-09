@@ -172,7 +172,9 @@ public class JSONSystemHandler extends JSONHandler {
                         //TODO this should be 3 cases: null (500?), NOT_ACC, OK
                         if (result == null || !result.isGoodResponse) {
                             responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
-                            return makeErrorJson(result.stringResponse);
+                            String rcvdJson = result.stringResponse;
+                            return rcvdJson;
+                            //return makeErrorJson(result.stringResponse);
                         }
 
                         responseStatus = NanoHTTPD.Response.Status.OK;
