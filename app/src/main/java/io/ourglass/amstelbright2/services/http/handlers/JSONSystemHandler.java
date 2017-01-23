@@ -71,7 +71,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                     default:
                         responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
-                        return "no such command: " + cmd;
+                        return makeErrorJson("no such command: " + cmd);
                 }
 
 

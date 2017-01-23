@@ -103,7 +103,7 @@ public class TVMediaAPI {
      */
     public static JSONObject lineupWithStations(String lineupID) {
 
-        String TASK = " chanel info on for lineup ID.";
+        String TASK = " channel info on for lineup ID.";
         Log.d(TAG, "GETting " + TASK);
 
         JSONObject rval = null;
