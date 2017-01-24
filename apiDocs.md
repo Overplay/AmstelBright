@@ -133,23 +133,25 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 -----
 
 **The method that handles this request seems too unstable to document right now**
+
 | Call | `POST/PUT /api/sytem/device`|
 |:---:|:---:|
-| Successful return JSON | |   
-| Query Params | |
-| JSON Body Params|  |
-| Possible Errors |  |
-| Check to make sure error paths return JSON (initials & comment) | |
+| Successful return JSON | Empty |   
+| Query Params | Empty |
+| JSON Body Params|  Empty |
+| Possible Errors |  Empty |
+| Check to make sure error paths return JSON (initials & comment) | Empty |
 -----
 
 **The method that handles this request seems too unstable to document right now**
+
 | Call | `POST/PUT /api/sytem/regcode`|
 |:---:|:---:|
-| Successful return JSON | |   
-| Query Params | |
-| JSON Body Params|  |
-| Possible Errors |  |
-| Check to make sure error paths return JSON (initials & comment) | |
+| Successful return JSON | Empty |   
+| Query Params | Empty |
+| JSON Body Params|  Empty |
+| Possible Errors |  Empty |
+| Check to make sure error paths return JSON (initials & comment) | Empty|
 -----
 
 | Call | `POST/PUT /api/channel/favorite/:channel`|
