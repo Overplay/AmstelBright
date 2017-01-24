@@ -106,8 +106,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 -----
 
 | Call | `GET /api/sytem/device`|
-|:---:|:---:|
-| Successful return JSON | {`name`: String (System name), `locationWithinVenue`: String, `randomFactoid`: String (TODO probably should go?), `wifiMacAddress`: String, `isPairedToSTB`: Boolean, `pairedSTBIP`: String (IP address), `channel`(only if paired): String, `title`(only if paired): String, `outputRes`: String (in the format `<width>x<height>`, `abVersionName`: String, `abVersionCode`: Integer, `osVersion`: String, `osApiLevel`: Integer, `venue`: String, `udid`: String, `lastGuideSync`: utcISOTimeString }|   
+|:---:|---|
+| Successful return JSON | {`name`: String (System name),<br> `locationWithinVenue`: String,<br> `randomFactoid`: String (TODO probably should go?),<br> `wifiMacAddress`: String,<br> `isPairedToSTB`: Boolean,<br> `pairedSTBIP`: String (IP address),<br> `channel`(only if paired): String,<br> `title`(only if paired): String,<br> `outputRes`: String (in the format `<width>x<height>`,<br> `abVersionName`: String,<br> `abVersionCode`: Integer,<br> `osVersion`: String,<br> `osApiLevel`: Integer,<br> `venue`: String,<br> `udid`: String,<br> `lastGuideSync`: utcISOTimeString<br> }|   
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | `500 - Internal Error` |
@@ -115,8 +115,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 -----
 
 | Call | `GET /api/sytem/channel`|
-|:---:|:---:|
-| Successful return JSON | { `channel`: String, `programId`: String, `programTitle`: String } |   
+|:---:|---|
+| Successful return JSON | {<br> `channel`: String,<br> `programId`: String,<br> `programTitle`: String<br> } |   
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
@@ -124,8 +124,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 -----
 
 | Call | `GET /api/sytem/logs`|
-|:---:|:---:|
-| Successful return JSON | [{`logType`: String, `message`: JSONObject, `loggedAt`: long (date), `uploadedAt`: long (date), `deviceUniqueId`: String (UUID), `deviceId`: String}, ...] |   
+|:---:|---|
+| Successful return JSON | [<br>{`logType`: String,<br> `message`: JSONObject,<br> `loggedAt`: long (date),<br> `uploadedAt`: long (date),<br> `deviceUniqueId`: String (UUID),<br> `deviceId`: String},<br> ...<br>] |   
 | Query Params | NONE  |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
