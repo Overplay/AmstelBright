@@ -145,7 +145,7 @@ public class OGCore {
                     .ofType(OGServerException.ErrorType.NO_SUCH_APP);
         }
 
-        JSONObject rval = app.getPublicData();
+        JSONObject rval = app.getPublicData(realm);
         realm.close();
 
         return rval;
@@ -437,7 +437,7 @@ public class OGCore {
                 String appId = obj.getString("appId");
                 Realm tempRealm = Realm.getDefaultInstance();
                 OGApp foundApp = OGApp.getApp(tempRealm, appId);
-                if (foundApp == null || foundApp.getPublicData().toString().equals("{}")) {
+                if (foundApp == null || foundApp.getPublicData(tempRealm).toString().equals("{}")) {
                     Log.v(TAG, "there was no appdata for " + appId + " so setting it to initialValue");
                     JSONObject initValue = obj.getJSONObject("initialValue");
                     obj.put("publicData", initValue);

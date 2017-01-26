@@ -20,6 +20,7 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
 
 import io.ourglass.amstelbright2.services.http.handlers.JSONJWTHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONTVControlHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONTestHandler;
 
 public class OGNanolets extends OGRouterNanoHTTPD {
 
@@ -183,6 +184,8 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         // Ads
         File mediaFileDir = new File("/data/data/io.ourglass.amstelbright2/media").getAbsoluteFile();
         addRoute("/api/admedia/(.)+", StaticPageTestHandler.class, mediaFileDir.getAbsoluteFile());
+
+        addRoute("/api/test", JSONTestHandler.class);
 
         // Examples
 //        addRoute("/user", UserHandler.class);
