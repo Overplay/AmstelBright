@@ -102,7 +102,7 @@ public class JSONPGSHandler extends JSONHandler {
                         //todo add more checks to determine if the JWT contains the correct information
                         if (!OGConstants.TEST_MODE && !JWTPresent(session)) {
                             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
-                            return "Unauthorized";
+                            return makeErrorJson("Unauthorized");
                         }
 
                         Realm realm = Realm.getDefaultInstance();
