@@ -19,6 +19,9 @@ import io.realm.annotations.Required;
  */
 public class OGApp extends RealmObject {
 
+    public static final String TAG = "OGApp";
+    public static long NANO_STALE = (long) (1 * 1E9);
+
     @Required
     @PrimaryKey
     public String appId;
@@ -50,6 +53,8 @@ public class OGApp extends RealmObject {
     public int height;
     public int width;
 
+    public long lockKey;
+
     private String publicData = "{}";
     private String privateData = "{}";
 
@@ -68,15 +73,19 @@ public class OGApp extends RealmObject {
 
     }
 
-    public JSONObject getPublicData(){
+    public JSONObject getPublicData(Realm realm){
 
-       return OGApp.validOrEmptyJson(this.publicData);
+        realm.beginTransaction();
+        this.checkStaleLock();
+        realm.commitTransaction();
+        return OGApp.validOrEmptyJson(this.publicData);
 
     }
 
     public void setPublicData(JSONObject jobj){
 
         this.publicData = jobj.toString();
+        this.lockKey = 0;
 
     }
 
@@ -108,6 +117,7 @@ public class OGApp extends RealmObject {
 
             rval.put("version", this.version);
             rval.put("installDate", this.installDate);
+            rval.put("lockKey", this.lockKey);
 
         } catch (Exception e){
 
@@ -122,6 +132,22 @@ public class OGApp extends RealmObject {
     public static RealmResults<OGApp> getAllApps(Realm realm){
 
         return realm.where(OGApp.class).findAll();
+
+    }
+
+    private boolean checkStaleLock(){
+
+        long now = System.nanoTime();
+        long delta = now - this.lockKey;
+
+        boolean stale = delta > NANO_STALE;
+
+        if (stale){
+            Log.d(TAG, "Lock was stale, resetting");
+            this.lockKey = 0;
+        }
+
+        return stale;
 
     }
 
@@ -205,4 +231,38 @@ public class OGApp extends RealmObject {
         return heightOrWidth > 0 && heightOrWidth <= 100;
     }
 
+    public long lockUpdates(){
+
+        Log.d("OGApp", "Checking lock. Lock is: "+this.lockKey);
+
+        boolean isOpen = ( this.lockKey == 0 ) || ( this.checkStaleLock() );
+
+        if (isOpen){
+            this.lockKey = System.nanoTime();
+            return this.lockKey;
+        }
+
+        return 0; //already locked
+
+    }
+
+    public boolean unlockUpdates(long unlockKey){
+
+        if (this.lockKey==unlockKey){
+            this.lockKey = 0;
+            return true;
+        }
+
+        return false; //already locked
+
+    }
+
+    public boolean checkKey(Realm realm, long unlockKey){
+
+        realm.beginTransaction();
+        this.checkStaleLock();
+        realm.commitTransaction();
+        return (this.lockKey==0) || (this.lockKey==unlockKey);
+
+    }
 }

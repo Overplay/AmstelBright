@@ -2,6 +2,7 @@ package io.ourglass.amstelbright2.services.http.handlers;
 
 import android.content.Intent;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -30,7 +31,7 @@ public class JSONAppDataHandler extends JSONHandler {
         final String appId = urlParams.get("appid");
 
         Realm realm = Realm.getDefaultInstance();
-        OGApp app = OGApp.getApp(realm, appId);
+        final OGApp app = OGApp.getApp(realm, appId);
 
         if (app==null){
             realm.close();
@@ -42,7 +43,25 @@ public class JSONAppDataHandler extends JSONHandler {
 
             case GET:
 
-                JSONObject appData = app.getPublicData();
+                //TODO a better locking mechanism would use request IP address...for Bucanero
+                boolean shouldLock = session.getParms().containsKey("lock");
+                long key = 0;
+
+                if (shouldLock==true){
+                    realm.beginTransaction();
+                    key = app.lockUpdates();
+                    realm.commitTransaction();
+                }
+
+                JSONObject appData = app.getPublicData(realm);
+                if (key!=0){
+                    try {
+                        appData.putOpt("lockKey", key);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 realm.close();
                 responseStatus = NanoHTTPD.Response.Status.OK;
                 return appData.toString();
@@ -54,27 +73,37 @@ public class JSONAppDataHandler extends JSONHandler {
                 try {
                     final JSONObject dataJson = getBodyAsJSONObject(session);
 
-                    realm.executeTransactionAsync(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm bgRealm) {
-                            OGApp app = OGApp.getApp(bgRealm, appId);
-                            app.setPublicData(dataJson);
+                    long lockKey = dataJson.optLong("lockKey", 0);
 
-                            String appType = app.appType;
-                            Intent intent = new Intent();
-                            intent.setAction("com.ourglass.amstelbrightserver.status");
-                            intent.putExtra("newAppData", dataJson.toString());
-                            intent.putExtra("appType", appType);
-                            //AmstelBrightService.context.sendBroadcast(intent);
-                            ABApplication.sharedContext.sendBroadcast(intent);
+                    dataJson.remove("lockKey");
 
-                        }
-                    }, null, null );
-                    realm.close();
-                    responseStatus = NanoHTTPD.Response.Status.OK;
+                    if (app.checkKey(realm, lockKey)){
 
+                        realm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm bgRealm) {
+                                OGApp app = OGApp.getApp(bgRealm, appId);
+                                app.setPublicData(dataJson);
 
-                    return dataJson.toString();
+                                String appType = app.appType;
+                                Intent intent = new Intent();
+                                intent.setAction("com.ourglass.amstelbrightserver.status");
+                                intent.putExtra("newAppData", dataJson.toString());
+                                intent.putExtra("appType", appType);
+                                //AmstelBrightService.context.sendBroadcast(intent);
+                                ABApplication.sharedContext.sendBroadcast(intent);
+
+                            }
+                        }, null, null );
+                        realm.close();
+                        responseStatus = NanoHTTPD.Response.Status.OK;
+
+                        return dataJson.toString();
+                    } else {
+                        responseStatus = NanoHTTPD.Response.Status.CONFLICT;
+                        return makeErrorJson("data locked by another client");
+                    }
+
 
                 } catch (Exception e) {
                     responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
