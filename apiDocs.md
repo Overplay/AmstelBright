@@ -84,7 +84,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid` - unique name of the installed app, defined in info.json  |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No visible Error Paths `JEA` |
+| Correct Error Path | No visible Error Paths `JEA` |
 -----
 
 | Call | `POST /api/appdata/:appid`|
@@ -93,7 +93,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid` - unique name of the installed app, defined in info.json  |
 | JSON Body Params| JSON object representing the data that you want associated with the given app |
 | Possible Errors | `500 - Internal Error` |
-| Check to make sure error paths return JSON (initials & comment) | Only Exception makes call to makeErrorJSON - `JEA` |
+| Correct Error Path | Only Exception makes call to makeErrorJSON - `JEA` |
 -----
 
 | Call | `GET /api/sytem/apps`|
@@ -102,7 +102,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE  |
 | JSON Body Params| JSON object representing the data that you want associated with the given app |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No error paths visible - `JEA` |
+| Correct Error Path | No error paths visible - `JEA` |
 -----
 
 | Call | `GET /api/sytem/device`|
@@ -111,7 +111,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | `500 - Internal Error` |
-| Check to make sure error paths return JSON (initials & comment) | Only Exception makes call to makeErrorJSON - `JEA` |
+| Correct Error Path | Only Exception makes call to makeErrorJSON - `JEA` |
 -----
 
 | Call | `GET /api/sytem/channel`|
@@ -120,7 +120,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No possible error paths, may return an incomplete or empty JSON object - `JEA`|
+| Correct Error Path | No possible error paths, may return an incomplete or empty JSON object - `JEA`|
 -----
 
 | Call | `GET /api/sytem/logs`|
@@ -129,7 +129,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE  |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No possible error paths, may return an incomplete or empty JSON Object - `JEA` |
+| Correct Error Path | No possible error paths, may return an incomplete or empty JSON Object - `JEA` |
 -----
 
 **The method that handles this request seems too unstable to document right now**
@@ -140,7 +140,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | Empty |
 | JSON Body Params|  Empty |
 | Possible Errors |  Empty |
-| Check to make sure error paths return JSON (initials & comment) | Empty |
+| Correct Error Path | Empty |
 -----
 
 **The method that handles this request seems too unstable to document right now**
@@ -151,7 +151,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | Empty |
 | JSON Body Params|  Empty |
 | Possible Errors |  Empty |
-| Check to make sure error paths return JSON (initials & comment) | Empty|
+| Correct Error Path | Empty|
 -----
 
 | Call | `POST/PUT /api/channel/favorite/:channel`|
@@ -160,7 +160,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `channel`: int representing the channe|
 | JSON Body Params| `clear`(optional): presence will clear bookmark |
 | Possible Errors | Missing JWT returns `401 UNAUTHORIZED`.<br> Not high enough authority level returns `401 UNAUTHORIZED`.<br> Station is invalid returns `406 NOT_ACCEPTABLE`  |
-| Check to make sure error paths return JSON (initials & comment) | Was returning an empty string for Unauthorized added JSON. JEA|
+| Correct Error Path | Was returning an empty string for Unauthorized added JSON. JEA|
 -----
 
 | Call | `GET /api/program/grid4channel`|
@@ -169,7 +169,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE|
 | JSON Body Params| `channel`: Integer |
 | Possible Errors | Missing channel parameter - returns `406 NOT_ACCEPTABLE`|
-| Check to make sure error paths return JSON (initials & comment) | Error paths seem in order. `JEA` |
+| Correct Error Path | Error paths seem in order. `JEA` |
 -----
 
 | Call | `GET /api/program/grid`|
@@ -178,7 +178,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No visible error paths `JEA` |
+| Correct Error Path | No visible error paths `JEA` |
 -----
 
 | Call | `GET /api/program/channels`|
@@ -187,7 +187,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | NONE |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No visible error paths `JEA` |
+| Correct Error Path | No visible error paths `JEA` |
 -----
 
 | Call | `POST/PUT /api/program/unfavorite` |
@@ -196,7 +196,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `channel`: name of the channel to unfavorite |
 | JSON Body Params| NONE |
 | Possible Errors | `401: UNAUTHORIZED`<br>`406: NOT_ACCEPTABLE` |
-| Check to make sure error paths return JSON (initials & comment) | Needed makeErrorJSON for Unauthorized error. `JEA` |
+| Correct Error Path | Needed makeErrorJSON for Unauthorized error. `JEA` |
 -----
 
 | Call | `POST/PUT /api/program/favorite` |
@@ -205,7 +205,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `channel`: name of the channel to favorite |
 | JSON Body Params| NONE |
 | Possible Errors | `401: UNAUTHORIZED`<br>`406: NOT_ACCEPTABLE` |
-| Check to make sure error paths return JSON (initials & comment) | Needed makeErrorJSON for Unauthorized error. `JEA` |
+| Correct Error Path | Needed makeErrorJSON for Unauthorized error. `JEA` |
 -----
 
 | Call | `GET /api/tv/currentGrid` |
@@ -214,7 +214,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params |  |
 | JSON Body Params|  |
 | Possible Errors | `401: UNAUTHORIZED`,<br>`406: NOT_ACCEPTABLE`,<br>`500: INTERNAL_ERROR` |
-| Check to make sure error paths return JSON (initials & comment) | Unauthorized needed call to makeErrorJSON. |
+| Correct Error Path | Unauthorized needed call to makeErrorJSON. |
 -----
 
 | Call | `POST /api/tv/change/:newchannel` |
@@ -223,7 +223,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `newchannel`: int |
 | JSON Body Params| NONE |
 | Possible Errors | NONE |
-| Check to make sure error paths return JSON (initials & comment) | No visible error paths `JEA` |
+| Correct Error Path | No visible error paths `JEA` |
 -----
 
 | Call | `POST /api/app/:appid/move` |
@@ -232,7 +232,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid`: name of the application |
 | JSON Body Params| NONE |
 | Possible Errors | `404: NOT_FOUND`<br>`406: NOT_ACCEPTABLE`<br>`500: INTERNAL_ERROR` |
-| Check to make sure error paths return JSON (initials & comment) | All evident error paths seem valid `JEA` |
+| Correct Error Path | All evident error paths seem valid `JEA` |
 -----
 
 | Call | `POST /api/app/:appid/launch` |
@@ -241,7 +241,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid`: name of the application |
 | JSON Body Params| NONE |
 | Possible Errors | `404: NOT_FOUND`<br>`406: NOT_ACCEPTABLE`<br>`500: INTERNAL_ERROR` |
-| Check to make sure error paths return JSON (initials & comment) | All evident error paths seem valid `JEA` |
+| Correct Error Path | All evident error paths seem valid `JEA` |
 -----
 
 | Call | `POST /api/app/:appid/kill` |
@@ -250,7 +250,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid`: name of the application |
 | JSON Body Params| NONE |
 | Possible Errors | `404: NOT_FOUND`<br>`406: NOT_ACCEPTABLE`<br>`500: INTERNAL_ERROR` |
-| Check to make sure error paths return JSON (initials & comment) | All evident error paths seem valid `JEA` |
+| Correct Error Path | All evident error paths seem valid `JEA` |
 -----
 
 | Call | `POST /api/app/:appid/adjust` |
@@ -259,23 +259,5 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 | Query Params | `appid`: name of the application |
 | JSON Body Params| NONE |
 | Possible Errors | `404: NOT_FOUND`<br>`406: NOT_ACCEPTABLE`<br>`500: INTERNAL_ERROR` |
-| Check to make sure error paths return JSON (initials & comment) | All evident error paths seem valid |
+| Correct Error Path | All evident error paths seem valid |
 -----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
