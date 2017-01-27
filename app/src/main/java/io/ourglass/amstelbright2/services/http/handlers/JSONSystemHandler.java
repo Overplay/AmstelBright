@@ -51,7 +51,11 @@ public class JSONSystemHandler extends JSONHandler {
                         return arr.toString();
                     }
                     case "device":
-
+                        JSONObject sysInfo = OGSystem.getSystemInfo();
+                        if(sysInfo == null){
+                            responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
+                            return makeErrorJson("JSONException trying to create System Info");
+                        }
                         responseStatus = NanoHTTPD.Response.Status.OK;
                         return OGSystem.getSystemInfo().toString();
 

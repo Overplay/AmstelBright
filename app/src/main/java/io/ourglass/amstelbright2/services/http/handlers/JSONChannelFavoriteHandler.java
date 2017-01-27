@@ -35,7 +35,7 @@ public class JSONChannelFavoriteHandler extends JSONHandler {
         String tok = session.getHeaders().get("authorization");
         if (!OGConstants.USE_JWT && (tok == null || !JWTHelper.getInstance().checkJWT(tok, OGConstants.AUTH_LEVEL.OWNER))) {
             responseStatus = NanoHTTPD.Response.Status.UNAUTHORIZED;
-            return "";
+            return makeErrorJson("Missing JWT or not Authorized");
         }
 
         int channel = Integer.parseInt(urlParams.get("channel"));
