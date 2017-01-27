@@ -121,11 +121,22 @@ public class ABApplication extends Application {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
                 OGSystem.checkHardSTBConnection();
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                OGSystem.checkHardSTBConnection();
+
+
             }
         });
 
-        bringUpUdhcpd.exec("/system/bin/busybox udhcpd /mnt/sdcard/wwwaqui/conf/udhcpd.conf");
+        bringUpUdhcpd.exec("su -c /system/bin/busybox udhcpd /mnt/sdcard/wwwaqui/conf/udhcpd.conf");
 
     }
 
@@ -141,7 +152,7 @@ public class ABApplication extends Application {
             }
         });
 
-        bringUpEth.exec("/system/bin/busybox ifconfig eth0 10.21.200.1/24");
+        bringUpEth.exec("su -c /system/bin/busybox ifconfig eth0 10.21.200.1 netmask 255.255.255.0");
     }
 
 }

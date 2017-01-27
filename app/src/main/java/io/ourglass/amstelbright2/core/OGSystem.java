@@ -357,7 +357,12 @@ public class OGSystem {
 
     public static boolean isHardPaired(){
 
-        return getPairedSTBIpAddress().equalsIgnoreCase("10.21.200.2");
+        if (OGConstants.SIMULATE_HARD_PAIR==true)
+            return true;
+
+        String pairedSTBAddr = getPairedSTBIpAddress();
+        if (pairedSTBAddr==null) return false;
+        return pairedSTBAddr.equalsIgnoreCase("10.21.200.2");
     }
 
     public static void checkHardSTBConnection(){
@@ -373,9 +378,13 @@ public class OGSystem {
                     DirecTVSetTopBox newSTB = new DirecTVSetTopBox(null, "10.21.200.2",
                             SetTopBox.STBConnectionType.IPGENERIC, null);
                     OGSystem.setPairedSTB(newSTB);
+                    //Toast.makeText(ABApplication.sharedContext, "Hard Paired!", Toast.LENGTH_LONG).show();
+
 
                 } else {
                     Log.d(TAG, "Hard pair check failed!");
+                    //Toast.makeText(ABApplication.sharedContext, "Hard Pair FAILED!", Toast.LENGTH_LONG).show();
+
                 }
             }
         };

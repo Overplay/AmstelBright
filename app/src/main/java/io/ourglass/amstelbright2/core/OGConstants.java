@@ -21,6 +21,9 @@ public class OGConstants {
     public static final String SSL_KEY_PASSWORD = "password";
     public static final String SSL_KEYSTORE = "src/main/resources/keystore2.jks";
 
+    //normally this is FALSE, set to test effects of hard pairing
+    public static final boolean SIMULATE_HARD_PAIR = false;
+
     /**
      * PROGRAM GUIDE CONSTANTS FOR ALPHA
      */
