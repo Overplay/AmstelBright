@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.ourglass.amstelbright2.services.ajpgsservice.AJPGSPollingService;
+import io.ourglass.amstelbright2.services.stbservice.DirecTVAPI;
 import io.ourglass.amstelbright2.services.stbservice.DirecTVSetTopBox;
 import io.ourglass.amstelbright2.services.stbservice.SetTopBox;
 import io.ourglass.amstelbright2.tvui.WidthHeight;
@@ -345,6 +346,49 @@ public class OGSystem {
                 commonService.setInputSource(eis);
             }
         }
+    }
+
+
+    /***********************************
+     *
+     * HARD PAIR CODE
+     *
+     ***********************************/
+
+    public static boolean isHardPaired(){
+
+        return getPairedSTBIpAddress().equalsIgnoreCase("10.21.200.2");
+    }
+
+    public static void checkHardSTBConnection(){
+
+        Runnable checkHardRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Checking hard pair thread running");
+                JSONObject stbJson = DirecTVAPI.stbInfo("10.21.200.2");
+                if (stbJson!=null){
+                    Log.d(TAG, "We are hard paired!");
+                    OGSystem.setPairedSTBIpAddress("10.21.200.2");
+                    DirecTVSetTopBox newSTB = new DirecTVSetTopBox(null, "10.21.200.2",
+                            SetTopBox.STBConnectionType.IPGENERIC, null);
+                    OGSystem.setPairedSTB(newSTB);
+
+                } else {
+                    Log.d(TAG, "Hard pair check failed!");
+                }
+            }
+        };
+
+        Thread cht = new Thread(checkHardRunnable);
+        cht.start();
+
+
+    }
+
+    public static void bringUpEthernetPort(){
+
+
     }
 
 

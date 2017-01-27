@@ -25,6 +25,7 @@ import okhttp3.OkHttpClient;
 public class ABApplication extends Application {
 
     public static Context sharedContext;
+    public static final String TAG = "ABApplication";
 
     // Shared by all!
     public static final OkHttpClient okclient = new OkHttpClient();
@@ -33,9 +34,11 @@ public class ABApplication extends Application {
     public void onCreate() {
         super.onCreate();
         // The realm file will be located in Context.getFilesDir() with name "default.realm"
-        Log.d("ABAPP", "Loading AB application");
+        Log.d(TAG, "Loading AB application");
 
         sharedContext = getApplicationContext();
+
+        bringUpEthernet();
 
         RealmConfiguration config = new RealmConfiguration.Builder(this)
                 .name("ab.realm")
@@ -105,5 +108,40 @@ public class ABApplication extends Application {
         return false;
     }
 
+    public void launchUDHCPd(){
+
+        Log.d(TAG, "Firing up UDHCPD");
+
+        ShellExecutor bringUpUdhcpd = new ShellExecutor(new ShellExecutor.ShellExecutorListener() {
+            @Override
+            public void results(String results) {
+                Log.d(TAG, "UDHCPD>>>>> "+results);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                OGSystem.checkHardSTBConnection();
+            }
+        });
+
+        bringUpUdhcpd.exec("/system/bin/busybox udhcpd /mnt/sdcard/wwwaqui/conf/udhcpd.conf");
+
+    }
+
+    public void bringUpEthernet(){
+
+        Log.d(TAG, "Bringing up ethernet interface.");
+
+        ShellExecutor bringUpEth = new ShellExecutor(new ShellExecutor.ShellExecutorListener() {
+            @Override
+            public void results(String results) {
+                Log.d(TAG, "IFUP>>>>> "+results);
+                launchUDHCPd();
+            }
+        });
+
+        bringUpEth.exec("/system/bin/busybox ifconfig eth0 10.21.200.1/24");
+    }
 
 }
