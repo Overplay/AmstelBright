@@ -666,6 +666,7 @@ public class OGCore {
     private static void systemLog(final String type, final JSONObject logData) {
 
         Realm realm = Realm.getDefaultInstance();
+        Log.d(TAG, "Realm is here: "+realm.getPath());
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {

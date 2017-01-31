@@ -1,6 +1,7 @@
 package io.ourglass.amstelbright2.services.http.handlers;
 
 import android.content.Intent;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +19,8 @@ import io.realm.Realm;
  * Created by mkahn on 5/9/16.
  */
 public class JSONAppDataHandler extends JSONHandler {
+
+    public static final String TAG = "JSONAppDataHandler";
 
     public String getText(Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
 
@@ -43,11 +46,13 @@ public class JSONAppDataHandler extends JSONHandler {
 
             case GET:
 
+                Log.d(TAG, "GET for appdata on "+ app.appId);
                 //TODO a better locking mechanism would use request IP address...for Bucanero
                 boolean shouldLock = session.getParms().containsKey("lock");
                 long key = 0;
 
                 if (shouldLock==true){
+                    Log.d(TAG, "GET for is LOCKED");
                     realm.beginTransaction();
                     key = app.lockUpdates();
                     realm.commitTransaction();
@@ -69,6 +74,7 @@ public class JSONAppDataHandler extends JSONHandler {
             // These are treated the same for now
 
             case POST:
+                Log.d(TAG, "POST for appdata on "+ app.appId);
 
                 try {
                     final JSONObject dataJson = getBodyAsJSONObject(session);
@@ -100,12 +106,14 @@ public class JSONAppDataHandler extends JSONHandler {
 
                         return dataJson.toString();
                     } else {
+                        realm.close();
                         responseStatus = NanoHTTPD.Response.Status.CONFLICT;
                         return makeErrorJson("data locked by another client");
                     }
 
 
                 } catch (Exception e) {
+                    realm.close();
                     responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
                     return makeErrorJson(e);
                 }
@@ -113,6 +121,7 @@ public class JSONAppDataHandler extends JSONHandler {
 
             default:
                 // Only allowed verbs are GET/POST/PUT
+                realm.close();
                 responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
                 return "";
         }

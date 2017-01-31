@@ -148,7 +148,9 @@ public class AJPGSPollingService extends Service {
 
             Log.d(TAG, "UPDATING FULL GRID");
 
-            JSONArray grid = TVMediaAPI.gridForLineupID("5266D");
+            //JSONArray grid = TVMediaAPI.gridForLineupID("5266D");
+
+            JSONArray grid = TVMediaAPI.gridForLineupIDByProxy("5266D");
 
             if (grid != null) {
                 Log.d(TAG, "There are " + grid.length() + " grid entries");

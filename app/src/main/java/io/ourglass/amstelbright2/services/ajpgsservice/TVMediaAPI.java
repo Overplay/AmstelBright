@@ -252,4 +252,38 @@ public class TVMediaAPI {
         return rval;
     }
 
+    //http://api.tvmedia.ca/tv/v4/lineups/5266D/listings/grid?api_key=761cbd1955e14ff1b1af8d677a488904&timezone=-08:00
+    public static JSONArray gridForLineupIDByProxy(String lineupId) {
+
+        String TASK = " grid array for next 4 hours on for lineupID via AJPGS proxy"+lineupId;
+        Log.d(TAG, "GETting " + TASK);
+
+        JSONArray rval = null;
+
+        String startTime = TimeHelpers.utcISOTimeStringWithOffset(-30);
+
+        try {
+
+            Request req = new Request.Builder()
+                    .url("http://104.131.145.36:1338/tvmediaproxy/fetch/"+lineupId)
+                    .build();
+            Response response = mClient.newCall(req).execute();
+
+            String respString = response.body().string();
+
+            if (response.isSuccessful()) {
+                rval = new JSONArray(respString);
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception getting" + TASK);
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON Exception getting" + TASK);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception getting" + TASK);
+        }
+
+        return rval;
+    }
+
 }

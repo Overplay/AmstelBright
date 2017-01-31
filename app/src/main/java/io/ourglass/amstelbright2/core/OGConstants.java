@@ -48,7 +48,7 @@ public class OGConstants {
 //    public static final int UDP_LISTEN_AND_RESPOND_PORT = 9091;
     public static final int UDP_BEACON_FREQ = 2000;
 
-    public static final int CLOUD_SCRAPE_INTERVAL = 1000*15;
+    public static final int CLOUD_SCRAPE_INTERVAL = 1000*5*60;
     public static final int TV_POLL_INTERVAL = 5000;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
 
