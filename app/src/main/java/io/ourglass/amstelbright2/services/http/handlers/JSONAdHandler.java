@@ -24,6 +24,12 @@ public class JSONAdHandler extends JSONHandler {
             case GET:
 
                 JSONObject responseObj = OGCore.getAdvertisement();
+
+                if (responseObj==null){
+                    responseStatus = NanoHTTPD.Response.Status.NO_CONTENT;
+                    return makeErrorJson("no ads found");
+                }
+
                 responseStatus = NanoHTTPD.Response.Status.OK;
                 return responseObj.toString();
 

@@ -51,8 +51,9 @@ public class OGConstants {
     public static final int CLOUD_SCRAPE_INTERVAL = 1000*5*60;
     public static final int TV_POLL_INTERVAL = 5000;
     public static final int TV_DISCOVER_INTERVAL = 1000 * 60;
+    public static  final int LOG_UPLOAD_INTERVAL = 1000 * 60 * 2; // 2 minutes
 
-    public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 60; //1 hour
+    public static final int HEARTBEAT_TIMER_INTERVAL = 1000 * 60 * 5; //5 minutes
 
     public static final int STB_SERVICE_CHANNEL_POLL_INTERVAL = 60 * 1000; //every two seconds upon completion
 
@@ -71,6 +72,7 @@ public class OGConstants {
 
     public static final String ASAHI_API_ENDPOINT = "/api/v1/";
     public static final String ASAHI_ACCEPTED_AD_ENDPOINT = "/ad/getAccepted";
+    public static final String ASAHI_VENUE_AD_ENDPOINT = "/ad/forVenue/";
     public static final String ASAHI_MEDIA_ENDPOINT = "/media/download/";
 
     public static final String INTERNAL_PATH_TO_MEDIA = "/data/data/io.ourglass.amstelbright2/media/";

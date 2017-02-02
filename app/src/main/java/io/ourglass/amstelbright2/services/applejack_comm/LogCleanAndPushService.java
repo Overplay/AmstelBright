@@ -88,8 +88,8 @@ public class LogCleanAndPushService extends Service {
 
                 realm.close();
 
-                //todo replace this with constant or settings, right now set to 15 minutes
-                mWorkerThreadHandler.postDelayed(this, 1000 * 60 * 15);
+                //TODO replace this with constant or settings, right now set to 15 minutes
+                mWorkerThreadHandler.postDelayed(this, OGConstants.LOG_UPLOAD_INTERVAL);
 
             }
 

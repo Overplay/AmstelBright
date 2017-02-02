@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import io.ourglass.amstelbright2.core.ABApplication;
 import io.ourglass.amstelbright2.core.OGConstants;
+import io.ourglass.amstelbright2.core.OGSystem;
 import io.ourglass.amstelbright2.realm.OGAdvertisement;
 import io.realm.Realm;
 import okhttp3.Call;
@@ -61,7 +62,16 @@ public class AdFetchService extends Service {
             public void run() {
                 Log.d(TAG, "In ad scraping runnable");
 
-                String url = OGConstants.ASAHI_ADDRESS + OGConstants.ASAHI_ACCEPTED_AD_ENDPOINT;
+                String url = null;
+
+                if (OGSystem.getVenueId().equalsIgnoreCase("")){
+                    Log.d(TAG, "Not assigned to a venue, so I am getting all ads!");
+                    url = OGConstants.ASAHI_ADDRESS + OGConstants.ASAHI_ACCEPTED_AD_ENDPOINT;
+                } else {
+                    Log.d(TAG, "Assigned to a venue, so I am getting venue-specific ads!");
+                    url = OGConstants.ASAHI_ADDRESS + OGConstants.ASAHI_VENUE_AD_ENDPOINT+OGSystem.getVenueId();
+                }
+
 
                 Request request = new Request.Builder()
                         .url(url)
@@ -178,6 +188,9 @@ public class AdFetchService extends Service {
             //copy or update the ad objects created from the response
             Realm realm = Realm.getDefaultInstance();
             realm.beginTransaction();
+            //Out with the old
+            realm.where(OGAdvertisement.class).findAll().deleteAllFromRealm();
+            //In with the new
             realm.copyToRealmOrUpdate(receivedAds);
             realm.commitTransaction();
             realm.close();

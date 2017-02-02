@@ -118,6 +118,7 @@ public class OGTweetScraper {
         String fUrl = baseUrl + q + "&lang=en";
         fUrl += "&result_type=mixed";
         fUrl += "&include_entities=false";
+        fUrl += "&include_entities=false";
 
         Request request = new Request.Builder()
                 .header("Authorization" , "Bearer "+mToken)

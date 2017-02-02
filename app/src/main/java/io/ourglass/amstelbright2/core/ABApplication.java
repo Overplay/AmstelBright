@@ -132,6 +132,30 @@ public class ABApplication extends Application {
 
                 OGSystem.checkHardSTBConnection();
 
+                try {
+                    Thread.sleep(15000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                OGSystem.checkHardSTBConnection();
+
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                OGSystem.checkHardSTBConnection();
+
+                try {
+                    Thread.sleep(120000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                OGSystem.checkHardSTBConnection();
+
 
             }
         });
