@@ -15,6 +15,7 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONChannelFavoriteHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONPGSHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONSpamHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
 
@@ -164,6 +165,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
         addRoute("/api/tv/change/:newchannel", JSONTVControlHandler.class);
         addRoute("/api/tv/currentgrid", JSONTVControlHandler.class);
         addRoute("/api/app/:appid/:command", JSONAppCommandsHandler.class);
+        addRoute("/api/spam", JSONSpamHandler.class);
 
         // TODO: add source to route e.g."twitter"
         addRoute("/api/scrape/:appid", JSONAppScrapeHandler.class);
