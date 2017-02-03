@@ -22,7 +22,7 @@ public class OGConstants {
     public static final String SSL_KEYSTORE = "src/main/resources/keystore2.jks";
 
     //normally this is FALSE, set to test effects of hard pairing
-    public static final boolean SIMULATE_HARD_PAIR = false;
+    public static final boolean SIMULATE_HARD_PAIR = true;
 
     /**
      * PROGRAM GUIDE CONSTANTS FOR ALPHA

@@ -5,7 +5,7 @@
     android:id="@+id/activity_direc_tvpair"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.ourglass.amstelbright2.fordeprecation.DirecTVPairActivity"
+    tools:context="io.ourglass.amstelbright2.tvui.stb.SetTopBoxPairActivity"
     android:background="#00FFFFFF">
 
     <RelativeLayout

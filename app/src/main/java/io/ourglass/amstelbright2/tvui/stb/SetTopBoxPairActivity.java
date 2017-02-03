@@ -55,6 +55,8 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
     int contentMarginHor;
     int contentMarginVer;
 
+    private boolean isHardPaired = false;
+
     // Added by MAK, new SSDP
     ArrayList<SetTopBox> mFoundBoxes = new ArrayList<>();
     SetTopBoxAdapter mSTBArrayAdapter;
@@ -93,7 +95,7 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
                 contentWrapperParams.height = contentHeight;
 
                 contentWrapper.setLayoutParams(contentWrapperParams);
-                //contentWrapper.setPadding(10, 10, 10, 10);
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -131,26 +133,32 @@ public class SetTopBoxPairActivity extends AppCompatActivity {
         mSTBArrayAdapter = new SetTopBoxAdapter(this, mFoundBoxes, poppins, boldFont);
         directvDevicesList.setAdapter(mSTBArrayAdapter);
 
-
+        if(isHardPaired = OGSystem.isHardPaired()){
+            emptyListMessage.setText("This Ourglass system is directly connected to a DirecTV set top box");
+            emptyListMessage.setTextSize(emptyListMessage.getTextSize() / 4);
+            emptyListMessage.setVisibility(View.VISIBLE);
+            scanningMessage.setVisibility(View.GONE);
+        }
     }
     @Override
     public void onResume(){
         super.onResume();
 
-        registerSSDPResponse();
-        Intent ssdpi = new Intent(this, SSDPService.class);
-        ssdpi.putExtra("deviceFilter", "DIRECTV");
-        startService(ssdpi);
+        if(!isHardPaired) {
+            registerSSDPResponse();
+            Intent ssdpi = new Intent(this, SSDPService.class);
+            ssdpi.putExtra("deviceFilter", "DIRECTV");
+            startService(ssdpi);
 
-        // MAK: Replaced all the Realm based pairing with OGSystem calls
-        if(OGSystem.isPairedToSTB()){
-            setCurrentPair(OGSystem.getPairedSTBIpAddress());
-        }
-        else{
-            nullifyCurrentPair();
-        }
+            // MAK: Replaced all the Realm based pairing with OGSystem calls
+            if (OGSystem.isPairedToSTB()) {
+                setCurrentPair(OGSystem.getPairedSTBIpAddress());
+            } else {
+                nullifyCurrentPair();
+            }
 
-        startCheckLoop();
+            startCheckLoop();
+        }
     }
 
     @Override
