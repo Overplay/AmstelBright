@@ -14,12 +14,12 @@ import io.ourglass.amstelbright2.services.http.handlers.JSONAppCommandsHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppDataHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONAppScrapeHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONChannelFavoriteHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONJWTHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONPGSHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONProxyAppDataHandler;
+import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSpamHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONSystemHandler;
-import io.ourglass.amstelbright2.services.http.handlers.JSONSTBHandler;
-
-import io.ourglass.amstelbright2.services.http.handlers.JSONJWTHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONTVControlHandler;
 import io.ourglass.amstelbright2.services.http.handlers.JSONTestHandler;
 
@@ -159,6 +159,7 @@ public class OGNanolets extends OGRouterNanoHTTPD {
 
         // Real OG Routes
         addRoute("/api/appdata/:appid", JSONAppDataHandler.class);
+        addRoute("/api/appdataproxy/:appid", JSONProxyAppDataHandler.class);
         addRoute("/api/system/:command", JSONSystemHandler.class);
         addRoute("/api/channel/favorite/:channel", JSONChannelFavoriteHandler.class);
         addRoute("/api/program/:command", JSONPGSHandler.class);
