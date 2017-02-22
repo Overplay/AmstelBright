@@ -166,7 +166,7 @@ public class JSONSystemHandler extends JSONHandler {
 
                         if (code == null) {
                             responseStatus = NanoHTTPD.Response.Status.BAD_REQUEST;
-                            return makeErrorJson("No code, homie");
+                            return makeErrorJson("Please enter a registration code.");
                         }
 
                         //TODO add mechanism to add paired Settop box info

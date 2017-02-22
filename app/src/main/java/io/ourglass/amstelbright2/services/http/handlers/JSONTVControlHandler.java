@@ -84,6 +84,33 @@ public class JSONTVControlHandler extends JSONHandler {
             return rval.toString();
             //return makeErrorJson("gonna change to "+channel);
 
+        } else if ( session.getUri().contains("currentchannel") &&  session.getMethod()==NanoHTTPD.Method.GET) {
+
+
+            DirecTVSetTopBox stb = OGSystem.getPairedSTB();
+            if (stb==null){
+                responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
+                return makeErrorJson("Failed retrieving paired STB");
+            }
+
+            TVShow nowPlaying = OGSystem.getPairedSTB().nowPlaying;
+            if (nowPlaying==null){
+                responseStatus = NanoHTTPD.Response.Status.INTERNAL_ERROR;
+                return makeErrorJson("Failed retrieving now playing from paired STB");
+            }
+
+            JSONObject rval = new JSONObject();
+            try {
+                rval.put("channelNumber", nowPlaying.channelNumber);
+                rval.put("title", nowPlaying.title );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            responseStatus = NanoHTTPD.Response.Status.OK;
+            return rval.toString();
+
+
         } else {
 
             responseStatus = NanoHTTPD.Response.Status.NOT_ACCEPTABLE;
