@@ -1,10 +1,18 @@
 package io.ourglass.amstelbright2.core;
 
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,7 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 
+import io.ourglass.amstelbright2.services.logcat.LogCatRotationService;
+import io.ourglass.amstelbright2.tvui.RootActivity;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import okhttp3.OkHttpClient;
@@ -29,6 +40,8 @@ public class ABApplication extends Application {
 
     // Shared by all!
     public static final OkHttpClient okclient = new OkHttpClient();
+
+    private LogCatRotationService mLogCatService;
 
     @Override
     public void onCreate() {
@@ -61,31 +74,27 @@ public class ABApplication extends Application {
         // Logcat messages go to a file...
         if ( isExternalStorageWritable() && OGConstants.LOGCAT_TO_FILE ) {
 
-            File appDirectory = new File( Environment.getExternalStorageDirectory() + "/ABLogs" );
-            File logDirectory = new File( appDirectory + "/log" );
-            Calendar now = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH-mm-ss-SSS");
-            String time = sdf.format(now.getTime());
+            final Intent logCatServiceIntent = new Intent(this, LogCatRotationService.class);
+//            //check if bucanero LogCatService is installed
+//            boolean logCatServiceInstalled = ABApplication.packageExists(this, OGConstants.LOG_CAT_SERVICE_PACKAGE_NAME);
+//            if(!logCatServiceInstalled){
+//                Log.w(TAG, "log cat service is not installed and cannot run");
+//            }
+//            else {
+//                Log.v(TAG, "Log cat service is installed!");
+//
+//                //start the external bucanero LogCatService
+//                Intent logCatServiceIntent = new Intent();
+//                logCatServiceIntent.setClassName(
+//                        OGConstants.LOG_CAT_SERVICE_PACKAGE_NAME,
+//                        OGConstants.LOG_CAT_SERVICE_PACKAGE_NAME + "." + OGConstants.LOG_CAT_SERVICE_SERVICE_NAME);
+//
+//                logCatServiceIntent.putExtra("uuid", OGSystem.uniqueDeviceId());
+//                logCatServiceIntent.putExtra("asahiAddress", OGConstants.ASAHI_ADDRESS);
+//            ComponentName c = startService(logCatServiceIntent);
 
-            File logFile = new File( logDirectory, "logcat" + time + ".txt" );
+            startService(logCatServiceIntent);
 
-            // create app folder
-            if ( !appDirectory.exists() ) {
-                appDirectory.mkdir();
-            }
-
-            // create log folder
-            if ( !logDirectory.exists() ) {
-                logDirectory.mkdir();
-            }
-
-            // clear the previous logcat and then write the new one to the file
-            try {
-                Process process = Runtime.getRuntime().exec( "logcat -c");
-                process = Runtime.getRuntime().exec( "logcat -f " + logFile + "");
-            } catch ( IOException e ) {
-                e.printStackTrace();
-            }
 
         }
 
