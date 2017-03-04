@@ -188,34 +188,4 @@ public class ABApplication extends Application {
         bringUpEth.exec("su -c /system/bin/busybox ifconfig eth0 10.21.200.1 netmask 255.255.255.0");
     }
 
-    private static boolean packageExists(Context ctx, String packageName){
-        List<ApplicationInfo> packages;
-        PackageManager pm;
-
-        pm = ctx.getPackageManager();
-        packages = pm.getInstalledApplications(0);
-        for(ApplicationInfo packageInfo : packages){
-            if(packageInfo.packageName.equalsIgnoreCase(packageName)){
-                return true;
-            }
-        }
-        return false;
-
-    }
-
-
-    public static class LogServiceMessageHandler extends Handler {
-        @Override
-        public void handleMessage(Message message){
-            Bundle b = message.getData();
-            String actionName = b.getString("action");
-
-            switch (actionName) {
-                case "NEW_FILE":
-                    String newLogCatFileName = b.getString("newLogCatFileName");
-
-
-            }
-        }
-    }
 }

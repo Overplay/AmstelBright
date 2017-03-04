@@ -83,7 +83,6 @@ public class LogCatRotationService extends IntentService {
         /* set up the repeater */
         wakeUpAndWorkHandler = new Handler();
 
-        final Handler h = wakeUpAndWorkHandler;
         Runnable repeater = new Runnable() {
             @Override
             public void run() {
@@ -115,11 +114,11 @@ public class LogCatRotationService extends IntentService {
                 attemptUploadOfOldestLogFile();
 
                 //run this every hour
-                h.postDelayed(this, 1000 * 60 * 60);
+                wakeUpAndWorkHandler.postDelayed(this, 1000 * 20);
             }
         };
 
-        boolean repeating = h.postDelayed(repeater, 1000);
+        boolean repeating = wakeUpAndWorkHandler.postDelayed(repeater, 1000);
 
         return START_NOT_STICKY;
     }
@@ -342,9 +341,14 @@ public class LogCatRotationService extends IntentService {
                 JSONObject logCatObj = new JSONObject();
                 logCatObj.put("uuid", OGSystem.uniqueDeviceId());
                 logCatObj.put("date", dateStr);
+
+                JSONObject metadataObj = new JSONObject();
+                metadataObj.put("logcat", logCatObj);
+                metadataObj.put("src", oldLogFile.getName());
+
                 RequestBody reqBody = new MultipartBody.Builder()
                         .setType(MultipartBody.FORM)
-                        .addFormDataPart("logcat", logCatObj.toString())
+                        .addFormDataPart("metadata", metadataObj.toString())
                         .addFormDataPart("file", oldLogFile.getName(),
                                 RequestBody.create(MediaType.parse("text/plain"), oldLogFile))
                         .build();
