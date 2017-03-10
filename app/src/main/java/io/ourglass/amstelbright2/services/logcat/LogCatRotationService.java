@@ -114,7 +114,7 @@ public class LogCatRotationService extends IntentService {
                 attemptUploadOfOldestLogFile();
 
                 //run this every hour
-                wakeUpAndWorkHandler.postDelayed(this, 1000 * 20);
+                wakeUpAndWorkHandler.postDelayed(this, 1000 * 60 * 60);
             }
         };
 
