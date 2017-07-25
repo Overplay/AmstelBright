@@ -1,4 +1,5 @@
-#AMSTEL BRIGHT: OBSOLETE
+AMSTEL BRIGHT: OBSOLETE
+=======================
 
 Amstel Bright is the Ourglass Android servers and TV UI. It consists of the following components:
 
